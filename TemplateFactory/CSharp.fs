@@ -42,8 +42,7 @@ module public CSharp =
     and private propertyMap (key : string) (value : JsonValue) = (key, map value)
 
     let public ParseJson input =
-        let result = JsonValue.Parse input |> map
         {
             NameSpace = "TODO"
-            Types = result
+            Types = input |> JsonValue.Parse |> map
         }
