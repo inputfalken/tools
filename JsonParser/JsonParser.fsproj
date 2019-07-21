@@ -5,14 +5,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="TryParse.fs" />
-        <Compile Include="Types.fs" />
-        <Compile Include="JsonParser.fs" />
+        <Compile Include="TryParse.fs"/>
+        <Compile Include="Types.fs"/>
+        <Compile Include="JsonParser.fs"/>
     </ItemGroup>
 
 
     <ItemGroup>
-        <PackageReference PrivateAssets="Compile" Include="FSharp.Data" Version="3.1.1" />
-        <PackageReference  Include="FSharp.Core" Version="4.6.2"/>
+        <PackageReference PrivateAssets="Compile" Include="FSharp.Data" Version="3.1.1"/>
+        <PackageReference Include="FSharp.Core" Version="4.6.2"/>
     </ItemGroup>
 </Project>

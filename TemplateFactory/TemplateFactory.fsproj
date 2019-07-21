@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\JsonParser\JsonParser.fsproj"/>
+        <ProjectReference  Include="..\JsonParser\JsonParser.fsproj"/>
     </ItemGroup>
 
 </Project>
