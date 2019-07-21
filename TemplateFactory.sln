@@ -4,7 +4,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TemplateFactory", "Template
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "JsonParser", "JsonParser\JsonParser.fsproj", "{B73DAF24-9D2E-4D88-913B-A5A3F2B75C64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeGenerator", "CodeGenerator\CodeGenerator.csproj", "{C7594FE1-8B5F-45DA-9364-22631B5C3BE6}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PowerShellModule", "PowerShellModule\PowerShellModule.fsproj", "{059C9AC4-7581-415D-9BFE-EFF6DFC52076}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,10 +20,10 @@ Global
 		{B73DAF24-9D2E-4D88-913B-A5A3F2B75C64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B73DAF24-9D2E-4D88-913B-A5A3F2B75C64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B73DAF24-9D2E-4D88-913B-A5A3F2B75C64}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C7594FE1-8B5F-45DA-9364-22631B5C3BE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C7594FE1-8B5F-45DA-9364-22631B5C3BE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C7594FE1-8B5F-45DA-9364-22631B5C3BE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C7594FE1-8B5F-45DA-9364-22631B5C3BE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{059C9AC4-7581-415D-9BFE-EFF6DFC52076}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{059C9AC4-7581-415D-9BFE-EFF6DFC52076}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{059C9AC4-7581-415D-9BFE-EFF6DFC52076}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{059C9AC4-7581-415D-9BFE-EFF6DFC52076}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

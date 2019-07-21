@@ -4,6 +4,7 @@ open JsonParser
 open System
 
 type CSharp =
+    // With this syntax It's possible for CSharp to also call this function
     static member CreateFile(input : string,  [<Optional>] ?nameSpace) =
         let data = (input, nameSpace) ||> Json.parse
         let rec stringifyObject property : string =
