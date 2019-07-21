@@ -1,10 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TemplateFactory", "TemplateFactory\TemplateFactory.fsproj", "{94D90954-D560-4F7C-8931-EB2147AA27E5}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TemplateFactory", "src\TemplateFactory\TemplateFactory.fsproj", "{94D90954-D560-4F7C-8931-EB2147AA27E5}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "JsonParser", "JsonParser\JsonParser.fsproj", "{B73DAF24-9D2E-4D88-913B-A5A3F2B75C64}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "JsonParser", "src\JsonParser\JsonParser.fsproj", "{B73DAF24-9D2E-4D88-913B-A5A3F2B75C64}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PowerShellModule", "PowerShellModule\PowerShellModule.fsproj", "{059C9AC4-7581-415D-9BFE-EFF6DFC52076}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PowerShellModule", "src\PowerShellModule\PowerShellModule.fsproj", "{059C9AC4-7581-415D-9BFE-EFF6DFC52076}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
