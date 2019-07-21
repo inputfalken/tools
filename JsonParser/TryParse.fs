@@ -1,4 +1,4 @@
-namespace TemplateFactory
+namespace JsonParser
 module internal TryParse =
     // convenient, functional TryParse wrappers returning option<'a>
     let private tryParseWith (tryParseFunc : string -> (bool * _)) = tryParseFunc >> function
