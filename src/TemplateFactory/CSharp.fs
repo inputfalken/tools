@@ -26,7 +26,7 @@ type CSharp =
             | Double x -> "double"
             | Null -> String.Empty
             | Array x -> x |> Seq.map stringifyValue |> Seq.reduce (fun x y -> x + y)
-            | Object x -> x |> Seq.fold (fun acc x -> stringifyObject x) String.Empty
+            | Object x -> x |> Seq.fold (fun acc x -> acc + stringifyObject x) String.Empty
 
         match nameSpace with
         | Some x -> sprintf "namespace %s {%s}" x (stringifyValue (data))
