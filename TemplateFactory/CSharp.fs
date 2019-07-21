@@ -5,8 +5,6 @@ open FSharp.Data.Runtime
 
 
 module public CSharp =
-    open System
-
     type public Key = string
     type public NameSpace = string
     type public Value =
@@ -45,40 +43,33 @@ module public CSharp =
          | JsonValue.Record x -> x |> Seq.map (fun x -> x ||> propertyMap) |> Value.Object
     and private propertyMap (key : string) (value : JsonValue) = (key, map value)
 
-    let public ParseJson input =
+    let public parseJson input =
         {
             NameSpace = "TODO"
             Data = input |> JsonValue.Parse |> map
         }
 
     let public CreateFile(file : File) : string =
-        let rec processObject property =
+        let rec stringifyObject property : string =
             let (key, value) = property
             let typeKey = key |> NameUtils.nicePascalName
             let className = typeKey + "Model"
+            let stringifiedValue = stringifyValue value
 
-            // If value is not an object; then we need to to create getters and setters!
-            let isObject = match value with
-                           | Value.Object x -> true
-                           | _ -> false
-            let value = processValue value
-            if isObject then sprintf "public class %s { %s }" className value
-            else sprintf "public %s %s { get; set; }" value typeKey
+            match value with
+            | Value.Object x -> sprintf "public class %s { %s }" className stringifiedValue
+            | _ -> sprintf "public %s %s { get; set; }" stringifiedValue typeKey
 
-        and processValue value : string =
-            // There's sadly no nameof operator available, don't want to use reflection to get types.
-            // Might as well hard code it...
-            let foo = match value with
-                      | DateTime x -> "System.DateTime"
-                      | Decimal x -> "decimal"
-                      | String x -> "string"
-                      | Boolean x -> "bool"
-                      | Guid x -> "System.Guid"
-                      | Double x -> "double"
-                      | Null -> String.Empty
-                      | Array x -> x |> Seq.map processValue |> Seq.reduce (fun x y -> x + y)
-                      | Object x -> x |> Seq.fold (fun acc x -> processObject x) String.Empty
+        and stringifyValue value : string =
+            match value with
+            | DateTime x -> "System.DateTime"
+            | Decimal x -> "decimal"
+            | String x -> "string"
+            | Boolean x -> "bool"
+            | Guid x -> "System.Guid"
+            | Double x -> "double"
+            | Null -> String.Empty
+            | Array x -> x |> Seq.map stringifyValue |> Seq.reduce (fun x y -> x + y)
+            | Object x -> x |> Seq.fold (fun acc x -> stringifyObject x) String.Empty
 
-            foo
-
-        sprintf "namespace %s {%s}" file.NameSpace (processValue (file.Data))
+        sprintf "namespace %s {%s}" file.NameSpace (stringifyValue (file.Data))

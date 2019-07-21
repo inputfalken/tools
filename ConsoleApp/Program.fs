@@ -3,7 +3,7 @@ open TemplateFactory
 
 [<EntryPoint>]
 let main argv =
-    let result = CSharp.ParseJson """
+    let result = CSharp.parseJson """
     {
         "bar" : {
             "test":2
