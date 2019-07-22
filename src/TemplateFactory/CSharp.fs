@@ -3,10 +3,30 @@ open System.Runtime.InteropServices
 open JsonParser
 open System
 
+type Settings = {
+    Casing : CasingRule Option
+    NameSpace : String Option
+ }
+
 type CSharp =
-    // With this syntax It's possible for CSharp to also call this function
-    static member CreateFile(input : string,  [<Optional>] ?nameSpace) =
-        let data = (input, nameSpace) ||> Json.parse
+    static member CreateFile(input : string, ( [<Optional>] ?settings : Settings)) =
+        // Pretty ugly solution
+        // This neeeds to be solved differently,
+        // arguments should be optional without being this complex.
+        let settings = match settings with
+                       | Option.Some x -> x
+                       | Option.None -> {
+                           Casing = Option.None
+                           NameSpace = Option.None
+                       }
+                       
+        let casing = match settings.Casing with
+                     | Option.Some x -> x
+                     | Option.None -> Pascal
+        // Pretty ugly solution ends
+
+        let data = (input, casing) ||> Json.parse
+
         let rec stringifyObject (property : Property) (useNewline : bool) : string =
             let (key, value) = property
             let className = key + "Model"
@@ -29,7 +49,7 @@ type CSharp =
             | Array x -> x |> Seq.map stringifyValue |> Seq.reduce (fun x y -> x + y)
             | Object x -> x |> Seq.mapi (fun x y -> (x, y)) |> Seq.fold (fun acc (index, x) -> acc + stringifyObject x (index <> 0)) String.Empty
 
-        match nameSpace with
+        match settings.NameSpace with
         | Some x -> sprintf "namespace %s {%s}" x (stringifyValue (data))
         | None -> stringifyValue (data)
 

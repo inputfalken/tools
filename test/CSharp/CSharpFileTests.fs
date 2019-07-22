@@ -1,10 +1,11 @@
 module Tests
+open JsonParser
 open TemplateFactory
 open Xunit
 
 [<Fact>]
 let ``One Object``() =
-    let result = CSharp.CreateFile """{"foo": 2}"""
+    let result = CSharp.CreateFile("""{"FooBar": 2}""")
     Assert.Equal("public decimal Foo { get; set; }", result)
 
 [<Fact>]
