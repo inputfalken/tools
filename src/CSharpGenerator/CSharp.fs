@@ -21,16 +21,10 @@ type CSharp =
         CSharp.CreateFile(input, new Settings())
 
     static member CreateFile(input : string, settings : Settings) =
-
-        let casing = match settings.Casing |> CasingRule.fromString with
-                     | Option.Some x -> x
-                     | Option.None -> Pascal
-                     
-        let data = (input, casing) ||> Json.parse
-
+        let data = (input, settings.Casing |> CasingRule.fromString |> Option.defaultValue CasingRule.Pascal) ||> Json.parse
         let classSuffix = (settings.ClassSuffix |> stringValidators.valueExists |> Option.defaultValue "Model")
         let classPrefix = (settings.ClassPrefix |> stringValidators.valueExists |> Option.defaultValue String.Empty)
-        
+
         let rec stringifyObject (property : Property) (useNewline : bool) : string =
             let (key, value) = property
             let className = classPrefix + key + classSuffix
@@ -53,12 +47,15 @@ type CSharp =
             | Array x -> x |> Seq.map stringifyValue |> Seq.reduce (fun x y -> x + y)
             | Object x -> x |> Seq.mapi (fun x y -> (x, y)) |> Seq.fold (fun acc (index, x) -> acc + stringifyObject x (index <> 0)) String.Empty
 
-        let classFormatter = match settings.RootObjectName |> stringValidators.valueExists with
-                             | Some x -> sprintf "public class %s%s%s { %s }" classPrefix x classSuffix
-                             | None -> sprintf "public class %sRoot%s { %s }" classPrefix classSuffix
+        let namespaceFormatter = settings.NameSpace
+                                 |> stringValidators.valueExists
+                                 |> Option.map (fun x -> sprintf "namespace %s { %s }" x)
+                                 |> Option.defaultValue (sprintf "%s")
 
-        let nameSpaceFormatter = match settings.NameSpace |> stringValidators.valueExists with
-                                 | Some x -> sprintf "namespace %s { %s }" x
-                                 | None -> sprintf "%s"
 
-        data |> (stringifyValue >> classFormatter >> nameSpaceFormatter)
+        let classFormatter = settings.RootObjectName
+                             |> stringValidators.valueExists
+                             |> Option.map (fun x -> sprintf "public class %s%s%s { %s }" classPrefix x classSuffix)
+                             |> Option.defaultValue (sprintf "public class %sRoot%s { %s }" classPrefix classSuffix)
+                             
+        data |> (stringifyValue >> classFormatter >> namespaceFormatter)
