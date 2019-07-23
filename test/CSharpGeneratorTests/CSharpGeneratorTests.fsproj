@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
+        <RootNamespace>CSharp</RootNamespace>
     </PropertyGroup>
 
 
@@ -11,11 +12,11 @@
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\src\TemplateFactory\TemplateFactory.fsproj" />
-    </ItemGroup>
-    <ItemGroup>
       <Compile Include="CSharpFileTests.fs" />
       <Compile Include="Program.fs" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\CSharpGenerator\CSharpGenerator.fsproj" />
     </ItemGroup>
 
 </Project>

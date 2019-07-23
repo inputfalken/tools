@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TemplateFactory", "src\TemplateFactory\TemplateFactory.fsproj", "{94D90954-D560-4F7C-8931-EB2147AA27E5}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CSharpGenerator", "src\CSharpGenerator\CSharpGenerator.fsproj", "{94D90954-D560-4F7C-8931-EB2147AA27E5}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "JsonParser", "src\JsonParser\JsonParser.fsproj", "{B73DAF24-9D2E-4D88-913B-A5A3F2B75C64}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PowerShellModule", "src\PowerShellModule\PowerShellModule.fsproj", "{059C9AC4-7581-415D-9BFE-EFF6DFC52076}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CSharp", "test\CSharp\CSharp.fsproj", "{F6AD7ACB-DE7A-4F6B-B9F1-B902BEAE0B24}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CSharpGeneratorTests", "test\CSharpGeneratorTests\CSharpGeneratorTests.fsproj", "{F6AD7ACB-DE7A-4F6B-B9F1-B902BEAE0B24}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F7B45BE6-9006-44C1-B6B2-F7532C3023DE}"
 EndProject

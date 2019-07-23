@@ -15,7 +15,6 @@ module UnionFunctions =
 
 
 type public Key = string
-type public NameSpace = string
 type public Value =
             | Double of double
             | Decimal of decimal

@@ -3,8 +3,6 @@ open FSharp.Data
 open FSharp.Data.Runtime.NameUtils
 
 module public Json =
-    open FSharp.Data.Runtime
-
     let private stringParser =
          function
             | TryParse.Date x -> DateTime x
@@ -29,8 +27,9 @@ module public Json =
            | Pascal ->  nicePascalName
            | Camel -> niceCamelName
         |> (fun x -> (x, map value casing))
-    // this will always produce pascal case currently.
-    let parse input casing = (input |> JsonValue.Parse, casing) ||> map
+    
+    let parse (input: string) (casing : CasingRule) =
+         input |> JsonValue.Parse |> (fun x -> map x casing)  
 
 
 

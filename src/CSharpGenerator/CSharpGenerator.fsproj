@@ -2,18 +2,19 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
+        <RootNamespace>TemplateFactory</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="CSharp.fs"/>
+        <Compile Include="CSharp.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="FSharp.Core" Version="4.6.2"/>
+        <PackageReference Include="FSharp.Core" Version="4.6.2" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference  Include="..\JsonParser\JsonParser.fsproj"/>
+        <ProjectReference Include="..\JsonParser\JsonParser.fsproj" />
     </ItemGroup>
 
 </Project>
