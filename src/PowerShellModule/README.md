@@ -4,7 +4,7 @@ In order to install this module, you will have to run `dotnet publish` in this d
 
 ## Cmdlets
 
-### `New-CsharpModel`
+### `New-CSharpModel`
 
 Creates a CSharp model from json
 
