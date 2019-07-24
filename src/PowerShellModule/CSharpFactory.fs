@@ -1,5 +1,4 @@
 ﻿namespace PowerShellModule
-open JsonParser
 open System.Management.Automation
 open TemplateFactory
 
@@ -18,19 +17,19 @@ type CSharpFactory() =
     [<ValidateNotNullOrEmpty>]
     [<Parameter(Mandatory = false, Position = 2 )>]
     member val NameSpace : string = "" with get, set
-    
+
     [<ValidateNotNullOrEmpty>]
     [<Parameter(Mandatory = false, Position = 3 )>]
     member val RootObjectName : string = "" with get, set
-    
+
     [<ValidateNotNullOrEmpty>]
     [<Parameter(Mandatory = false, Position = 4 )>]
     member val ClassPrefix : string = "" with get, set
-    
+
     [<ValidateNotNullOrEmpty>]
     [<Parameter(Mandatory = false, Position = 5 )>]
     member val ClassSuffix : string = "" with get, set
-    
+
 
     override x.EndProcessing() =
         let settings = new Settings(
