@@ -1,14 +1,21 @@
 module Tests
+open System
 open TemplateFactory
 open Xunit
 
-[<Fact>]
-let ``One Object``() =
-    let result = CSharp.CreateFile("""{"Foo": 2}""")
-    Assert.Equal("public decimal Foo { get; set; }", result)
+let assertion expected actual =
+    let expected = expected |> sprintf "public class RootModel { %s }"
+    Assert.Equal(expected, actual)
     
+     
 [<Fact>]
-let ``One object with nested object using white spaces``() =
+let Object() =
+    let result = CSharp.CreateFile("""{"Foo": 2}""")
+    let expected = "public decimal Foo { get; set; }" 
+    assertion expected result
+
+[<Fact>]
+let ``Object with nested string``() =
     let result = CSharp.CreateFile("""{
 
   "aps":
@@ -18,8 +25,18 @@ let ``One object with nested object using white spaces``() =
 
   }
 }""")
-    Assert.Equal("public class ApsModel { public string Alert { get; set; } }", result)
+    let expected = "public class ApsModel { public string Alert { get; set; } }"
+    assertion expected result
+
 [<Fact>]
-let ``Two  Objects``() =
+let ``Two Objects``() =
     let result = CSharp.CreateFile """{"foo": 2, "bar": "this is a test"}"""
-    Assert.Equal("public decimal Foo { get; set; }public string Bar { get; set; }", result)
+    let expected = sprintf "public decimal Foo { get; set; }%spublic string Bar { get; set; }" Environment.NewLine
+    assertion expected result
+
+[<Fact>]
+let ``Object with nested int array``() =
+    let result = CSharp.CreateFile """{"foo": 2, "items": [1,2,3,4,5]}"""
+    let expected = "public decimal Foo { get; set; }public string Bar { get; set; }"
+    assertion expected result
+
