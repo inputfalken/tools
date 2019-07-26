@@ -10,7 +10,7 @@ Creates a CSharp model from json
 
 ```powerShell
   $json = '{"foo": "bar"}'
-  $jsonModel = $json | New-CsharpModel
-  $jsonModel | New-Item -Type File -Name 'Model.cs'
+  $CSharpModel = $json | New-CsharpModel
+  $CSharpModel | New-Item -Type File -Name 'Model.cs'
 ```
 
