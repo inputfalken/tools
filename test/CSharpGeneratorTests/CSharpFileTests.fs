@@ -9,10 +9,23 @@ let assertion expected actual =
     
      
 [<Fact>]
-let Object() =
+let ``Object``() =
     let result = CSharp.CreateFile("""{"Foo": 2}""")
     let expected = "public decimal Foo { get; set; }" 
     assertion expected result
+
+[<Fact>]
+let ``Array with numbers``() =
+    let result = CSharp.CreateFile("""[1,2,3,4]""")
+    let expected = "public decimal[] RootModel { get; set; }" 
+    assertion expected result
+    
+[<Fact>]
+let ``Array with strings and numbers``() =
+    let result = CSharp.CreateFile("""[1,2,3,"foo"]""")
+    let expected = "public object[] RootModel { get; set; }" 
+    assertion expected result
+    
 
 [<Fact>]
 let ``Object with nested string``() =
@@ -37,6 +50,6 @@ let ``Two Objects``() =
 [<Fact>]
 let ``Object with nested int array``() =
     let result = CSharp.CreateFile """{"foo": 2, "items": [1,2,3,4,5]}"""
-    let expected = "public decimal Foo { get; set; }public string Bar { get; set; }"
+    let expected = "public decimal Foo { get; set; } public string Bar { get; set; }"
     assertion expected result
 

@@ -20,7 +20,7 @@ type CSharpFactory() =
 
     [<ValidateNotNullOrEmpty>]
     [<Parameter(Mandatory = false, Position = 3 )>]
-    member val RootObjectName : string = "" with get, set
+    member val RootObjectName : string = "Root" with get, set
 
     [<ValidateNotNullOrEmpty>]
     [<Parameter(Mandatory = false, Position = 4 )>]

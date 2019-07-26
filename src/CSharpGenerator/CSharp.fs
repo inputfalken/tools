@@ -22,20 +22,19 @@ type CSharp =
 
     static member CreateFile(input : string, settings : Settings) =
         let data = (input, settings.Casing |> CasingRule.fromString |> Option.defaultValue CasingRule.Pascal) ||> Json.parse
-        let classSuffix = (settings.ClassSuffix |> stringValidators.valueExists |> Option.defaultValue "Model")
-        let classPrefix = (settings.ClassPrefix |> stringValidators.valueExists |> Option.defaultValue String.Empty)
+        let classPrefix = settings.ClassPrefix
+                          |> stringValidators.valueExists
+                          |> Option.defaultValue String.Empty
+        let classSuffix = settings.ClassSuffix
+                          |> stringValidators.valueExists
+                          |> Option.defaultValue "Model"
+        let rootObject = settings.RootObjectName
+                         |> stringValidators.valueExists
+                         |> Option.defaultValue "Root"
+                         |> (fun x -> sprintf "%s%s%s" classPrefix x classSuffix)
 
-        let rec stringifyObject (property : Property) (useNewline : bool) : string =
-            let (key, value) = property
-            let className = classPrefix + key + classSuffix
-            let stringifiedValue = stringifyValue value
-            let newLine = (if useNewline then Environment.NewLine else String.Empty)
 
-            match value with
-            | Object x -> sprintf "%spublic class %s { %s }" newLine className stringifiedValue
-            | _ -> sprintf "%spublic %s %s { get; set; }" newLine stringifiedValue key
-
-        and stringifyValue value : string =
+        let rec stringifyValue value : string =
             match value with
             | DateTime x -> "System.DateTime"
             | Decimal x -> "decimal"
@@ -44,8 +43,30 @@ type CSharp =
             | Guid x -> "System.Guid"
             | Double x -> "double"
             | Null -> String.Empty
-            | Array x -> x |> Seq.map stringifyValue |> Seq.reduce (fun x y -> x + y)
+            | Array x -> stringifyArray x
             | Object x -> x |> Seq.mapi (fun x y -> (x, y)) |> Seq.fold (fun acc (index, x) -> acc + stringifyObject x (index <> 0)) String.Empty
+
+        and stringifyArray (value : Value seq) =
+            value
+            |> Seq.take 1
+            |> Seq.toList
+            |> Option.Some
+            |> Option.filter (fun x -> not x.IsEmpty)
+            |> Option.map (fun x -> x.[0])
+            |> Option.map stringifyValue
+            |> Option.defaultValue "object"
+            |> (fun x -> sprintf "public %s[] %s { get; set; }" x rootObject )
+
+        and stringifyObject (property : Property) (useSpace : bool) : string =
+            let (key, value) = property
+            let className = classPrefix + key + classSuffix
+            let stringifiedValue = stringifyValue value
+            let space = (if useSpace then "" else String.Empty)
+
+            match value with
+            | Object x -> sprintf "%spublic class %s { %s }" space className stringifiedValue
+            | Array x -> ""
+            | _ -> sprintf "%spublic %s %s { get; set; }" space stringifiedValue key
 
         let namespaceFormatter = settings.NameSpace
                                  |> stringValidators.valueExists
@@ -53,9 +74,6 @@ type CSharp =
                                  |> Option.defaultValue (sprintf "%s")
 
 
-        let classFormatter = settings.RootObjectName
-                             |> stringValidators.valueExists
-                             |> Option.map (fun x -> sprintf "public class %s%s%s { %s }" classPrefix x classSuffix)
-                             |> Option.defaultValue (sprintf "public class %sRoot%s { %s }" classPrefix classSuffix)
-                             
+        let classFormatter = sprintf "public class %s { %s }" rootObject 
+
         data |> (stringifyValue >> classFormatter >> namespaceFormatter)
