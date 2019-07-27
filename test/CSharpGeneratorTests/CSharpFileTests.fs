@@ -21,6 +21,12 @@ let ``Array with numbers``() =
     assertion expected result
     
 [<Fact>]
+let ``Array with strings``() =
+    let result = CSharp.CreateFile("""["foo","bar"]""")
+    let expected = "public string[] RootModel { get; set; }" 
+    assertion expected result
+    
+[<Fact>]
 let ``Array with strings and numbers``() =
     let result = CSharp.CreateFile("""[1,2,3,"foo"]""")
     let expected = "public object[] RootModel { get; set; }" 
@@ -44,12 +50,12 @@ let ``Object with nested string``() =
 [<Fact>]
 let ``Two Objects``() =
     let result = CSharp.CreateFile """{"foo": 2, "bar": "this is a test"}"""
-    let expected = sprintf "public decimal Foo { get; set; }%spublic string Bar { get; set; }" Environment.NewLine
+    let expected = "public decimal Foo { get; set; } public string Bar { get; set; }" 
     assertion expected result
 
 [<Fact>]
 let ``Object with nested int array``() =
     let result = CSharp.CreateFile """{"foo": 2, "items": [1,2,3,4,5]}"""
-    let expected = "public decimal Foo { get; set; } public string Bar { get; set; }"
+    let expected = "public decimal Foo { get; set; } public decimal[] Items { get; set; }"
     assertion expected result
 

@@ -4,10 +4,9 @@ open System
 
 module private stringValidators =
     let valueExists input =
-        let optional = input
-                       |> Option.Some
-                       |> Option.filter (fun x -> not (System.String.IsNullOrWhiteSpace(x)))
-        optional
+       input
+       |> Option.Some
+       |> Option.filter (fun x -> not (System.String.IsNullOrWhiteSpace(x)))
 
 type Settings() =
         member val Casing = "" with get, set
@@ -43,29 +42,28 @@ type CSharp =
             | Guid x -> "System.Guid"
             | Double x -> "double"
             | Null -> String.Empty
-            | Array x -> stringifyArray x
+            | Array x -> stringifyArray x rootObject
             | Object x -> x |> Seq.mapi (fun x y -> (x, y)) |> Seq.fold (fun acc (index, x) -> acc + stringifyObject x (index <> 0)) String.Empty
 
-        and stringifyArray (value : Value seq) =
+        and stringifyArray (value : Value seq) (key: string) =
             value
-            |> Seq.take 1
-            |> Seq.toList
-            |> Option.Some
-            |> Option.filter (fun x -> not x.IsEmpty)
-            |> Option.map (fun x -> x.[0])
-            |> Option.map stringifyValue
-            |> Option.defaultValue "object"
-            |> (fun x -> sprintf "public %s[] %s { get; set; }" x rootObject )
+            |> Seq.fold (fun x y ->
+                let value = y |> stringifyValue
+                if x = String.Empty then value
+                else if value = x then value
+                else "object"
+            ) String.Empty
+            |> (fun x -> sprintf "public %s[] %s { get; set; }" x key)
 
         and stringifyObject (property : Property) (useSpace : bool) : string =
             let (key, value) = property
             let className = classPrefix + key + classSuffix
             let stringifiedValue = stringifyValue value
-            let space = (if useSpace then "" else String.Empty)
+            let space = (if useSpace then " " else String.Empty)
 
             match value with
             | Object x -> sprintf "%spublic class %s { %s }" space className stringifiedValue
-            | Array x -> ""
+            | Array x -> stringifyArray x key |> (fun x -> sprintf "%s%s" space x)
             | _ -> sprintf "%spublic %s %s { get; set; }" space stringifiedValue key
 
         let namespaceFormatter = settings.NameSpace
