@@ -1,5 +1,4 @@
 module Tests
-open System
 open TemplateFactory
 open Xunit
 
@@ -49,6 +48,20 @@ let ``Array with strings and numbers``() =
     let result = CSharp.CreateFile("""[1,2,3,"foo"]""")
     let expected = "public object[] RootModel { get; set; }"
     assertion expected result
+    
+[<Fact>]
+let ``Array with objects``() =
+    let result = CSharp.CreateFile """[
+    {
+        "foo": 1
+    },
+    {
+        "foo": 2
+    }
+]
+"""
+    let expected = "public class FooModel { public decimal Foo { get; set;} }"
+    assertion expected result
 
 
 [<Fact>]
@@ -76,4 +89,12 @@ let ``Object with nested int array``() =
     let result = CSharp.CreateFile """{"foo": 2, "items": [1,2,3,4,5]}"""
     let expected = "public decimal Foo { get; set; } public decimal[] Items { get; set; }"
     assertion expected result
+    
+[<Fact>]
+let ``Object with nested string array``() =
+    let result = CSharp.CreateFile """{"foo": 2, "items": ["foo","bar", "doe"]}"""
+    let expected = "public decimal Foo { get; set; } public string[] Items { get; set; }"
+    assertion expected result
+    
+    
 
