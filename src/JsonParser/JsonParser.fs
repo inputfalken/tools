@@ -9,9 +9,6 @@ module public Json =
             | TryParse.Guid x -> Guid x
             | x -> Value.String x
 
-    // JSON is built on two structures:
-    // 1: A collection of name/value pairs
-    // 2: An ordered list of values.
     let rec private map (value : JsonValue) casing =
          match value with
          | JsonValue.Number x -> Decimal(x)
