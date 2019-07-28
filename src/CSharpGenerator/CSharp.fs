@@ -1,20 +1,24 @@
 ﻿namespace TemplateFactory
 open JsonParser
 open System
+open System
 
 module private stringValidators =
     let valueExists input =
        input
        |> Option.Some
        |> Option.filter (fun x -> not (System.String.IsNullOrWhiteSpace(x)))
-       
+
 module private Formatters =
     let ``class`` name content =
         sprintf "public class %s { %s }" name content
-        
+    
+    let ``namespace`` name content =
+        sprintf "namespace %s { %s }" name content
+
     let property ``type`` name : string =
         sprintf "public %s %s { get; set; }" ``type`` name
-        
+
     let arrayProperty ``type`` name =
         property (sprintf "%s[]" ``type``) name
 
@@ -78,7 +82,13 @@ type CSharp =
 
         let namespaceFormatter = settings.NameSpace
                                  |> stringValidators.valueExists
-                                 |> Option.map (fun x -> sprintf "namespace %s { %s }" x)
+                                 |> Option.map (fun x -> Formatters.``namespace`` x)
                                  |> Option.defaultValue (sprintf "%s")
-
-        data |> (stringifyValue >> (Formatters.``class`` rootObject) >> namespaceFormatter)
+        match data with
+        | Array x -> x |> stringifyArray rootObject 
+        | Object x -> x
+                      |> Seq.mapi (fun x y -> (x, y))
+                      |> Seq.fold (fun acc (index, x) -> acc + stringifyObject x (index <> 0)) String.Empty
+                      |> Formatters.``class`` rootObject
+        | _ -> raise (new Exception("The entry point can be Array or Object."))
+        |> namespaceFormatter
