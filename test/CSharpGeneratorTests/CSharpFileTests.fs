@@ -96,6 +96,20 @@ let ``Array with object with array property with strings mixed items``() =
 """
     let expected = "public class RootModel { public decimal Foo { get; set; } public object[] Bar { get; set; } }"
     arrayEntryAssertion expected result
+    
+[<Fact>]
+let ``Array with object with array property with strings mixed items reversed order``() =
+    let result = CSharp.CreateFile """[
+    {
+        "bar": [1, 2]
+    },
+    {
+        "bar": [1, "foo"]
+    }
+]
+"""
+    let expected = "public class RootModel { public decimal Foo { get; set; } public object[] Bar { get; set; } }"
+    arrayEntryAssertion expected result
 
 [<Fact>]
 let ``Object with nested string``() =
