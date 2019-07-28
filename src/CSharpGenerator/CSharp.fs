@@ -57,7 +57,7 @@ type CSharp =
             | Double x -> "double"
             | Null -> String.Empty
             | Array x -> stringifyArray rootObject x
-            | Object x -> x |> Seq.mapi (fun x y -> (x, y)) |> Seq.fold (fun acc (index, x) -> acc + stringifyObject x (index <> 0)) String.Empty
+            | Object x -> x |> stringifyObject
 
         and stringifyArray (key : string) (value : Value seq) =
             value
@@ -66,8 +66,7 @@ type CSharp =
                 match y with
                 | Object x ->
                      x
-                     |> Seq.mapi (fun x y -> (x, y))
-                     |> Seq.fold (fun acc (index, x) -> acc + stringifyObject x (index <> 0)) String.Empty
+                     |> stringifyObject
                      |> Formatters.``class`` key
                      |> (fun x -> (x, true))
                 | _ ->
@@ -80,17 +79,20 @@ type CSharp =
             ) (String.Empty, false)
             |> (fun (x, y) -> if y then x else Formatters.arrayProperty (if x = String.Empty then "object" else x) key)
 
-        and stringifyObject (property : Property) (useSpace : bool) : string =
-            let (key, value) = property
-            let className = classPrefix + key + classSuffix
-            let stringifiedValue = stringifyValue value
-            let space = (if useSpace then " " else String.Empty)
-
-            match value with
-            | Object x -> Formatters.``class`` className stringifiedValue |> (fun x -> sprintf "%s%s" space x)
-            | Array x -> stringifyArray key x |> (fun x -> sprintf "%s%s" space x)
-            | _ -> Formatters.property stringifiedValue key |> (fun x -> sprintf "%s%s" space x)
-
+        and stringifyObject (properties : Property seq)  : string =
+            properties
+            |> Seq.mapi (fun x y -> (x, y))
+            |> Seq.fold (fun acc (index, (key, value)) ->
+                let className = classPrefix + key + classSuffix
+                let stringifiedValue = stringifyValue value
+                let space = (if index <> 0 then " " else String.Empty)
+                let result = match value with
+                             | Object x -> Formatters.``class`` className stringifiedValue |> (fun x -> sprintf "%s%s" space x)
+                             | Array x -> stringifyArray key x |> (fun x -> sprintf "%s%s" space x)
+                             | _ -> Formatters.property stringifiedValue key |> (fun x -> sprintf "%s%s" space x)
+                acc + result
+            ) String.Empty
+            
         let namespaceFormatter = settings.NameSpace
                                  |> stringValidators.valueExists
                                  |> Option.map (fun x -> Formatters.``namespace`` x)
@@ -103,9 +105,6 @@ type CSharp =
         """
         match data with
         | Array x -> x |> stringifyArray rootObject
-        | Object x -> x
-                      |> Seq.mapi (fun x y -> (x, y))
-                      |> Seq.fold (fun acc (index, x) -> acc + stringifyObject x (index <> 0)) String.Empty
-                      |> Formatters.``class`` rootObject
+        | Object x -> x |> stringifyObject |> Formatters.``class`` rootObject
         | _ -> raise (new ArgumentException(error))
         |> namespaceFormatter
