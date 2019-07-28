@@ -53,7 +53,7 @@ type CSharp =
                 else if value = x then value
                 else "object"
             ) String.Empty
-            |> (fun x -> sprintf "public %s[] %s { get; set; }" x key)
+            |> (fun x ->  sprintf "public %s[] %s { get; set; }" (if x = String.Empty then "object" else x) key)
 
         and stringifyObject (property : Property) (useSpace : bool) : string =
             let (key, value) = property
