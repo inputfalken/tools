@@ -7,6 +7,16 @@ module private stringValidators =
        input
        |> Option.Some
        |> Option.filter (fun x -> not (System.String.IsNullOrWhiteSpace(x)))
+       
+module private Formatters =
+    let ``class`` name content =
+        sprintf "public class %s { %s }" name content
+        
+    let property ``type`` name : string =
+        sprintf "public %s %s { get; set; }" ``type`` name
+        
+    let arrayProperty ``type`` name =
+        property (sprintf "%s[]" ``type``) name
 
 type Settings() =
         member val Casing = "" with get, set
@@ -42,10 +52,10 @@ type CSharp =
             | Guid x -> "System.Guid"
             | Double x -> "double"
             | Null -> String.Empty
-            | Array x -> stringifyArray x rootObject
+            | Array x -> stringifyArray rootObject x
             | Object x -> x |> Seq.mapi (fun x y -> (x, y)) |> Seq.fold (fun acc (index, x) -> acc + stringifyObject x (index <> 0)) String.Empty
 
-        and stringifyArray (value : Value seq) (key: string) =
+        and stringifyArray (key : string) (value : Value seq) =
             value
             |> Seq.fold (fun x y ->
                 let value = y |> stringifyValue
@@ -53,7 +63,7 @@ type CSharp =
                 else if value = x then value
                 else "object"
             ) String.Empty
-            |> (fun x ->  sprintf "public %s[] %s { get; set; }" (if x = String.Empty then "object" else x) key)
+            |> (fun x -> Formatters.arrayProperty (if x = String.Empty then "object" else x) key)
 
         and stringifyObject (property : Property) (useSpace : bool) : string =
             let (key, value) = property
@@ -62,16 +72,13 @@ type CSharp =
             let space = (if useSpace then " " else String.Empty)
 
             match value with
-            | Object x -> sprintf "%spublic class %s { %s }" space className stringifiedValue
-            | Array x -> stringifyArray x key |> (fun x -> sprintf "%s%s" space x)
-            | _ -> sprintf "%spublic %s %s { get; set; }" space stringifiedValue key
+            | Object x -> Formatters.``class`` className stringifiedValue |> (fun x -> sprintf "%s%s" space x)
+            | Array x -> stringifyArray key x |> (fun x -> sprintf "%s%s" space x)
+            | _ -> Formatters.property stringifiedValue key |> (fun x -> sprintf "%s%s" space x)
 
         let namespaceFormatter = settings.NameSpace
                                  |> stringValidators.valueExists
                                  |> Option.map (fun x -> sprintf "namespace %s { %s }" x)
                                  |> Option.defaultValue (sprintf "%s")
 
-
-        let classFormatter = sprintf "public class %s { %s }" rootObject 
-
-        data |> (stringifyValue >> classFormatter >> namespaceFormatter)
+        data |> (stringifyValue >> (Formatters.``class`` rootObject) >> namespaceFormatter)
