@@ -53,7 +53,7 @@ let ``Array with strings and numbers``() =
     arrayEntryAssertion expected result
     
 [<Fact>]
-let ``Array with objects``() =
+let ``Array with object with decimal property``() =
     let result = CSharp.CreateFile """[
     {
         "foo": 1
@@ -63,7 +63,38 @@ let ``Array with objects``() =
     }
 ]
 """
-    let expected = "public class FooModel { public decimal Foo { get; set;} }"
+    let expected = "public class RootModel { public decimal Foo { get; set; } }"
+    arrayEntryAssertion expected result
+    
+[<Fact>]
+let ``Array with object with decimal and string properties``() =
+    let result = CSharp.CreateFile """[
+    {
+        "foo": 1,
+        "bar": "Hi"
+    },
+    {
+        "foo": 2,
+        "bar": "Hi"
+    }
+]
+"""
+    let expected = "public class RootModel { public decimal Foo { get; set; } public string Bar { get; set; } }"
+    arrayEntryAssertion expected result
+    
+    
+[<Fact>]
+let ``Array with object with array property with strings mixed items``() =
+    let result = CSharp.CreateFile """[
+    {
+        "bar": [1, "foo"]
+    },
+    {
+        "bar": [1, 2]
+    }
+]
+"""
+    let expected = "public class RootModel { public decimal Foo { get; set; } public object[] Bar { get; set; } }"
     arrayEntryAssertion expected result
 
 [<Fact>]

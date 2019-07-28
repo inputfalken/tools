@@ -62,12 +62,19 @@ type CSharp =
         and stringifyArray (key : string) (value : Value seq) =
             value
             |> Seq.fold (fun x y ->
-                let value = y |> stringifyValue
-                if x = String.Empty then value
-                else if value = x then value
-                else "object"
+                match y with
+                | Object x ->
+                     x
+                     |> Seq.mapi (fun x y -> (x, y))
+                     |> Seq.fold (fun acc (index, x) -> acc + stringifyObject x (index <> 0)) String.Empty
+                     |> Formatters.``class`` key
+                | _ -> 
+                    let value = y |> stringifyValue
+                    if x = String.Empty then value
+                    else if value = x then value
+                    else "object"
+                    |> (fun x -> Formatters.arrayProperty (if x = String.Empty then "object" else x) key)
             ) String.Empty
-            |> (fun x -> Formatters.arrayProperty (if x = String.Empty then "object" else x) key)
 
         and stringifyObject (property : Property) (useSpace : bool) : string =
             let (key, value) = property
@@ -84,11 +91,17 @@ type CSharp =
                                  |> stringValidators.valueExists
                                  |> Option.map (fun x -> Formatters.``namespace`` x)
                                  |> Option.defaultValue (sprintf "%s")
+                                 
+        let error = """
+            JSON is built on two structures:
+            1: A collection of name/value pairs
+            2: An ordered list of values.
+        """
         match data with
         | Array x -> x |> stringifyArray rootObject 
         | Object x -> x
                       |> Seq.mapi (fun x y -> (x, y))
                       |> Seq.fold (fun acc (index, x) -> acc + stringifyObject x (index <> 0)) String.Empty
                       |> Formatters.``class`` rootObject
-        | _ -> raise (new Exception("The entry point can be Array or Object."))
+        | _ -> raise (new ArgumentException(error))
         |> namespaceFormatter
