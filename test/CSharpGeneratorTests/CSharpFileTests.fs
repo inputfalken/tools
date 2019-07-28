@@ -94,7 +94,7 @@ let ``Array with object with array property with strings mixed items``() =
     }
 ]
 """
-    let expected = "public class RootModel { public decimal Foo { get; set; } public object[] Bar { get; set; } }"
+    let expected = "public class RootModel { public object[] Bar { get; set; } }"
     arrayEntryAssertion expected result
     
 [<Fact>]
@@ -108,7 +108,7 @@ let ``Array with object with array property with strings mixed items reversed or
     }
 ]
 """
-    let expected = "public class RootModel { public decimal Foo { get; set; } public object[] Bar { get; set; } }"
+    let expected = "public class RootModel { public object[] Bar { get; set; } }"
     arrayEntryAssertion expected result
 
 [<Fact>]

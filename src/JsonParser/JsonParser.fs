@@ -26,7 +26,7 @@ module public Json =
         |> match casing with
            | Pascal ->  nicePascalName
            | Camel -> niceCamelName
-        |> (fun x -> (x, map value casing))
+        |> (fun x -> { Key = x ; Value = map value casing })
     
     let parse (input: string) (casing : CasingRule) =
          input |> JsonValue.Parse |> (fun x -> map x casing)  

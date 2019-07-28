@@ -25,7 +25,7 @@ type public Value =
             | Guid of Guid
             | Null
             | Object of Property seq
-and public Property = Key * Value
+and public Property = { Key : Key ; Value : Value }
 
 
 type public CasingRule =

@@ -82,14 +82,14 @@ type CSharp =
         and stringifyObject (properties : Property seq)  : string =
             properties
             |> Seq.mapi (fun x y -> (x, y))
-            |> Seq.fold (fun acc (index, (key, value)) ->
-                let className = classPrefix + key + classSuffix
-                let stringifiedValue = stringifyValue value
+            |> Seq.fold (fun acc (index, property) ->
+                let className = classPrefix + property.Key + classSuffix
+                let stringifiedValue = stringifyValue property.Value
                 let space = (if index <> 0 then " " else String.Empty)
-                let result = match value with
+                let result = match property.Value with
                              | Object x -> Formatters.``class`` className stringifiedValue |> (fun x -> sprintf "%s%s" space x)
-                             | Array x -> stringifyArray key x |> (fun x -> sprintf "%s%s" space x)
-                             | _ -> Formatters.property stringifiedValue key |> (fun x -> sprintf "%s%s" space x)
+                             | Array x -> stringifyArray property.Key x |> (fun x -> sprintf "%s%s" space x)
+                             | _ -> Formatters.property stringifiedValue property.Key |> (fun x -> sprintf "%s%s" space x)
                 acc + result
             ) String.Empty
             
