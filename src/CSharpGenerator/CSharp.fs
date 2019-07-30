@@ -2,6 +2,7 @@
 open JsonParser
 open System
 open System
+open System
 
 module private stringValidators =
     let valueExists input =
@@ -62,24 +63,17 @@ type CSharp =
         and stringifyArray (key : string) (value : Value seq) =
             value
             |> Seq.fold (fun x y ->
-                let (x, _) = x
-                match y with
-                | Object x ->
-                     x
-                     |> stringifyObject
-                     |> Formatters.``class`` key
-                     |> (fun x -> (x, true))
-                | _ ->
-                    let value = y |> stringifyValue
-                    if x = String.Empty then value
-                    else if value = x then value
-                    else "object"
-                    |> (fun x -> (x, false))
+                let value = match y with
+                            | Object x -> x |> stringifyObject |> (fun x -> Formatters.``class`` key x )
+                            | x -> x |> stringifyValue |> (fun x -> Formatters.arrayProperty x key)
 
-            ) (String.Empty, false)
-            |> (fun (x, y) -> if y then x else Formatters.arrayProperty (if x = String.Empty then "object" else x) key)
+                if x = String.Empty then value
+                else if value = x then value
+                else "object" |> (fun x -> Formatters.arrayProperty x key)
+            ) String.Empty
 
-        and stringifyObject (properties : Property seq)  : string =
+
+        and stringifyObject (properties : Property seq) : string =
             properties
             |> Seq.mapi (fun x y -> (x, y))
             |> Seq.fold (fun acc (index, property) ->
@@ -92,7 +86,7 @@ type CSharp =
                              | _ -> Formatters.property stringifiedValue property.Key |> (fun x -> sprintf "%s%s" space x)
                 acc + result
             ) String.Empty
-            
+
         let namespaceFormatter = settings.NameSpace
                                  |> stringValidators.valueExists
                                  |> Option.map (fun x -> Formatters.``namespace`` x)
