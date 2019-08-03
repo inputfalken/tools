@@ -9,8 +9,12 @@ In order to install this module, you will have to run `dotnet publish` in this d
 Creates a CSharp model from json
 
 ```powerShell
-  $json = '{"foo": "bar"}'
-  $CSharpModel = $json | New-CsharpModel
-  $CSharpModel | New-Item -Type File -Name 'Model.cs'
+$json = '{"foo": "bar"}'
+$CSharpModel = $json | New-CsharpModel
+$CSharpModel | New-Item -Type File -Name 'Model.cs'
 ```
+The `$CSharpModel` would in this case look like 
 
+```csharp
+public class RootModel { public string Foo { get; set; } }
+```
