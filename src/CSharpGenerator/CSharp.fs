@@ -61,13 +61,15 @@ type CSharp =
             | Object x -> x |> stringifyObject
 
         and stringifyArray (key : string) (value : Value seq) =
-            value
-            |> Seq.map (fun x ->
-                match x with
-                | Object x -> x |> stringifyObject |> (fun x -> Formatters.``class`` key x)
-                | x -> x |> stringifyValue |> (fun x -> Formatters.arrayProperty x key)
-            )
-            |> Seq.reduce (fun x y -> if y = x then y else "object" |> (fun x -> Formatters.arrayProperty x key))
+            if Seq.isEmpty value then Formatters.arrayProperty "object" key
+            else 
+                value
+                |> Seq.map (fun x ->
+                    match x with
+                    | Object x -> x |> stringifyObject |> (fun x -> Formatters.``class`` key x)
+                    | x -> x |> stringifyValue |> (fun x -> Formatters.arrayProperty x key)
+                )
+                |> Seq.reduce (fun x y -> if y = x then y else "object" |> (fun x -> Formatters.arrayProperty x key))
 
 
         and stringifyObject (properties : Property seq) : string =
