@@ -74,12 +74,17 @@ type CSharp =
             properties
             |> Seq.mapi (fun index property ->
                 let className = classPrefix + property.Key + classSuffix
-                let stringifiedValue = stringifyValue property.Value
                 let space = (if index <> 0 then " " else String.Empty)
                 match property.Value with
-                | Object x -> Formatters.``class`` className stringifiedValue |> (fun x -> sprintf "%s%s" space x)
-                | Array x -> stringifyArray property.Key x |> (fun x -> sprintf "%s%s" space x)
-                | _ -> Formatters.property stringifiedValue property.Key |> (fun x -> sprintf "%s%s" space x)
+                | Object x ->
+                    let stringifiedValue = stringifyObject x
+                    Formatters.``class`` className stringifiedValue |> (fun x -> sprintf "%s%s" space x)
+                | Array x ->
+                    let stringifiedValue = stringifyArray property.Key x
+                    sprintf "%s%s" space stringifiedValue
+                | x ->
+                    let stringifiedValue = stringifyValue x
+                    Formatters.property stringifiedValue property.Key |> (fun x -> sprintf "%s%s" space x)
             )
             |> Seq.reduce (fun acc curr -> acc + curr)
 
