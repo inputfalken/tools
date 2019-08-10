@@ -62,30 +62,26 @@ type CSharp =
 
         and stringifyArray (key : string) (value : Value seq) =
             value
-            |> Seq.fold (fun x y ->
-                let value = match y with
-                            | Object x -> x |> stringifyObject |> (fun x -> Formatters.``class`` key x )
-                            | x -> x |> stringifyValue |> (fun x -> Formatters.arrayProperty x key)
-
-                if x = String.Empty then value
-                else if value = x then value
-                else "object" |> (fun x -> Formatters.arrayProperty x key)
-            ) String.Empty
+            |> Seq.map (fun x ->
+                match x with
+                | Object x -> x |> stringifyObject |> (fun x -> Formatters.``class`` key x)
+                | x -> x |> stringifyValue |> (fun x -> Formatters.arrayProperty x key)
+            )
+            |> Seq.reduce (fun x y -> if y = x then y else "object" |> (fun x -> Formatters.arrayProperty x key))
 
 
         and stringifyObject (properties : Property seq) : string =
             properties
-            |> Seq.mapi (fun x y -> (x, y))
-            |> Seq.fold (fun acc (index, property) ->
+            |> Seq.mapi (fun index property ->
                 let className = classPrefix + property.Key + classSuffix
                 let stringifiedValue = stringifyValue property.Value
                 let space = (if index <> 0 then " " else String.Empty)
-                let result = match property.Value with
-                             | Object x -> Formatters.``class`` className stringifiedValue |> (fun x -> sprintf "%s%s" space x)
-                             | Array x -> stringifyArray property.Key x |> (fun x -> sprintf "%s%s" space x)
-                             | _ -> Formatters.property stringifiedValue property.Key |> (fun x -> sprintf "%s%s" space x)
-                acc + result
-            ) String.Empty
+                match property.Value with
+                | Object x -> Formatters.``class`` className stringifiedValue |> (fun x -> sprintf "%s%s" space x)
+                | Array x -> stringifyArray property.Key x |> (fun x -> sprintf "%s%s" space x)
+                | _ -> Formatters.property stringifiedValue property.Key |> (fun x -> sprintf "%s%s" space x)
+            )
+            |> Seq.reduce (fun acc curr -> acc + curr)
 
         let namespaceFormatter = settings.NameSpace
                                  |> stringValidators.valueExists
