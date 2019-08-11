@@ -7,27 +7,7 @@ module private stringValidators =
        input
        |> Option.Some
        |> Option.filter (fun x -> not (System.String.IsNullOrWhiteSpace(x)))
-
-module private Formatters =
-    let ``class`` name content =
-        sprintf "public class %s { %s }" name content
-
-    let ``namespace`` name content =
-        sprintf "namespace %s { %s }" name content
-
-    let property ``type`` name : string =
-        sprintf "public %s %s { get; set; }" ``type`` name
-
-    let arrayProperty ``type`` name =
-        property (sprintf "%s[]" ``type``) name
-
-type Settings() =
-        member val Casing = "" with get, set
-        member val NameSpace = "" with get, set
-        member val ClassPrefix = "" with get, set
-        member val ClassSuffix = "" with get, set
-        member val RootObjectName = "" with get, set
-
+       
 type CSharp =
     static member CreateFile(input : string) =
         CSharp.CreateFile(input, new Settings())
@@ -60,7 +40,7 @@ type CSharp =
 
         and stringifyArray (key : string) (value : Value seq) =
             if Seq.isEmpty value then Formatters.arrayProperty "object" key
-            else 
+            else
                 value
                 |> Seq.map (fun x ->
                     match x with

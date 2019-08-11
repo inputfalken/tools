@@ -6,6 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Formatters.fs" />
+        <Compile Include="Setttings.fs" />
         <Compile Include="CSharp.fs" />
     </ItemGroup>
 
