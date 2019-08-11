@@ -1,8 +1,6 @@
 ﻿namespace TemplateFactory
 open JsonParser
 open System
-open System
-open System
 
 module private stringValidators =
     let valueExists input =
@@ -75,10 +73,10 @@ type CSharp =
         and stringifyObject (properties : Property seq) : string =
             properties
             |> Seq.mapi (fun index property ->
-                let className = classPrefix + property.Key + classSuffix
                 let space = (if index <> 0 then " " else String.Empty)
                 match property.Value with
                 | Object x ->
+                    let className = classPrefix + property.Key + classSuffix
                     let stringifiedValue = stringifyObject x
                     Formatters.``class`` className stringifiedValue |> (fun x -> sprintf "%s%s" space x)
                 | Array x ->
