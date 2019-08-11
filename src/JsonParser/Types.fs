@@ -3,7 +3,7 @@ open System
 open Microsoft.FSharp.Reflection
 
 
-module UnionFunctions =
+module private UnionFunctions =
     let toString (x : 'a) =
         match FSharpValue.GetUnionFields(x, typeof<'a>) with
         | case, _ -> case.Name
