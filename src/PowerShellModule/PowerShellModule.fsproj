@@ -10,7 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" />
-        <PackageReference Include="FSharp.Core" Version="4.6.2" />
+        <PackageReference Update="FSharp.Core" Version="4.7.0" />
     </ItemGroup>
 
     <ItemGroup>
