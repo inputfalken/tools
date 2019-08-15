@@ -2,7 +2,6 @@
 open Formatters
 open JsonParser
 open System
-open System
 
 module private stringValidators =
     let valueExists input =
@@ -25,7 +24,6 @@ type CSharp =
         let rootObject = settings.RootObjectName
                          |> stringValidators.valueExists
                          |> Option.defaultValue "Root"
-                         |> (fun x -> sprintf "%s%s%s" classPrefix x classSuffix)
 
         let rec stringifyValue value: string =
             match value with
@@ -36,29 +34,29 @@ type CSharp =
             | Guid x -> "System.Guid"
             | Double x -> "double"
             | Null -> String.Empty
-            | Array x -> stringifyArray x
-            | Object x -> x |> stringifyObject
+            | _ -> raise (new Exception("Array or object can never be resolved from value."))
 
-        and stringifyArray (value: Value seq): string =
-            if Seq.isEmpty value then "object"
+        and stringifyArray (value: Value seq) (key: string): string =
+            if Seq.isEmpty value then "object" |> (fun x -> Formatters.arrayProperty x key)
             else
-                let result = value
-                            |> Seq.map stringifyValue
-                            |> Seq.reduce (fun x y -> if x = y then y else "object")
+                 value
+                 |> Seq.map (fun x ->
+                     match x with
+                     | Object x -> stringifyObject x rootObject
+                     | x -> stringifyValue x |> (fun x -> (x, option.None))
+                 )
+                 |> Seq.reduce (fun x y -> if x = y then y else ("object", option.None))
+                 |> (fun (x, y) -> if y.IsSome then x + " " + (Formatters.arrayProperty y.Value key) else Formatters.arrayProperty x key)
 
-                result
-
-        and stringifyObject (properties: Property seq): string =
+        and stringifyObject (properties: Property seq) (key: string): string * string option =
+            let key = classPrefix + key + classSuffix
             properties
             |> Seq.mapi (fun index property ->
                 let space = (if index <> 0 then " " else String.Empty)
                 match property.Value with
-                | Object x ->
-                    let className = classPrefix + property.Key + classSuffix
-                    let stringifiedValue = stringifyObject x
-                    Formatters.``class`` className stringifiedValue |> (fun x -> sprintf "%s%s" space x)
+                | Object x -> stringifyObject x property.Key |> (fun (x, y) -> x)
                 | Array x ->
-                    let stringifiedValue = stringifyArray x |> Formatters.arrayProperty <| property.Key
+                    let stringifiedValue = stringifyArray x property.Key
                     sprintf "%s%s" space stringifiedValue
                 | x ->
                     let stringifiedValue = stringifyValue x
@@ -66,6 +64,7 @@ type CSharp =
                     formatted
             )
             |> Seq.reduce (fun acc curr -> acc + curr)
+            |> (fun x -> (Formatters.``class`` key x, option.Some key))
 
         let namespaceFormatter = settings.NameSpace
                                  |> stringValidators.valueExists
@@ -78,12 +77,7 @@ type CSharp =
             2: An ordered list of values.
         """
         match data with
-        | Array x ->
-                     let ``type`` = stringifyArray x
-                     let property = ``type`` |> Formatters.arrayProperty <| rootObject
-                     property
-        | Object x ->
-            let content = x |> stringifyObject
-            Formatters.``class`` rootObject content
+        | Array x -> stringifyArray x "Items"
+        | Object x -> x |> stringifyObject <| rootObject |> (fun (x, y) -> x)
         | _ -> raise (new ArgumentException(error))
         |> namespaceFormatter
