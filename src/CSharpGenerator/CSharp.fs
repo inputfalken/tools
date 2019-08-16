@@ -1,6 +1,7 @@
 ﻿namespace TemplateFactory
-open Formatters
 open JsonParser
+open CSTypeTemp
+open System
 open System
 
 module private stringValidators =
@@ -14,7 +15,6 @@ type CSharp =
         CSharp.CreateFile(input, new Settings())
 
     static member CreateFile(input: string, settings: Settings) =
-        let data = (input, settings.Casing |> CasingRule.fromString |> Option.defaultValue CasingRule.Pascal) ||> Json.parse
         let classPrefix = settings.ClassPrefix
                           |> stringValidators.valueExists
                           |> Option.defaultValue String.Empty
@@ -25,50 +25,56 @@ type CSharp =
                          |> stringValidators.valueExists
                          |> Option.defaultValue "Root"
 
-        let rec stringifyValue value: string =
+        let unresolvedBaseType = BaseType.Object |> BaseType
+
+        let rec baseType value: BaseType =
             match value with
-            | DateTime x -> "System.DateTime"
-            | Decimal x -> "decimal"
-            | String x -> "string"
-            | Boolean x -> "bool"
-            | Guid x -> "System.Guid"
-            | Double x -> "double"
-            | Null -> String.Empty
+            | DateTime _ -> BaseType.DateTime
+            | Decimal _ -> BaseType.Decimal
+            | String _ -> BaseType.String
+            | Boolean _ -> BaseType.Boolean
+            | Guid _ -> BaseType.Guid
+            | Double _ -> BaseType.Double
             | _ -> raise (new Exception("Array or object can never be resolved from value."))
 
-        and stringifyArray (value: Value seq) (key: string): string =
-            if Seq.isEmpty value then "object" |> (fun x -> Formatters.arrayProperty x key)
+        and stringifyArray (value: Value seq): CSType =
+            if Seq.isEmpty value then unresolvedBaseType
             else
                  value
                  |> Seq.map (fun x ->
                      match x with
-                     | Object x -> stringifyObject x rootObject
-                     | x -> stringifyValue x |> (fun x -> (x, option.None))
+                     | Object x -> generatedType x rootObject |> GeneratedType
+                     | x -> baseType x |> BaseType
                  )
-                 |> Seq.reduce (fun x y -> if x = y then y else ("object", option.None))
-                 |> (fun (x, y) -> if y.IsSome then x + " " + (Formatters.arrayProperty y.Value key) else Formatters.arrayProperty x key)
+                 |> Seq.reduce (fun x y -> if x = y then y else unresolvedBaseType)
 
-        and stringifyObject (properties: Property seq) (key: string): string * string option =
+        and generatedType (properties: Property seq) (key: string): GeneratedType =
             let key = classPrefix + key + classSuffix
             properties
             |> Seq.mapi (fun index property ->
-                let space = (if index <> 0 then " " else String.Empty)
+                let space = if index <> 0 then " " else String.Empty
                 match property.Value with
-                | Object x -> stringifyObject x property.Key |> (fun (x, y) -> x)
+                | Object x ->
+                    let generatedType = (generatedType x property.Key)
+                    generatedType.FormatClass
                 | Array x ->
-                    let stringifiedValue = stringifyArray x property.Key
-                    sprintf "%s%s" space stringifiedValue
+                    let ``type`` = stringifyArray x
+                    let str = match ``type`` with
+                              | GeneratedType x -> x.FormatClass + space
+                              | _ -> String.Empty
+                              + ``type``.FormatArray property.Key
+                    sprintf "%s%s" space str
                 | x ->
-                    let stringifiedValue = stringifyValue x
-                    let formatted = Formatters.property stringifiedValue property.Key |> (fun x -> sprintf "%s%s" space x)
-                    formatted
+                    let baseType = baseType x
+                    let str = baseType.FormatProperty(property.Key)
+                    sprintf "%s%s" space str
             )
             |> Seq.reduce (fun acc curr -> acc + curr)
-            |> (fun x -> (Formatters.``class`` key x, option.Some key))
-
+            |> (fun x -> { Name = key; Members = x })
+            
         let namespaceFormatter = settings.NameSpace
                                  |> stringValidators.valueExists
-                                 |> Option.map (fun x -> Formatters.``namespace`` x)
+                                 |> Option.map (fun x -> sprintf "namespace %s { %s }" x)
                                  |> Option.defaultValue (sprintf "%s")
 
         let error = """
@@ -76,8 +82,14 @@ type CSharp =
             1: A collection of name/value pairs
             2: An ordered list of values.
         """
+        let data = (input, settings.Casing |> CasingRule.fromString |> Option.defaultValue CasingRule.Pascal) ||> Json.parse
         match data with
-        | Array x -> stringifyArray x "Items"
-        | Object x -> x |> stringifyObject <| rootObject |> (fun (x, y) -> x)
+        | Array x ->
+            let ``type`` = stringifyArray x
+            match ``type`` with
+            | GeneratedType x -> x.FormatClass + " "
+            | _ -> String.Empty            
+            + (``type``).FormatArray "Items"
+        | Object x -> (x |> generatedType <| rootObject).FormatClass
         | _ -> raise (new ArgumentException(error))
         |> namespaceFormatter

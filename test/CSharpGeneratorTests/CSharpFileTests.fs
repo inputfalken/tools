@@ -19,37 +19,37 @@ let Object() =
 [<Fact>]
 let ``Empty Array``() =
     let result = CSharp.CreateFile("""[]""")
-    let expected = "public object[] RootModel { get; set; }"
+    let expected = "public object[] Items { get; set; }"
     arrayEntryAssertion expected result
     
 [<Fact>]
 let ``Array with single number``() =
     let result = CSharp.CreateFile("""[1]""")
-    let expected = "public decimal[] RootModel { get; set; }"
+    let expected = "public decimal[] Items { get; set; }"
     arrayEntryAssertion expected result
 
 [<Fact>]
 let ``Array with single string``() =
     let result = CSharp.CreateFile("""["bar"]""")
-    let expected = "public string[] RootModel { get; set; }"
+    let expected = "public string[] Items { get; set; }"
     arrayEntryAssertion expected result
 
 [<Fact>]
 let ``Array with numbers``() =
     let result = CSharp.CreateFile("""[1,2,3,4]""")
-    let expected = "public decimal[] RootModel { get; set; }"
+    let expected = "public decimal[] Items { get; set; }"
     arrayEntryAssertion expected result
 
 [<Fact>]
 let ``Array with strings``() =
     let result = CSharp.CreateFile("""["foo","bar"]""")
-    let expected = "public string[] RootModel { get; set; }"
+    let expected = "public string[] Items { get; set; }"
     arrayEntryAssertion expected result
 
 [<Fact>]
 let ``Array with strings and numbers``() =
     let result = CSharp.CreateFile("""[1,2,3,"foo"]""")
-    let expected = "public object[] RootModel { get; set; }"
+    let expected = "public object[] Items { get; set; }"
     arrayEntryAssertion expected result
     
 [<Fact>]
@@ -63,7 +63,7 @@ let ``Array with object with decimal property``() =
     }
 ]
 """
-    let expected = "public class RootModel { public decimal Foo { get; set; } }"
+    let expected = "public class RootModel { public decimal Foo { get; set; } } public RootModel[] Items { get; set; }"
     arrayEntryAssertion expected result
     
 [<Fact>]
@@ -79,7 +79,7 @@ let ``Array with object with decimal and string properties``() =
     }
 ]
 """
-    let expected = "public class RootModel { public decimal Foo { get; set; } public string Bar { get; set; } }"
+    let expected = "public class RootModel { public decimal Foo { get; set; } public string Bar { get; set; } } public RootModel[] Items { get; set; }"
     arrayEntryAssertion expected result
     
     
