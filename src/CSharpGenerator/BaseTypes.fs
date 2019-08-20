@@ -31,6 +31,7 @@ namespace CSTypeTemp
         Members: string
      } with
         member this.FormatArray key = Formatters.arrayProperty this.Name key
+        member this.FormatProperty key = Formatters.property this.Name key
         member this.FormatClass = Formatters.``class`` this.Name this.Members
 
     type CSType =

@@ -56,11 +56,14 @@ type CSharp =
                 | Object x ->
                     let generatedType = (generatedType x property.Key)
                     generatedType.FormatClass
+                    + " "
+                    + generatedType.FormatProperty generatedType.Name
                 | Array x ->
                     let ``type`` = stringifyArray x
                     let str = match ``type`` with
                               | GeneratedType x -> x.FormatClass
                               | _ -> String.Empty
+                              + " "
                               + ``type``.FormatArray property.Key
                     str
                 | x ->
