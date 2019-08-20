@@ -51,8 +51,7 @@ type CSharp =
         and generatedType (properties: Property seq) (key: string): GeneratedType =
             let key = classPrefix + key + classSuffix
             properties
-            |> Seq.mapi (fun index property ->
-                let space = if index <> 0 then " " else String.Empty
+            |> Seq.map (fun property ->
                 match property.Value with
                 | Object x ->
                     let generatedType = (generatedType x property.Key)
@@ -60,18 +59,18 @@ type CSharp =
                 | Array x ->
                     let ``type`` = stringifyArray x
                     let str = match ``type`` with
-                              | GeneratedType x -> x.FormatClass + space
+                              | GeneratedType x -> x.FormatClass
                               | _ -> String.Empty
                               + ``type``.FormatArray property.Key
-                    sprintf "%s%s" space str
+                    str
                 | x ->
                     let baseType = baseType x
                     let str = baseType.FormatProperty(property.Key)
-                    sprintf "%s%s" space str
+                    str
             )
-            |> Seq.reduce (fun acc curr -> acc + curr)
+            |> Seq.reduce (fun acc curr -> acc + " " + curr)
             |> (fun x -> { Name = key; Members = x })
-            
+
         let namespaceFormatter = settings.NameSpace
                                  |> stringValidators.valueExists
                                  |> Option.map (fun x -> sprintf "namespace %s { %s }" x)
@@ -88,7 +87,7 @@ type CSharp =
             let ``type`` = stringifyArray x
             match ``type`` with
             | GeneratedType x -> x.FormatClass + " "
-            | _ -> String.Empty            
+            | _ -> String.Empty
             + (``type``).FormatArray "Items"
         | Object x -> (x |> generatedType <| rootObject).FormatClass
         | _ -> raise (new ArgumentException(error))
