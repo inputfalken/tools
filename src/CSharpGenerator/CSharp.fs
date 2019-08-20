@@ -46,33 +46,28 @@ type CSharp =
                      | Object x -> generatedType x rootObject |> GeneratedType
                      | x -> baseType x |> BaseType
                  )
-                 |> Seq.reduce (fun x y -> if x = y then y else unresolvedBaseType)
+                 |> Seq.reduce (fun x y ->
+                     let comparison = match x with
+                                       | GeneratedType x1 ->
+                                           match y with
+                                           | GeneratedType x2 -> (x1.Members, x2.Members) ||> Seq.forall2 (=)
+                                           | _ -> false
+                                       | _ -> false
+                     if comparison then y
+                     else if x = y then y
+                     else unresolvedBaseType
+                     )
+                 |> CSType.ArrType
 
         and generatedType (properties: Property seq) (key: string): GeneratedType =
-            let key = classPrefix + key + classSuffix
             properties
             |> Seq.map (fun property ->
                 match property.Value with
-                | Object x ->
-                    let generatedType = (generatedType x property.Key)
-                    generatedType.FormatClass
-                    + " "
-                    + generatedType.FormatProperty generatedType.Name
-                | Array x ->
-                    let ``type`` = stringifyArray x
-                    let str = match ``type`` with
-                              | GeneratedType x -> x.FormatClass
-                              | _ -> String.Empty
-                              + " "
-                              + ``type``.FormatArray property.Key
-                    str
-                | x ->
-                    let baseType = baseType x
-                    let str = baseType.FormatProperty(property.Key)
-                    str
+                | Object x -> (property.Key, generatedType x property.Key |> CSType.GeneratedType)
+                | Array x -> (property.Key, stringifyArray x)
+                | x -> (property.Key, baseType x |> CSType.BaseType)
             )
-            |> Seq.reduce (fun acc curr -> acc + " " + curr)
-            |> (fun x -> { Name = key; Members = x })
+            |> (fun x -> { Name = key; Members = x; NameSuffix = classSuffix; NamePrefix = classPrefix })
 
         let namespaceFormatter = settings.NameSpace
                                  |> stringValidators.valueExists

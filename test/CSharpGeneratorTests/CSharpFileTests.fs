@@ -122,7 +122,7 @@ let ``Object with nested string``() =
 
   }
 }""")
-    let expected = "public class ApsModel { public string Alert { get; set; } }"
+    let expected = "public class ApsModel { public string Alert { get; set; } } public ApsModel Aps { get; set; }"
     objectEntryAssertion expected result
 
 [<Fact>]

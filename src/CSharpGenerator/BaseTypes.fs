@@ -9,7 +9,7 @@ namespace CSTypeTemp
 
         let arrayProperty ``type`` name =
             property (sprintf "%s[]" ``type``) name
-            
+
     type BaseType = {
         Name: string
         Namespace: string
@@ -28,17 +28,29 @@ namespace CSTypeTemp
 
     type GeneratedType = {
         Name: string
-        Members: string
+        Members: (string * CSType) seq
+        NamePrefix: string
+        NameSuffix: string
      } with
-        member this.FormatArray key = Formatters.arrayProperty this.Name key
-        member this.FormatProperty key = Formatters.property this.Name key
-        member this.FormatClass = Formatters.``class`` this.Name this.Members
+        member this.FormatArray key = Formatters.arrayProperty (this.NamePrefix + this.Name + this.NameSuffix) key
+        member this.FormatProperty ``type`` name = Formatters.property ``type`` name
+        member this.FormatClass: string =
+            this.Members
+            |> Seq.map (fun (name, ``type``) ->
+                match ``type`` with
+                | GeneratedType x -> x.FormatClass + " " + x.FormatProperty (x.NamePrefix + x.Name + x.NameSuffix) x.Name
+                | ArrType x -> x.FormatArray name
+                | BaseType x -> x.FormatProperty name
+            )
+            |> Seq.reduce (fun x y -> x + " " + y)
+            |> (fun x -> Formatters.``class`` (this.NamePrefix + this.Name + this.NameSuffix) x)
 
-    type CSType =
+    and CSType =
         | BaseType of BaseType
         | GeneratedType of GeneratedType
-    with
+        | ArrType of CSType
+
         member this.FormatArray key = match this with
-                                           | BaseType x -> x.FormatArray
-                                           | GeneratedType x -> x.FormatArray
-                                           <| key
+                                      | BaseType x -> x.FormatArray key
+                                      | GeneratedType x -> x.FormatClass + " " + x.FormatArray key
+                                      | ArrType x -> x.FormatArray key
