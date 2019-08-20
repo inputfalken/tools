@@ -144,4 +144,18 @@ let ``Object with nested string array``() =
     objectEntryAssertion expected result
     
     
+[<Fact>]
+let ``Object with object array``() =
+    let result = CSharp.CreateFile """{ "Models": [
+        {
+            "foo": 1
+        },
+        {
+            "foo": 2
+        }
+    ]}
+    """
+    let expected = "public class FooModel { public decimal Foo { get; set; } } public FooModel[] Models { get; set; }"
+    objectEntryAssertion expected result
+    
 
