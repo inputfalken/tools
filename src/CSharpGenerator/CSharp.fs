@@ -81,12 +81,7 @@ type CSharp =
         """
         let data = (input, settings.Casing |> CasingRule.fromString |> Option.defaultValue CasingRule.Pascal) ||> Json.parse
         match data with
-        | Array x ->
-            let ``type`` = stringifyArray x
-            match ``type`` with
-            | GeneratedType x -> x.ClassDeclaration rootObject + " "
-            | _ -> String.Empty
-            + (``type``).FormatArray rootObject 
+        | Array x -> (stringifyArray x).FormatArray rootObject
         | Object x -> (x |> generatedType ).ClassDeclaration rootObject
         | _ -> raise (new ArgumentException(error))
         |> namespaceFormatter
