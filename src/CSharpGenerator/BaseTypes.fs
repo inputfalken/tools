@@ -31,7 +31,6 @@ namespace CSTypeTemp
         NamePrefix: string
         NameSuffix: string
      } with
-
         member this.FormatProperty ``type`` name = Formatters.property ``type`` name
         member this.ClassDeclaration name: string =
             let name = this.NamePrefix + name + this.NameSuffix
@@ -49,7 +48,6 @@ namespace CSTypeTemp
         | BaseType of BaseType
         | GeneratedType of GeneratedType
         | ArrType of CSType
-
         member this.FormatArray key = match this with
                                       | BaseType x -> x.FormatArray key
                                       | GeneratedType x -> x.ClassDeclaration key + " " + Formatters.arrayProperty (x.NamePrefix + key + x.NameSuffix) key
