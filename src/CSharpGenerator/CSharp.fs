@@ -43,7 +43,7 @@ type CSharp =
                  value
                  |> Seq.map (fun x ->
                      match x with
-                     | Object x -> generatedType x rootObject |> GeneratedType
+                     | Object x -> generatedType x  |> GeneratedType
                      | x -> baseType x |> BaseType
                  )
                  |> Seq.reduce (fun x y ->
@@ -59,15 +59,15 @@ type CSharp =
                      )
                  |> CSType.ArrType
 
-        and generatedType (properties: Property seq) (key: string): GeneratedType =
+        and generatedType (properties: Property seq) : GeneratedType =
             properties
             |> Seq.map (fun property ->
                 match property.Value with
-                | Object x -> (property.Key, generatedType x property.Key |> CSType.GeneratedType)
+                | Object x -> (property.Key, generatedType x |> CSType.GeneratedType)
                 | Array x -> (property.Key, stringifyArray x)
                 | x -> (property.Key, baseType x |> CSType.BaseType)
             )
-            |> (fun x -> { Name = key; Members = x; NameSuffix = classSuffix; NamePrefix = classPrefix })
+            |> (fun x -> { Members = x; NameSuffix = classSuffix; NamePrefix = classPrefix })
 
         let namespaceFormatter = settings.NameSpace
                                  |> stringValidators.valueExists
@@ -84,9 +84,9 @@ type CSharp =
         | Array x ->
             let ``type`` = stringifyArray x
             match ``type`` with
-            | GeneratedType x -> x.FormatClass + " "
+            | GeneratedType x -> x.ClassDeclaration rootObject + " "
             | _ -> String.Empty
-            + (``type``).FormatArray "Items"
-        | Object x -> (x |> generatedType <| rootObject).FormatClass
+            + (``type``).FormatArray rootObject 
+        | Object x -> (x |> generatedType ).ClassDeclaration rootObject
         | _ -> raise (new ArgumentException(error))
         |> namespaceFormatter

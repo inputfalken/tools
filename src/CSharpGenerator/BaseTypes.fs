@@ -27,23 +27,23 @@ namespace CSTypeTemp
         override this.ToString() = this.Alias |> Option.defaultValue (this.Namespace + "." + this.Name)
 
     type GeneratedType = {
-        Name: string
         Members: (string * CSType) seq
         NamePrefix: string
         NameSuffix: string
      } with
-        member this.FormatArray key = Formatters.arrayProperty (this.NamePrefix + this.Name + this.NameSuffix) key
+
         member this.FormatProperty ``type`` name = Formatters.property ``type`` name
-        member this.FormatClass: string =
+        member this.ClassDeclaration name: string =
+            let name = this.NamePrefix + name + this.NameSuffix
             this.Members
             |> Seq.map (fun (name, ``type``) ->
                 match ``type`` with
-                | GeneratedType x -> x.FormatClass + " " + x.FormatProperty (x.NamePrefix + x.Name + x.NameSuffix) x.Name
+                | GeneratedType x -> x.ClassDeclaration name + " " + x.FormatProperty (x.NamePrefix + name + x.NameSuffix) name
                 | ArrType x -> x.FormatArray name
                 | BaseType x -> x.FormatProperty name
             )
             |> Seq.reduce (fun x y -> x + " " + y)
-            |> (fun x -> Formatters.``class`` (this.NamePrefix + this.Name + this.NameSuffix) x)
+            |> (fun x -> Formatters.``class`` name x)
 
     and CSType =
         | BaseType of BaseType
@@ -52,5 +52,5 @@ namespace CSTypeTemp
 
         member this.FormatArray key = match this with
                                       | BaseType x -> x.FormatArray key
-                                      | GeneratedType x -> x.FormatClass + " " + x.FormatArray key
+                                      | GeneratedType x -> x.ClassDeclaration key + " " + Formatters.arrayProperty (x.NamePrefix + key + x.NameSuffix) key
                                       | ArrType x -> x.FormatArray key
