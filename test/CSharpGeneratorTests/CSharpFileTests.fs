@@ -9,6 +9,33 @@ let objectEntryAssertion expected actual =
 let arrayEntryAssertion expected actual =
     Assert.Equal(expected, actual)
 
+[<Fact>]
+let ``Two array Objects next to each other``() =
+    let json = """
+    [
+      {
+        "tags": [ "non" ],
+        "friends": [
+          {
+            "id": 0,
+            "name": "Henrietta Tillman"
+          }
+        ]
+      },
+      {
+    "tags": [ "aliqua" ],
+    "friends": [
+      {
+        "id": 0,
+        "name": "Kristy Calhoun"
+      }
+    ]
+  }
+    ]
+    """
+    let result = CSharp.CreateFile json
+    let expected = "public class RootModel { public string[] Tags { get; set; } public class FriendsModel { public decimal Id { get; set; } public string Name { get; set; } } public FriendsModel[] Friends { get; set; } } public RootModel[] Root { get; set; }"
+    arrayEntryAssertion expected result
 
 [<Fact>]
 let Object() =
