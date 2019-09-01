@@ -50,10 +50,21 @@ type CSharp =
                      let comparison = match x with
                                        | GeneratedType x1 ->
                                            match y with
-                                           | GeneratedType x2 -> (x1.Members, x2.Members) ||> Seq.forall2 (=)
-                                           | _ -> false
-                                       | _ -> false
-                     if comparison then y
+                                           | GeneratedType x2 ->
+                                               Seq.map2 (fun elem1 elem2 ->
+                                                   if elem1 = elem2 then elem1
+                                                   else
+                                                       let (key, ``type``) = elem1
+                                                       match ``type`` with
+                                                       | CSType.ArrType _ -> unresolvedBaseType |> ArrType
+                                                       | _ -> unresolvedBaseType
+                                                       |> (fun x -> (key, x))
+                                               ) x1.Members x2.Members
+                                               |> (fun x -> {Members =x ; NamePrefix = classPrefix ; NameSuffix = classSuffix})
+                                               |> Option.Some
+                                           | _ -> Option.None
+                                       | _ -> Option.None
+                     if comparison.IsSome then comparison.Value |> CSType.GeneratedType
                      else if x = y then y
                      else unresolvedBaseType
                      )
