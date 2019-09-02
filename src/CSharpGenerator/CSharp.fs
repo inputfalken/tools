@@ -36,12 +36,12 @@ type CSharp =
             | Boolean _ -> BaseType.Boolean |> BaseType
             | Guid _ -> BaseType.Guid |> BaseType
             | Double _ -> BaseType.Double |> BaseType
-            | Object x -> generatedType x |> GeneratedType
+            | Object x -> generatedType x 
             | Array x -> stringifyArray x
             | x -> raise (new Exception("Unhandled value" + sprintf "'%A'." x))
 
         and stringifyArray (value: Value seq): CSType =
-            if Seq.isEmpty value then unresolvedBaseType
+            if Seq.isEmpty value then unresolvedBaseType |> CSType.ArrType
             else
                  value
                  |> Seq.map baseType
@@ -69,24 +69,21 @@ type CSharp =
                      )
                  |> CSType.ArrType
 
-        and generatedType (properties: Property seq) : GeneratedType =
+        and generatedType (properties: Property seq) : CSType =
             properties
             |> Seq.map (fun x -> (x.Key, baseType x.Value))
             |> (fun x -> { Members = x; NameSuffix = classSuffix; NamePrefix = classPrefix })
+            |> CSType.GeneratedType
 
         let namespaceFormatter = settings.NameSpace
                                  |> stringValidators.valueExists
                                  |> Option.map (fun x -> sprintf "namespace %s { %s }" x)
                                  |> Option.defaultValue (sprintf "%s")
 
-        let error = """
-            JSON is built on two structures:
-            1: A collection of name/value pairs
-            2: An ordered list of values.
-        """
         let data = (input, settings.Casing |> CasingRule.fromString |> Option.defaultValue CasingRule.Pascal) ||> Json.parse
-        match data with
-        | Array x -> (stringifyArray x).FormatArray rootObject
-        | Object x -> (x |> generatedType ).ClassDeclaration rootObject
-        | _ -> raise (new ArgumentException(error))
+        match baseType data with
+        | GeneratedType x -> x.ClassDeclaration 
+        | ArrType x -> x.FormatArray 
+        | BaseType x -> x.FormatProperty
+        <| rootObject
         |> namespaceFormatter
