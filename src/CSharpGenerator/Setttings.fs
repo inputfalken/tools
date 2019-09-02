@@ -1,5 +1,5 @@
 namespace CSharpGenerator.Arguments
-    type Settings() =
+    type public Settings() =
             member val Casing = "" with get, set
             member val NameSpace = "" with get, set
             member val ClassPrefix = "" with get, set
