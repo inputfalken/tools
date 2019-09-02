@@ -1,7 +1,8 @@
-﻿namespace TemplateFactory
+﻿namespace CSTypeTemp
+
+namespace TemplateFactory
 open JsonParser
 open CSTypeTemp
-open System
 open System
 
 module private stringValidators =
@@ -27,25 +28,23 @@ type CSharp =
 
         let unresolvedBaseType = BaseType.Object |> BaseType
 
-        let rec baseType value: BaseType =
+        let rec baseType value: CSType =
             match value with
-            | DateTime _ -> BaseType.DateTime
-            | Decimal _ -> BaseType.Decimal
-            | String _ -> BaseType.String
-            | Boolean _ -> BaseType.Boolean
-            | Guid _ -> BaseType.Guid
-            | Double _ -> BaseType.Double
-            | _ -> raise (new Exception("Array or object can never be resolved from value."))
+            | DateTime _ -> BaseType.DateTime |> BaseType
+            | Decimal _ -> BaseType.Decimal |> BaseType
+            | String _ -> BaseType.String |> BaseType
+            | Boolean _ -> BaseType.Boolean |> BaseType
+            | Guid _ -> BaseType.Guid |> BaseType
+            | Double _ -> BaseType.Double |> BaseType
+            | Object x -> generatedType x |> GeneratedType
+            | Array x -> stringifyArray x
+            | x -> raise (new Exception("Unhandled value" + sprintf "'%A'." x))
 
         and stringifyArray (value: Value seq): CSType =
             if Seq.isEmpty value then unresolvedBaseType
             else
                  value
-                 |> Seq.map (fun x ->
-                     match x with
-                     | Object x -> generatedType x  |> GeneratedType
-                     | x -> baseType x |> BaseType
-                 )
+                 |> Seq.map baseType
                  |> Seq.reduce (fun x y ->
                      let comparison = match x with
                                        | GeneratedType x1 ->
@@ -72,12 +71,7 @@ type CSharp =
 
         and generatedType (properties: Property seq) : GeneratedType =
             properties
-            |> Seq.map (fun property ->
-                match property.Value with
-                | Object x -> (property.Key, generatedType x |> CSType.GeneratedType)
-                | Array x -> (property.Key, stringifyArray x)
-                | x -> (property.Key, baseType x |> CSType.BaseType)
-            )
+            |> Seq.map (fun x -> (x.Key, baseType x.Value))
             |> (fun x -> { Members = x; NameSuffix = classSuffix; NamePrefix = classPrefix })
 
         let namespaceFormatter = settings.NameSpace
