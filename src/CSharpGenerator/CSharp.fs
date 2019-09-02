@@ -27,7 +27,7 @@ type CSharp =
                          |> Option.defaultValue "Root"
 
         let unresolvedBaseType = BaseType.Object |> BaseType
-
+        
         let rec baseType value: CSType =
             match value with
             | DateTime _ -> BaseType.DateTime |> BaseType
@@ -41,7 +41,7 @@ type CSharp =
             | x -> raise (new Exception("Unhandled value" + sprintf "'%A'." x))
 
         and stringifyArray (value: Value seq): CSType =
-            if Seq.isEmpty value then unresolvedBaseType |> CSType.ArrType
+            if Seq.isEmpty value then unresolvedBaseType 
             else
                  value
                  |> Seq.map baseType
@@ -50,14 +50,14 @@ type CSharp =
                                        | GeneratedType x1 ->
                                            match y with
                                            | GeneratedType x2 ->
-                                               Seq.map2 (fun elem1 elem2 ->
+                                               List.map2 (fun elem1 elem2 ->
                                                    if elem1 = elem2 then elem1
                                                    else
-                                                       let (key, ``type``) = elem1
-                                                       match ``type`` with
-                                                       | CSType.ArrType _ -> unresolvedBaseType |> ArrType
-                                                       | _ -> unresolvedBaseType
-                                                       |> (fun x -> (key, x))
+                                                       let (elem1Name, _) = elem1
+                                                       let (elem2Name, _) = elem2
+                                                       if elem1Name <> elem2Name then
+                                                           raise(new Exception("Could not generate unresolved type when keys differ."))
+                                                       (elem1Name, unresolvedBaseType |> ArrType)
                                                ) x1.Members x2.Members
                                                |> (fun x -> {Members =x ; NamePrefix = classPrefix ; NameSuffix = classSuffix})
                                                |> Option.Some
@@ -66,12 +66,13 @@ type CSharp =
                      if comparison.IsSome then comparison.Value |> CSType.GeneratedType
                      else if x = y then y
                      else unresolvedBaseType
-                     )
-                 |> CSType.ArrType
+                 )
+            |> CSType.ArrType
 
         and generatedType (properties: Property seq) : CSType =
             properties
             |> Seq.map (fun x -> (x.Key, baseType x.Value))
+            |> Seq.toList
             |> (fun x -> { Members = x; NameSuffix = classSuffix; NamePrefix = classPrefix })
             |> CSType.GeneratedType
 

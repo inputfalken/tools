@@ -27,7 +27,7 @@ namespace CSTypeTemp
         override this.ToString() = this.Alias |> Option.defaultValue (this.Namespace + "." + this.Name)
 
     type GeneratedType = {
-        Members: (string * CSType) seq
+        Members: (string * CSType) list
         NamePrefix: string
         NameSuffix: string
      } with
