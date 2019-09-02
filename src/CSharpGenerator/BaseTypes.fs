@@ -10,7 +10,7 @@ namespace CSharpGenerator.Types
         let arrayProperty ``type`` name =
             property (sprintf "%s[]" ``type``) name
 
-    type BaseType = {
+    type internal BaseType = {
         Name: string
         Namespace: string
         Alias: string option
@@ -26,7 +26,7 @@ namespace CSharpGenerator.Types
         member this.FormatProperty key = Formatters.property (this.ToString()) key
         override this.ToString() = this.Alias |> Option.defaultValue (this.Namespace + "." + this.Name)
 
-    type GeneratedType = {
+    type internal GeneratedType = {
         Members: (string * CSType) list
         NamePrefix: string
         NameSuffix: string
@@ -44,7 +44,7 @@ namespace CSharpGenerator.Types
             |> Seq.reduce (fun x y -> x + " " + y)
             |> (fun x -> Formatters.``class`` name x)
 
-    and CSType =
+    and internal CSType =
         | BaseType of BaseType
         | GeneratedType of GeneratedType
         | ArrType of CSType
