@@ -1,5 +1,5 @@
 module Tests
-open TemplateFactory
+open CSharpGenerator
 open Xunit
 
 let objectEntryAssertion expected actual =

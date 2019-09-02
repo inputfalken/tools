@@ -1,4 +1,4 @@
-namespace TemplateFactory
+namespace CSharpGenerator.Arguments
     type Settings() =
             member val Casing = "" with get, set
             member val NameSpace = "" with get, set

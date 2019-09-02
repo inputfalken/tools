@@ -1,4 +1,4 @@
-namespace CSTypeTemp
+namespace CSharpGenerator.Types
 
     module private Formatters =
         let ``class`` name content =

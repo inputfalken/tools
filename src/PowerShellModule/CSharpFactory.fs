@@ -1,9 +1,9 @@
 ﻿namespace PowerShellModule
 open System
 open System.Collections.Generic
-open System.Collections.Generic
 open System.Management.Automation
-open TemplateFactory
+open CSharpGenerator.Arguments
+open CSharpGenerator
 
 [<Cmdlet(VerbsCommon.New, "CSharpModel")>]
 type CSharpFactory() =

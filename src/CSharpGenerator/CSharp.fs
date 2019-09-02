@@ -1,8 +1,8 @@
-﻿namespace CSTypeTemp
+﻿namespace CSharpGenerator
 
-namespace TemplateFactory
 open JsonParser
-open CSTypeTemp
+open CSharpGenerator.Types
+open CSharpGenerator.Arguments
 open System
 
 module private stringValidators =
