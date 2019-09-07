@@ -55,11 +55,16 @@ type CSharp =
                                                List.map2 (fun elem1 elem2 ->
                                                    if elem1 = elem2 then elem1
                                                    else
-                                                       let (elem1Name, _) = elem1
-                                                       let (elem2Name, _) = elem2
-                                                       if elem1Name <> elem2Name then
-                                                           raise (new Exception("Could not generate unresolved type when keys differ."))
-                                                       (elem1Name, unresolvedBaseType |> ArrType)
+                                                       let (elem1Name, elem1Type) = elem1
+                                                       let (elem2Name, elem2Type) = elem2
+                                                       let hasSameKey = elem1Name = elem2Name
+                                                       if elem1Type = unresolvedBaseType && hasSameKey then elem2
+                                                       else if elem2Type = unresolvedBaseType && hasSameKey then elem1
+                                                       else
+                                                           if hasSameKey then
+                                                               (elem1Name, unresolvedBaseType |> ArrType)
+                                                           else 
+                                                               raise (new Exception("Could not generate unresolved type when keys differ."))
                                                ) x1.Members x2.Members
                                                |> (fun x -> { Members = x; NamePrefix = classPrefix; NameSuffix = classSuffix })
                                                |> Option.Some
@@ -73,11 +78,7 @@ type CSharp =
 
         and generatedType (properties: Property seq): CSType =
             properties
-            |> Seq.map (fun x ->
-                match baseType x.Value with
-                | Some ``type`` -> (x.Key, ``type``)
-                | None -> (x.Key, unresolvedBaseType)
-            )
+            |> Seq.map (fun x -> (x.Key, baseType x.Value |> Option.defaultValue unresolvedBaseType))
             |> Seq.toList
             |> (fun x -> { Members = x; NameSuffix = classSuffix; NamePrefix = classPrefix })
             |> CSType.GeneratedType

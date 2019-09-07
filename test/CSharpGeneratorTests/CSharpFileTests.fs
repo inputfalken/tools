@@ -189,3 +189,43 @@ let ``Object with null value``() =
     let result = CSharp.CreateFile """{ "Foo" : null }"""
     let expected = "public object Foo { get; set; }"
     objectEntryAssertion expected result
+    
+[<Fact>]
+let ``Object with null value and none null value``() =
+    let result = CSharp.CreateFile """{ "Foo" : null, "Bar" : 1 }"""
+    let expected = "public object Foo { get; set; } public decimal Bar { get; set; }"
+    objectEntryAssertion expected result
+    
+[<Fact>]
+let ``Array with null and none null values``() =
+    let result = CSharp.CreateFile """
+    [
+        {
+            "Foo" : null,
+            "Bar" : 2
+        },
+        {
+            "Foo" : "foobar",
+            "Bar" : 2
+        }
+    ]
+    """
+    let expected = "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
+    arrayEntryAssertion expected result
+    
+[<Fact>]
+let ``Array with null and none null values reversed``() =
+    let result = CSharp.CreateFile """
+    [
+        {
+            "Foo" : "foobar",
+            "Bar" : 2
+        },
+        {
+            "Foo" : null,
+            "Bar" : 2
+        }
+    ]
+    """
+    let expected = "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
+    arrayEntryAssertion expected result
