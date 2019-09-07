@@ -21,7 +21,7 @@ type CSharp =
         let rootObject = settings.RootObjectName
                          |> stringValidators.valueExists
                          |> Option.defaultValue "Root"
-                         
+
         let classPrefixExists = settings.ClassPrefix |> stringValidators.valueExists
         let classSuffixExists = settings.ClassSuffix |> stringValidators.valueExists
 
@@ -30,23 +30,23 @@ type CSharp =
 
         let unresolvedBaseType = BaseType.Object |> BaseType
 
-        let rec baseType value: CSType =
+        let rec baseType value: CSType Option =
             match value with
-            | DateTime _ -> BaseType.DateTime |> BaseType
-            | Decimal _ -> BaseType.Decimal |> BaseType
-            | String _ -> BaseType.String |> BaseType
-            | Boolean _ -> BaseType.Boolean |> BaseType
-            | Guid _ -> BaseType.Guid |> BaseType
-            | Double _ -> BaseType.Double |> BaseType
-            | Object x -> generatedType x
-            | Array x -> stringifyArray x
-            | x -> raise (new Exception("Unhandled value" + sprintf "'%A'." x))
+            | DateTime _ -> BaseType.DateTime |> BaseType |> Option.Some
+            | Decimal _ -> BaseType.Decimal |> BaseType |> Option.Some
+            | String _ -> BaseType.String |> BaseType |> Option.Some
+            | Boolean _ -> BaseType.Boolean |> BaseType |> Option.Some
+            | Guid _ -> BaseType.Guid |> BaseType |> Option.Some
+            | Double _ -> BaseType.Double |> BaseType |> Option.Some
+            | Object x -> generatedType x |> Option.Some
+            | Array x -> stringifyArray x |> Option.Some
+            | Null -> Option.None
 
         and stringifyArray (value: Value seq): CSType =
             if Seq.isEmpty value then unresolvedBaseType
             else
                  value
-                 |> Seq.map baseType
+                 |> Seq.choose baseType
                  |> Seq.reduce (fun x y ->
                      let comparison = match x with
                                        | GeneratedType x1 ->
@@ -73,7 +73,7 @@ type CSharp =
 
         and generatedType (properties: Property seq): CSType =
             properties
-            |> Seq.map (fun x -> (x.Key, baseType x.Value))
+            |> Seq.choose (fun x -> x.Value |> baseType |> Option.map (fun y -> (x.Key, y)))
             |> Seq.toList
             |> (fun x -> { Members = x; NameSuffix = classSuffix; NamePrefix = classPrefix })
             |> CSType.GeneratedType
@@ -84,9 +84,13 @@ type CSharp =
                                  |> Option.defaultValue (sprintf "%s")
 
         let data = (input, settings.Casing |> CasingRule.fromString |> Option.defaultValue CasingRule.Pascal) ||> Json.parse
-        match baseType data with
-        | GeneratedType x -> x.ClassDeclaration
-        | ArrType x -> x.FormatArray
-        | BaseType x -> x.FormatProperty
-        <| rootObject
-        |> namespaceFormatter
+        baseType data
+        |> Option.map (fun x ->
+            match x with
+            | GeneratedType x -> x.ClassDeclaration
+            | ArrType x -> x.FormatArray
+            | BaseType x -> x.FormatProperty
+            <| rootObject
+            |> namespaceFormatter
+        )
+        |> Option.defaultValue String.Empty
