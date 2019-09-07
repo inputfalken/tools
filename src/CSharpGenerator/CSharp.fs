@@ -73,7 +73,11 @@ type CSharp =
 
         and generatedType (properties: Property seq): CSType =
             properties
-            |> Seq.choose (fun x -> x.Value |> baseType |> Option.map (fun y -> (x.Key, y)))
+            |> Seq.map (fun x ->
+                match baseType x.Value with
+                | Some ``type`` -> (x.Key, ``type``)
+                | None -> (x.Key, unresolvedBaseType)
+            )
             |> Seq.toList
             |> (fun x -> { Members = x; NameSuffix = classSuffix; NamePrefix = classPrefix })
             |> CSType.GeneratedType

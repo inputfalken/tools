@@ -170,7 +170,6 @@ let ``Object with nested string array``() =
     let expected = "public decimal Foo { get; set; } public string[] Items { get; set; }"
     objectEntryAssertion expected result
     
-    
 [<Fact>]
 let ``Object with object array``() =
     let result = CSharp.CreateFile """{ "Models": [
@@ -185,4 +184,8 @@ let ``Object with object array``() =
     let expected = "public class ModelsModel { public decimal Foo { get; set; } } public ModelsModel[] Models { get; set; }"
     objectEntryAssertion expected result
     
-
+[<Fact>]
+let ``Object with null value``() =
+    let result = CSharp.CreateFile """{ "Foo" : null }"""
+    let expected = "public object Foo { get; set; }"
+    objectEntryAssertion expected result
