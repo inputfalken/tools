@@ -14,7 +14,8 @@ namespace CSharpGenerator.Types
         Name: string
         Namespace: string
         Alias: string option
-     } with
+    }
+    with
         static member Object = { Name = "Object"; Namespace = "System"; Alias = option.Some "object" }
         static member DateTime = { Namespace = "System"; Name = "DateTime"; Alias = option.None }
         static member Decimal = { Namespace = "System"; Name = "Decimal"; Alias = Option.Some "decimal" }
@@ -30,7 +31,8 @@ namespace CSharpGenerator.Types
         Members: (string * CSType) list
         NamePrefix: string
         NameSuffix: string
-     } with
+    }
+    with
         member this.FormatProperty ``type`` name = Formatters.property ``type`` name
         member this.ClassDeclaration name: string =
             let name = this.NamePrefix + name + this.NameSuffix
