@@ -46,39 +46,45 @@ type CSharp =
             if Seq.isEmpty value then unresolvedBaseType
             else
                  value
-                 |> Seq.choose baseType
+                 |> Seq.map baseType
+                 |> Seq.map (Option.defaultValue unresolvedBaseType)
                  |> Seq.reduce (fun x y ->
-                     let comparison = match x with
-                                       | GeneratedType x1 ->
-                                           match y with
-                                           | GeneratedType x2 ->
-                                               List.map2 (fun elem1 elem2 ->
-                                                   if elem1 = elem2 then elem1
-                                                   else
-                                                       let (elem1Name, elem1Type) = elem1
-                                                       let (elem2Name, elem2Type) = elem2
-                                                       let hasSameKey = elem1Name = elem2Name
-                                                       if elem1Type = unresolvedBaseType && hasSameKey then elem2
-                                                       else if elem2Type = unresolvedBaseType && hasSameKey then elem1
-                                                       else
-                                                           if hasSameKey then
-                                                               (elem1Name, unresolvedBaseType |> ArrType)
-                                                           else 
-                                                               raise (new Exception("Could not generate unresolved type when keys differ."))
-                                               ) x1.Members x2.Members
-                                               |> (fun x -> { Members = x; NamePrefix = classPrefix; NameSuffix = classSuffix })
-                                               |> Option.Some
-                                           | _ -> Option.None
-                                       | _ -> Option.None
-                     if comparison.IsSome then comparison.Value |> CSType.GeneratedType
-                     else if x = y then y
-                     else unresolvedBaseType
+                     if x = y then y
+                     else
+                         match x with
+                         | GeneratedType x1 ->
+                             match y with
+                             | GeneratedType x2 ->
+                                 List.map2 (fun left right ->
+                                     if left = right then left
+                                     else
+                                         let hasSameName = left.Name = left.Name
+                                         if left.Type = unresolvedBaseType && hasSameName then right
+                                         else if right.Type = unresolvedBaseType && hasSameName then left
+                                         else
+                                             if hasSameName then
+                                                 { Name = left.Name; Type = unresolvedBaseType |> ArrType }
+                                             else
+                                                 raise (new Exception("Could not generate unresolved type when keys differ."))
+                                 ) x1.Members x2.Members
+                                 |> (fun x -> { Members = x; NamePrefix = classPrefix; NameSuffix = classSuffix })
+                                 |> Option.Some
+                             | _ -> Option.None
+                         | _ -> Option.None
+                         |> Option.map CSType.GeneratedType
+                         |> Option.defaultValue unresolvedBaseType
                  )
             |> CSType.ArrType
 
-        and generatedType (properties: Property seq): CSType =
-            properties
-            |> Seq.map (fun x -> (x.Key, baseType x.Value |> Option.defaultValue unresolvedBaseType))
+        and generatedType (records: Record seq): CSType =
+            records
+            |> Seq.map (fun x -> {
+                    Name = x.Key;
+                    Type = x.Value
+                           |> baseType
+                           |> Option.defaultValue unresolvedBaseType
+                }
+            )
             |> Seq.toList
             |> (fun x -> { Members = x; NameSuffix = classSuffix; NamePrefix = classPrefix })
             |> CSType.GeneratedType

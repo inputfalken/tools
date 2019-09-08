@@ -24,8 +24,8 @@ type public Value =
             | Array of Value seq
             | Guid of Guid
             | Null
-            | Object of Property seq
-and public Property = { Key : Key ; Value : Value }
+            | Object of Record seq
+and public Record = { Key : Key ; Value : Value }
 
 
 type public CasingRule =

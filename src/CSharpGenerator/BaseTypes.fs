@@ -1,4 +1,5 @@
 namespace CSharpGenerator.Types
+    open JsonParser
 
     module private Formatters =
         let ``class`` name content =
@@ -28,7 +29,7 @@ namespace CSharpGenerator.Types
         override this.ToString() = this.Alias |> Option.defaultValue (this.Namespace + "." + this.Name)
 
     type internal GeneratedType = {
-        Members: (string * CSType) list
+        Members: Property list
         NamePrefix: string
         NameSuffix: string
     }
@@ -37,15 +38,19 @@ namespace CSharpGenerator.Types
         member this.ClassDeclaration name: string =
             let name = this.NamePrefix + name + this.NameSuffix
             this.Members
-            |> Seq.map (fun (name, ``type``) ->
-                match ``type`` with
-                | GeneratedType x -> x.ClassDeclaration name + " " + x.FormatProperty (x.NamePrefix + name + x.NameSuffix) name
-                | ArrType x -> x.FormatArray name
-                | BaseType x -> x.FormatProperty name
+            |> Seq.map (fun property ->
+                match property.Type with
+                | GeneratedType x -> x.ClassDeclaration property.Name + " " + x.FormatProperty (x.NamePrefix + property.Name + x.NameSuffix) property.Name
+                | ArrType x -> x.FormatArray property.Name
+                | BaseType x -> x.FormatProperty property.Name
             )
             |> Seq.reduce (fun x y -> x + " " + y)
             |> (fun x -> Formatters.``class`` name x)
 
+    and internal Property = {
+        Name: string
+        Type : CSType
+    }
     and internal CSType =
         | BaseType of BaseType
         | GeneratedType of GeneratedType
