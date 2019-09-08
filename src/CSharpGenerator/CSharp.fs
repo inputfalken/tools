@@ -87,7 +87,7 @@ type CSharp =
             )
             |> Seq.toList
             |> (fun x -> { Members = x; NameSuffix = classSuffix; NamePrefix = classPrefix })
-            |> CSType.GeneratedType
+            |> (fun x -> if x.Members.IsEmpty then unresolvedBaseType else CSType.GeneratedType x)
 
         let namespaceFormatter = settings.NameSpace
                                  |> stringValidators.valueExists

@@ -44,9 +44,35 @@ let Object() =
     objectEntryAssertion expected result
 
 [<Fact>]
+let ``Object with Empty Array``() =
+    let result = CSharp.CreateFile """
+    {
+        "Foo" : []
+    }
+    """
+    let expected = "public object[] Foo { get; set; }"
+    objectEntryAssertion expected result
+    
+[<Fact>]
+let ``Object with Empty object``() =
+    let result = CSharp.CreateFile """
+    {
+        "Foo" : {}
+    }
+    """
+    let expected = "public object Foo { get; set; }"
+    objectEntryAssertion expected result
+    
+[<Fact>]
 let ``Empty Array``() =
     let result = CSharp.CreateFile("""[]""")
     let expected = "public object[] Root { get; set; }"
+    arrayEntryAssertion expected result
+    
+[<Fact>]
+let ``Empty Object``() =
+    let result = CSharp.CreateFile("""{}""")
+    let expected = "public object Root { get; set; }"
     arrayEntryAssertion expected result
     
 [<Fact>]
