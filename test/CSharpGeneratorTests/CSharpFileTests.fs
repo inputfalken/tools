@@ -195,9 +195,67 @@ let ``Object with null value and none null value``() =
     let result = CSharp.CreateFile """{ "Foo" : null, "Bar" : 1 }"""
     let expected = "public object Foo { get; set; } public decimal Bar { get; set; }"
     objectEntryAssertion expected result
+
+[<Fact>]
+let ``Array with strings that are mixed with null values``() =
+    let result = CSharp.CreateFile """
+    [
+        "foo",
+        "bar",
+        "null"
+    ]
+    """
+    let expected = "public string[] Root { get; set; }"
+    arrayEntryAssertion expected result
     
 [<Fact>]
-let ``Array with null and none null values``() =
+let ``Array with numbers that are mixed with null values``() =
+    let result = CSharp.CreateFile """
+    [
+        1,
+        2,
+        null
+    ]
+    """
+    let expected = "public decimal?[] Root { get; set; }"
+    arrayEntryAssertion expected result
+    
+[<Fact>]
+let ``Array with objects with properties whose values are mixed with nullable value types``() =
+    let result = CSharp.CreateFile """
+    [
+        {
+            "Foo" : null,
+            "Bar" : 2
+        },
+        {
+            "Foo" : 4,
+            "Bar" : 2
+        }
+    ]
+    """
+    let expected = "public class RootModel { public decimal? Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
+    arrayEntryAssertion expected result
+    
+[<Fact>]
+let ``Array with objects with properties whose values are mixed with nullable value types reversed``() =
+    let result = CSharp.CreateFile """
+    [
+        {
+            "Foo" : null,
+            "Bar" : 2
+        },
+        {
+            "Foo" : 4,
+            "Bar" : 2
+        }
+    ]
+    """
+    let expected = "public class RootModel { public decimal? Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
+    arrayEntryAssertion expected result
+    
+[<Fact>]
+let ``Array with objects with properties whose values are mixed with null``() =
     let result = CSharp.CreateFile """
     [
         {
@@ -214,7 +272,7 @@ let ``Array with null and none null values``() =
     arrayEntryAssertion expected result
     
 [<Fact>]
-let ``Array with null and none null values reversed``() =
+let ``Array with objects with properties whose values are mixed with null reversed``() =
     let result = CSharp.CreateFile """
     [
         {
