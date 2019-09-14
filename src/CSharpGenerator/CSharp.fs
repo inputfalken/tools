@@ -28,16 +28,18 @@ type CSharp =
         let (classPrefix, classSuffix) = if classSuffixExists.IsNone && classPrefixExists.IsNone then (String.Empty, "Model")
                                          else (classPrefixExists |> Option.defaultValue String.Empty, classSuffixExists |> Option.defaultValue String.Empty)
 
-        let unresolvedBaseType = BaseType.Object |> BaseType
+        let unresolvedBaseType = ReferenceType.Object
+                                 |> BaseType.ReferenceType
+                                 |> CSType.BaseType
 
         let rec baseType value: CSType Option =
             match value with
-            | DateTime _ -> BaseType.DateTime |> BaseType |> Option.Some
-            | Decimal _ -> BaseType.Decimal |> BaseType |> Option.Some
-            | String _ -> BaseType.String |> BaseType |> Option.Some
-            | Boolean _ -> BaseType.Boolean |> BaseType |> Option.Some
-            | Guid _ -> BaseType.Guid |> BaseType |> Option.Some
-            | Double _ -> BaseType.Double |> BaseType |> Option.Some
+            | DateTime _ -> ValueType.DateTime|> BaseType.ValueType |> CSType.BaseType |> Option.Some
+            | Decimal _ -> ValueType.Decimal |> BaseType.ValueType |> CSType.BaseType |> Option.Some
+            | String _ -> ReferenceType.String |> BaseType.ReferenceType |> CSType.BaseType |> Option.Some
+            | Boolean _ -> ValueType.Boolean |> BaseType.ValueType |> CSType.BaseType |> Option.Some
+            | Guid _ -> ValueType.Guid |> BaseType.ValueType |> CSType.BaseType |> Option.Some
+            | Double _ -> ValueType.Double |> BaseType.ValueType |> CSType.BaseType |> Option.Some
             | Object x -> generatedType x |> Option.Some
             | Array x -> stringifyArray x |> Option.Some
             | Null -> Option.None
@@ -100,7 +102,9 @@ type CSharp =
             match x with
             | GeneratedType x -> x.ClassDeclaration
             | ArrType x -> x.FormatArray
-            | BaseType x -> x.FormatProperty
+            | BaseType x -> match x with
+                            | ReferenceType x -> x.Info.FormatProperty
+                            | ValueType x -> x.Info.FormatProperty
             <| rootObject
             |> namespaceFormatter
         )
