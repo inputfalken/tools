@@ -240,7 +240,8 @@ let ``Array with numbers that are mixed with null values``() =
     [
         1,
         2,
-        null
+        null,
+        4
     ]
     """
     let expected = "public decimal?[] Root { get; set; }"

@@ -1,7 +1,5 @@
 ﻿namespace CSharpGenerator
 
-
-
 open JsonParser
 open CSharpGenerator.Types
 open CSharpGenerator.Arguments
@@ -77,8 +75,14 @@ type CSharp =
                  |> Seq.reduce (fun x y ->
                      if x = y then y
                      else if x.IsSome && y.IsSome then analyzeValues x.Value y.Value
-                     else if x.IsNone || y.IsNone then option.None
-                     else Option.None
+                     else if x.IsNone && y.IsNone then option.None
+                     else
+                         match x |> Option.defaultWith (fun () -> y.Value) with
+                         | CSType.BaseType x ->
+                             match x with
+                             | BaseType.ValueType x -> option.None // TODO make nullable valuetype here.
+                             | _ -> option.None
+                         | _ -> option.None
                  )
                  |> Option.defaultValue unresolvedBaseType
             |> CSType.ArrType
