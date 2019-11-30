@@ -1,5 +1,7 @@
 ﻿namespace CSharpGenerator
 
+
+
 open JsonParser
 open CSharpGenerator.Types
 open CSharpGenerator.Arguments
@@ -32,9 +34,32 @@ type CSharp =
                                  |> BaseType.ReferenceType
                                  |> CSType.BaseType
 
+        let analyzeValues (left: CSType) (right: CSType) =
+             match left with
+             | GeneratedType x1 ->
+                 match right with
+                 | GeneratedType x2 ->
+                     List.map2 (fun left right ->
+                         if left = right then left
+                         else
+                             let hasSameName = left.Name = left.Name
+                             if left.Type = unresolvedBaseType && hasSameName then right
+                             else if right.Type = unresolvedBaseType && hasSameName then left
+                             else
+                                 if hasSameName then
+                                     { Name = left.Name; Type = unresolvedBaseType |> ArrType }
+                                 else
+                                     raise (new Exception("Could not generate unresolved type when keys differ."))
+                     ) x1.Members x2.Members
+                     |> (fun x -> { Members = x; NamePrefix = classPrefix; NameSuffix = classSuffix })
+                     |> Option.Some
+                 | _ -> Option.None
+             | _ -> Option.None
+             |> Option.map CSType.GeneratedType
+
         let rec baseType value: CSType Option =
             match value with
-            | DateTime _ -> ValueType.DateTime|> BaseType.ValueType |> CSType.BaseType |> Option.Some
+            | DateTime _ -> ValueType.DateTime |> BaseType.ValueType |> CSType.BaseType |> Option.Some
             | Decimal _ -> ValueType.Decimal |> BaseType.ValueType |> CSType.BaseType |> Option.Some
             | String _ -> ReferenceType.String |> BaseType.ReferenceType |> CSType.BaseType |> Option.Some
             | Boolean _ -> ValueType.Boolean |> BaseType.ValueType |> CSType.BaseType |> Option.Some
@@ -49,33 +74,13 @@ type CSharp =
             else
                  value
                  |> Seq.map baseType
-                 |> Seq.map (Option.defaultValue unresolvedBaseType)
                  |> Seq.reduce (fun x y ->
                      if x = y then y
-                     else
-                         match x with
-                         | GeneratedType x1 ->
-                             match y with
-                             | GeneratedType x2 ->
-                                 List.map2 (fun left right ->
-                                     if left = right then left
-                                     else
-                                         let hasSameName = left.Name = left.Name
-                                         if left.Type = unresolvedBaseType && hasSameName then right
-                                         else if right.Type = unresolvedBaseType && hasSameName then left
-                                         else
-                                             if hasSameName then
-                                                 { Name = left.Name; Type = unresolvedBaseType |> ArrType }
-                                             else
-                                                 raise (new Exception("Could not generate unresolved type when keys differ."))
-                                 ) x1.Members x2.Members
-                                 |> (fun x -> { Members = x; NamePrefix = classPrefix; NameSuffix = classSuffix })
-                                 |> Option.Some
-                             | _ -> Option.None
-                         | _ -> Option.None
-                         |> Option.map CSType.GeneratedType
-                         |> Option.defaultValue unresolvedBaseType
+                     else if x.IsSome && y.IsSome then analyzeValues x.Value y.Value
+                     else if x.IsNone || y.IsNone then option.None
+                     else Option.None
                  )
+                 |> Option.defaultValue unresolvedBaseType
             |> CSType.ArrType
 
         and generatedType (records: Record seq): CSType =

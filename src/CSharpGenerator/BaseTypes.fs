@@ -1,9 +1,4 @@
 namespace CSharpGenerator.Types
-    open System.Reflection
-    open System.Reflection
-    open System
-    open JsonParser
-
     module private Formatters =
         let ``class`` name content =
             sprintf "public class %s { %s }" name content
