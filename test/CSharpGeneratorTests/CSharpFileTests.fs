@@ -1,13 +1,15 @@
 module Tests
+
 open CSharpGenerator
 open Xunit
 
 let objectEntryAssertion expected actual =
     let expected = expected |> sprintf "public class RootModel { %s }"
     Assert.Equal(expected, actual)
-    
+
 let arrayEntryAssertion expected actual =
     Assert.Equal(expected, actual)
+
 
 [<Fact>]
 let ``Two array Objects next to each other``() =
@@ -34,7 +36,8 @@ let ``Two array Objects next to each other``() =
     ]
     """
     let result = CSharp.CreateFile json
-    let expected = "public class RootModel { public string[] Tags { get; set; } public class FriendsModel { public decimal Id { get; set; } public string Name { get; set; } } public FriendsModel[] Friends { get; set; } } public RootModel[] Root { get; set; }"
+    let expected =
+        "public class RootModel { public string[] Tags { get; set; } public class FriendsModel { public decimal Id { get; set; } public string Name { get; set; } } public FriendsModel[] Friends { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result
 
 [<Fact>]
@@ -45,36 +48,40 @@ let Object() =
 
 [<Fact>]
 let ``Object with Empty Array``() =
-    let result = CSharp.CreateFile """
+    let result =
+        CSharp.CreateFile """
     {
         "Foo" : []
     }
     """
+
     let expected = "public object[] Foo { get; set; }"
     objectEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Object with Empty object``() =
-    let result = CSharp.CreateFile """
+    let result =
+        CSharp.CreateFile """
     {
         "Foo" : {}
     }
     """
+
     let expected = "public object Foo { get; set; }"
     objectEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Empty Array``() =
     let result = CSharp.CreateFile("""[]""")
     let expected = "public object[] Root { get; set; }"
     arrayEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Empty Object``() =
     let result = CSharp.CreateFile("""{}""")
     let expected = "public object Root { get; set; }"
     arrayEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Array with single number``() =
     let result = CSharp.CreateFile("""[1]""")
@@ -104,10 +111,11 @@ let ``Array with strings and numbers``() =
     let result = CSharp.CreateFile("""[1,2,3,"foo"]""")
     let expected = "public object[] Root { get; set; }"
     arrayEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Array with object with decimal property``() =
-    let result = CSharp.CreateFile """[
+    let result =
+        CSharp.CreateFile """[
     {
         "foo": 1
     },
@@ -116,12 +124,14 @@ let ``Array with object with decimal property``() =
     }
 ]
 """
+
     let expected = "public class RootModel { public decimal Foo { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Array with object with decimal and string properties``() =
-    let result = CSharp.CreateFile """[
+    let result =
+        CSharp.CreateFile """[
     {
         "foo": 1,
         "bar": "Hi"
@@ -132,13 +142,16 @@ let ``Array with object with decimal and string properties``() =
     }
 ]
 """
-    let expected = "public class RootModel { public decimal Foo { get; set; } public string Bar { get; set; } } public RootModel[] Root { get; set; }"
+
+    let expected =
+        "public class RootModel { public decimal Foo { get; set; } public string Bar { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result
-    
-    
+
+
 [<Fact>]
 let ``Array with object with array property with strings mixed items``() =
-    let result = CSharp.CreateFile """[
+    let result =
+        CSharp.CreateFile """[
     {
         "bar": [1, "foo"]
     },
@@ -147,12 +160,14 @@ let ``Array with object with array property with strings mixed items``() =
     }
 ]
 """
+
     let expected = "public class RootModel { public object[] Bar { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Array with object with array property with strings mixed items reversed order``() =
-    let result = CSharp.CreateFile """[
+    let result =
+        CSharp.CreateFile """[
     {
         "bar": [1, 2]
     },
@@ -161,20 +176,24 @@ let ``Array with object with array property with strings mixed items reversed or
     }
 ]
 """
+
     let expected = "public class RootModel { public object[] Bar { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result
 
 [<Fact>]
 let ``Object with nested string``() =
-    let result = CSharp.CreateFile("""{
-
+    let result =
+        CSharp.CreateFile
+            ("""{
   "aps":
-
   {
        "alert":"tit}"
-
   }
-}""")
+}"""
+
+
+
+            )
     let expected = "public class ApsModel { public string Alert { get; set; } } public ApsModel Aps { get; set; }"
     objectEntryAssertion expected result
 
@@ -189,16 +208,17 @@ let ``Object with nested int array``() =
     let result = CSharp.CreateFile """{"foo": 2, "items": [1,2,3,4,5]}"""
     let expected = "public decimal Foo { get; set; } public decimal[] Items { get; set; }"
     objectEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Object with nested string array``() =
     let result = CSharp.CreateFile """{"foo": 2, "items": ["foo","bar", "doe"]}"""
     let expected = "public decimal Foo { get; set; } public string[] Items { get; set; }"
     objectEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Object with object array``() =
-    let result = CSharp.CreateFile """{ "Models": [
+    let result =
+        CSharp.CreateFile """{ "Models": [
         {
             "foo": 1
         },
@@ -207,15 +227,17 @@ let ``Object with object array``() =
         }
     ]}
     """
-    let expected = "public class ModelsModel { public decimal Foo { get; set; } } public ModelsModel[] Models { get; set; }"
+
+    let expected =
+        "public class ModelsModel { public decimal Foo { get; set; } } public ModelsModel[] Models { get; set; }"
     objectEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Object with null value``() =
     let result = CSharp.CreateFile """{ "Foo" : null }"""
     let expected = "public object Foo { get; set; }"
     objectEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Object with null value and none null value``() =
     let result = CSharp.CreateFile """{ "Foo" : null, "Bar" : 1 }"""
@@ -224,19 +246,22 @@ let ``Object with null value and none null value``() =
 
 [<Fact>]
 let ``Array with strings that are mixed with null values``() =
-    let result = CSharp.CreateFile """
+    let result =
+        CSharp.CreateFile """
     [
         "foo",
         "bar",
         "null"
     ]
     """
+
     let expected = "public string[] Root { get; set; }"
     arrayEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Array with numbers that are mixed with null values``() =
-    let result = CSharp.CreateFile """
+    let result =
+        CSharp.CreateFile """
     [
         1,
         2,
@@ -244,12 +269,14 @@ let ``Array with numbers that are mixed with null values``() =
         4
     ]
     """
+
     let expected = "public decimal?[] Root { get; set; }"
     arrayEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Array with objects with properties whose values are mixed with nullable value types``() =
-    let result = CSharp.CreateFile """
+    let result =
+        CSharp.CreateFile """
     [
         {
             "Foo" : null,
@@ -261,12 +288,15 @@ let ``Array with objects with properties whose values are mixed with nullable va
         }
     ]
     """
-    let expected = "public class RootModel { public decimal? Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
+
+    let expected =
+        "public class RootModel { public decimal? Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Array with objects with properties whose values are mixed with nullable value types reversed``() =
-    let result = CSharp.CreateFile """
+    let result =
+        CSharp.CreateFile """
     [
         {
             "Foo" : null,
@@ -278,12 +308,15 @@ let ``Array with objects with properties whose values are mixed with nullable va
         }
     ]
     """
-    let expected = "public class RootModel { public decimal? Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
+
+    let expected =
+        "public class RootModel { public decimal? Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Array with objects with properties whose values are mixed with null``() =
-    let result = CSharp.CreateFile """
+    let result =
+        CSharp.CreateFile """
     [
         {
             "Foo" : null,
@@ -295,12 +328,15 @@ let ``Array with objects with properties whose values are mixed with null``() =
         }
     ]
     """
-    let expected = "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
+
+    let expected =
+        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Array with objects with properties whose values are mixed with null reversed``() =
-    let result = CSharp.CreateFile """
+    let result =
+        CSharp.CreateFile """
     [
         {
             "Foo" : "foobar",
@@ -312,5 +348,7 @@ let ``Array with objects with properties whose values are mixed with null revers
         }
     ]
     """
-    let expected = "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
+
+    let expected =
+        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result
