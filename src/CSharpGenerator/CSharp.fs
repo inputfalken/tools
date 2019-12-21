@@ -33,23 +33,22 @@ type CSharp =
 
         let unresolvedBaseType = BaseType.Object |> CSType.BaseType
 
-        let analyzeValues (left: CSType) (right: CSType) =
-            match left with
+        let analyzeValues (current: CSType) (previous: CSType) =
+            match current with
             | GeneratedType x1 ->
-                match right with
+                match previous with
                 | GeneratedType x2 ->
-                    List.map2 (fun left right ->
-                        // TODO create a function for the comparison and flip the left with right if no match was made before returning Option.None.
-                        if left = right then
-                            left
+                    List.map2 (fun current previous ->
+                        if current = previous then
+                            current
                         else
-                            let hasSameName = left.Name = left.Name
-                            if left.Type = unresolvedBaseType && hasSameName then
-                                right
-                            else if right.Type = unresolvedBaseType && hasSameName then
-                                left
+                            let hasSameName = current.Name = current.Name
+                            if current.Type = unresolvedBaseType && hasSameName then
+                                previous
+                            else if previous.Type = unresolvedBaseType && hasSameName then
+                                current
                             else if hasSameName then
-                                { Name = left.Name
+                                { Name = current.Name
                                   Type = unresolvedBaseType |> ArrType }
                             else
                                 raise (Exception("Could not generate unresolved type when keys differ."))) x1.Members
@@ -62,8 +61,7 @@ type CSharp =
                 | _ -> Option.None
                 |> Option.map CSType.GeneratedType
             | BaseType left ->
-                    // TODO create a function for the comparison and flip the left with right if no match was made before returning Option.None.
-                match right with
+                match previous with
                 | BaseType right ->
                     match left with
                     | BaseType.ValueType left ->
@@ -123,15 +121,15 @@ type CSharp =
                 let result =
                     value
                     |> Seq.map baseType
-                    |> Seq.reduce (fun x y ->
-                        if x = y then
-                            y
-                        else if x.IsSome && y.IsSome then
-                            analyzeValues x.Value y.Value
-                        else if x.IsNone && y.IsNone then
+                    |> Seq.reduce (fun previous current ->
+                        if current = previous then
+                            current
+                        else if current.IsSome && previous.IsSome then
+                            analyzeValues previous.Value current.Value
+                        else if current.IsNone && previous.IsNone then
                             option.None
                         else
-                            match x |> Option.defaultWith (fun () -> y.Value) with
+                            match current |> Option.defaultWith (fun () -> previous.Value) with
                             | CSType.BaseType x ->
                                 match x with
                                 | BaseType.ValueType x ->
@@ -140,7 +138,7 @@ type CSharp =
                                     |> CSType.BaseType
                                     |> Option.Some
                                 | _ -> option.None
-                            | _ -> option.None)
+                            | x -> x |> Option.Some)
 
                 result |> Option.defaultValue unresolvedBaseType
             |> CSType.ArrType
