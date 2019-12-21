@@ -177,9 +177,7 @@ type CSharp =
             match x with
             | GeneratedType x -> x.ClassDeclaration
             | ArrType x -> x.FormatArray
-            | BaseType x -> match x with
-                            | ReferenceType x -> x.FormatProperty
-                            | ValueType x -> x.FormatProperty
+            | BaseType x -> x.FormatProperty
             <| rootObject
             |> namespaceFormatter
         ) |> Option.defaultValue String.Empty

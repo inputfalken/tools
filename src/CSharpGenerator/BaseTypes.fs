@@ -15,8 +15,6 @@ type internal TypeInfo =
       Namespace: string
       Alias: string option
       Nullable: bool }
-    member this.FormatArray key = Formatters.arrayProperty (this.ToString()) key
-    member this.FormatProperty key = Formatters.property (this.ToString()) key
     override this.ToString() = this.Alias |> Option.defaultValue (this.Namespace + "." + this.Name)
 
     member this.ToNullable() =
@@ -28,6 +26,15 @@ type internal TypeInfo =
 type internal BaseType =
     | ReferenceType of TypeInfo
     | ValueType of TypeInfo
+
+    member private this.TypeInfo =
+        match this with
+        | ReferenceType x -> x
+        | ValueType x -> x
+
+    member this.FormatArray key = this.TypeInfo |> fun x -> Formatters.arrayProperty (x.ToString()) key
+
+    member this.FormatProperty key = this.TypeInfo |> fun x -> Formatters.property (x.ToString()) key
 
     static member Guid =
         { Namespace = "System"
@@ -92,10 +99,7 @@ type internal GeneratedType =
                 x.ClassDeclaration property.Name + " "
                 + x.FormatProperty (x.NamePrefix + property.Name + x.NameSuffix) property.Name
             | ArrType x -> x.FormatArray property.Name
-            | BaseType x ->
-                match x with
-                | ReferenceType x -> x.FormatProperty property.Name
-                | ValueType x -> x.FormatProperty property.Name)
+            | BaseType x -> x.FormatProperty property.Name)
         |> Seq.reduce (fun x y -> x + " " + y)
         |> (fun x -> Formatters.``class`` name x)
 
@@ -109,10 +113,7 @@ and internal CSType =
     | ArrType of CSType
     member this.FormatArray key =
         match this with
-        | BaseType x ->
-            match x with
-            | ReferenceType x -> x.FormatArray key
-            | ValueType x -> x.FormatArray key
+        | BaseType x -> x.FormatArray key
         | GeneratedType x ->
             x.ClassDeclaration key + " " + Formatters.arrayProperty (x.NamePrefix + key + x.NameSuffix) key
         | ArrType x -> x.FormatArray key
