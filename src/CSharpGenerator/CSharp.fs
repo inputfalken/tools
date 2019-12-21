@@ -39,6 +39,7 @@ type CSharp =
                 match right with
                 | GeneratedType x2 ->
                     List.map2 (fun left right ->
+                        // TODO create a function for the comparison and flip the left with right if no match was made before returning Option.None.
                         if left = right then
                             left
                         else
@@ -61,6 +62,7 @@ type CSharp =
                 | _ -> Option.None
                 |> Option.map CSType.GeneratedType
             | BaseType left ->
+                    // TODO create a function for the comparison and flip the left with right if no match was made before returning Option.None.
                 match right with
                 | BaseType right ->
                     match left with
@@ -68,8 +70,8 @@ type CSharp =
                         match right with
                         | BaseType.ValueType right ->
                             if left = right then left |> Option.Some
-                            else if left = right.ToNullable() then left |> Option.Some
-                            else if left.ToNullable() = right.ToNullable() then right |> Option.Some
+                            else if left = right.AsNullable then left |> Option.Some
+                            else if left.AsNullable = right.AsNullable then right |> Option.Some
                             else Option.None
                         | _ -> Option.None
                     | _ -> Option.None
@@ -133,7 +135,7 @@ type CSharp =
                             | CSType.BaseType x ->
                                 match x with
                                 | BaseType.ValueType x ->
-                                    x.ToNullable()
+                                    x.AsNullable
                                     |> BaseType.ValueType
                                     |> CSType.BaseType
                                     |> Option.Some
