@@ -272,6 +272,20 @@ let ``Array with numbers that are mixed with null values``() =
 
     let expected = "public decimal?[] Root { get; set; }"
     arrayEntryAssertion expected result
+    
+[<Fact>]
+let ``Array mixed with strings and numbers``() =
+    let result =
+        CSharp.CreateFile """
+    [
+        "foo",
+        2,
+        4
+    ]
+    """
+
+    let expected = "public object[] Root { get; set; }"
+    arrayEntryAssertion expected result
 
 [<Fact>]
 let ``Array with objects with properties whose values are mixed with nullable value types``() =
