@@ -44,7 +44,12 @@ type CSharp =
                         else
                             let hasSameName = current.Name = current.Name
                             if current.Type = unresolvedBaseType && hasSameName then
-                                previous
+                                match previous.Type with
+                                | BaseType x ->
+                                    match x with
+                                    | ValueType x -> { Name = previous.Name; Type = x.AsNullable |> BaseType.ValueType |> CSType.BaseType }
+                                    | _ -> previous
+                                | _ -> previous
                             else if previous.Type = unresolvedBaseType && hasSameName then
                                 current
                             else if hasSameName then
