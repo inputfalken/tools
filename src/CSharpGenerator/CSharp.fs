@@ -35,7 +35,7 @@ type CSharp =
 
         let analyzeValues (current: CSType) (previous: CSType) =
             match current with
-            | GeneratedType x1 ->
+            | GeneratedType current ->
                 match previous with
                 | GeneratedType x2 ->
                     List.map2 (fun current previous ->
@@ -56,7 +56,7 @@ type CSharp =
                                 { Name = current.Name
                                   Type = unresolvedBaseType |> ArrType }
                             else
-                                raise (Exception("Could not generate unresolved type when keys differ."))) x1.Members
+                                raise (Exception("Could not generate unresolved type when keys differ."))) current.Members
                         x2.Members
                     |> (fun x ->
                     { Members = x
@@ -65,16 +65,16 @@ type CSharp =
                     |> Option.Some
                 | _ -> Option.None
                 |> Option.map CSType.GeneratedType
-            | BaseType left ->
+            | BaseType current ->
                 match previous with
-                | BaseType right ->
-                    match left with
-                    | BaseType.ValueType left ->
-                        match right with
-                        | BaseType.ValueType right ->
-                            if left = right then left |> Option.Some
-                            else if left = right.AsNullable then left |> Option.Some
-                            else if left.AsNullable = right.AsNullable then right |> Option.Some
+                | BaseType previous ->
+                    match current with
+                    | BaseType.ValueType current ->
+                        match previous with
+                        | BaseType.ValueType previous ->
+                            if current = previous then current |> Option.Some
+                            else if current = previous.AsNullable then current |> Option.Some
+                            else if current.AsNullable = previous.AsNullable then previous |> Option.Some
                             else Option.None
                         | _ -> Option.None
                     | _ -> Option.None
