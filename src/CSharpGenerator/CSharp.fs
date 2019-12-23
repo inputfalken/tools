@@ -131,8 +131,6 @@ type CSharp =
                             current
                         else if current.IsSome && previous.IsSome then
                             analyzeValues previous.Value current.Value
-                        else if current.IsNone && previous.IsNone then
-                            option.None
                         else
                             match current |> Option.defaultWith (fun () -> previous.Value) with
                             | CSType.BaseType x ->
