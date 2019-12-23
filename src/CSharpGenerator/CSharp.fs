@@ -37,7 +37,7 @@ type CSharp =
             match current with
             | GeneratedType current ->
                 match previous with
-                | GeneratedType x2 ->
+                | GeneratedType previous ->
                     List.map2 (fun current previous ->
                         if current = previous then
                             current
@@ -62,7 +62,7 @@ type CSharp =
                                   Type = unresolvedBaseType |> ArrType }
                             else
                                 raise (Exception("Could not generate unresolved type when keys differ.")))
-                        current.Members x2.Members
+                        current.Members previous.Members
                     |> (fun x ->
                     { Members = x
                       NamePrefix = classPrefix
