@@ -47,7 +47,12 @@ type CSharp =
                                 match previous.Type with
                                 | BaseType x ->
                                     match x with
-                                    | ValueType x -> { Name = previous.Name; Type = x.AsNullable |> BaseType.ValueType |> CSType.BaseType }
+                                    | ValueType x ->
+                                        { Name = previous.Name
+                                          Type =
+                                              x.AsNullable
+                                              |> BaseType.ValueType
+                                              |> CSType.BaseType }
                                     | _ -> previous
                                 | _ -> previous
                             else if previous.Type = unresolvedBaseType && hasSameName then
@@ -56,8 +61,8 @@ type CSharp =
                                 { Name = current.Name
                                   Type = unresolvedBaseType |> ArrType }
                             else
-                                raise (Exception("Could not generate unresolved type when keys differ."))) current.Members
-                        x2.Members
+                                raise (Exception("Could not generate unresolved type when keys differ.")))
+                        current.Members x2.Members
                     |> (fun x ->
                     { Members = x
                       NamePrefix = classPrefix
@@ -169,18 +174,16 @@ type CSharp =
             |> Option.map (fun x -> sprintf "namespace %s { %s }" x)
             |> Option.defaultValue (sprintf "%s")
 
-        let data =
-            (input, settings.Casing
-             |> CasingRule.fromString
-             |> Option.defaultValue CasingRule.Pascal)
-            ||> Json.parse
-            
-        data |>baseType 
+        (input,
+         settings.Casing
+         |> CasingRule.fromString
+         |> Option.defaultValue CasingRule.Pascal)
+        ||> Json.parse
+        |> baseType
         |> Option.map (fun x ->
             match x with
-            | GeneratedType x -> x.ClassDeclaration
-            | ArrType x -> x.FormatArray
-            | BaseType x -> x.FormatProperty
-            <| rootObject
-            |> namespaceFormatter
-        ) |> Option.defaultValue String.Empty
+            | GeneratedType x -> x.ClassDeclaration rootObject
+            | ArrType x -> x.FormatArray rootObject
+            | BaseType x -> x.FormatProperty rootObject
+            |> namespaceFormatter)
+        |> Option.defaultValue String.Empty
