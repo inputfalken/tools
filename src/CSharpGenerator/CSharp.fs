@@ -14,9 +14,8 @@ module private stringValidators =
 
 type CSharp =
     static member CreateFile(input: string) = CSharp.CreateFile(input, Settings())
-
+    static member private UnresolvedBaseType = BaseType.Object |> CSType.BaseType
     static member CreateFile(input: string, settings: Settings) =
-
         let rootObject =
             settings.RootObjectName
             |> stringValidators.valueExists
@@ -30,8 +29,6 @@ type CSharp =
              |> stringValidators.valueExists
              |> Option.defaultValue "Model")
 
-        let unresolvedBaseType = BaseType.Object |> CSType.BaseType
-
         let analyzeValues (current: CSType) (previous: CSType) =
             match current with
             | GeneratedType current ->
@@ -42,7 +39,7 @@ type CSharp =
                             current
                         else
                             let hasSameName = current.Name = current.Name
-                            if current.Type = unresolvedBaseType && hasSameName then
+                            if current.Type = CSharp.UnresolvedBaseType && hasSameName then
                                 match previous.Type with
                                 | BaseType x ->
                                     match x with
@@ -54,11 +51,11 @@ type CSharp =
                                               |> CSType.BaseType }
                                     | _ -> previous
                                 | _ -> previous
-                            else if previous.Type = unresolvedBaseType && hasSameName then
+                            else if previous.Type = CSharp.UnresolvedBaseType && hasSameName then
                                 current
                             else if hasSameName then
                                 { Name = current.Name
-                                  Type = unresolvedBaseType |> ArrType }
+                                  Type = CSharp.UnresolvedBaseType |> ArrType }
                             else
                                 raise (Exception("Could not generate unresolved type when keys differ.")))
                         current.Members previous.Members
@@ -125,7 +122,7 @@ type CSharp =
 
         and stringifyArray (value: Value seq): CSType =
             if Seq.isEmpty value then
-                unresolvedBaseType
+                CSharp.UnresolvedBaseType
             else
                 let result =
                     value
@@ -147,7 +144,7 @@ type CSharp =
                                 | _ -> option.None
                             | x -> x |> Option.Some)
 
-                result |> Option.defaultValue unresolvedBaseType
+                result |> Option.defaultValue CSharp.UnresolvedBaseType
             |> CSType.ArrType
 
         and generatedType (records: Record seq): CSType =
@@ -157,14 +154,14 @@ type CSharp =
                   Type =
                       x.Value
                       |> baseType
-                      |> Option.defaultValue unresolvedBaseType })
+                      |> Option.defaultValue CSharp.UnresolvedBaseType })
             |> Seq.toList
             |> (fun x ->
             { Members = x
               NameSuffix = classSuffix
               NamePrefix = classPrefix })
             |> (fun x ->
-            if x.Members.IsEmpty then unresolvedBaseType
+            if x.Members.IsEmpty then CSharp.UnresolvedBaseType
             else CSType.GeneratedType x)
 
         let namespaceFormatter =
