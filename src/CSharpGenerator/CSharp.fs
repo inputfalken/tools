@@ -22,14 +22,11 @@ type CSharp =
             |> stringValidators.valueExists
             |> Option.defaultValue "Root"
 
-        let classPrefixExists = settings.ClassPrefix |> stringValidators.valueExists
-        let classSuffixExists = settings.ClassSuffix |> stringValidators.valueExists
-
         let (classPrefix, classSuffix) =
-            if classSuffixExists.IsNone && classPrefixExists.IsNone then (String.Empty, "Model")
-            else
-                (classPrefixExists |> Option.defaultValue String.Empty,
-                 classSuffixExists |> Option.defaultValue String.Empty)
+            match settings.ClassPrefix |> stringValidators.valueExists,
+                  settings.ClassSuffix |> stringValidators.valueExists with
+            | None, None -> (String.Empty, "Model")
+            | x, y -> (x |> Option.defaultValue String.Empty, y |> Option.defaultValue String.Empty)
 
         let unresolvedBaseType = BaseType.Object |> CSType.BaseType
 
