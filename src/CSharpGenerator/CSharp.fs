@@ -23,10 +23,12 @@ type CSharp =
             |> Option.defaultValue "Root"
 
         let (classPrefix, classSuffix) =
-            match settings.ClassPrefix |> stringValidators.valueExists,
-                  settings.ClassSuffix |> stringValidators.valueExists with
-            | None, None -> (String.Empty, "Model")
-            | x, y -> (x |> Option.defaultValue String.Empty, y |> Option.defaultValue String.Empty)
+            (settings.ClassPrefix
+             |> stringValidators.valueExists
+             |> Option.defaultValue String.Empty,
+             settings.ClassSuffix
+             |> stringValidators.valueExists
+             |> Option.defaultValue "Model")
 
         let unresolvedBaseType = BaseType.Object |> CSType.BaseType
 
