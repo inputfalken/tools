@@ -131,7 +131,10 @@ type CSharp =
                         if current = previous then
                             current
                         else if current.IsSome && previous.IsSome then
-                            analyzeValues previous.Value current.Value
+                            match analyzeValues previous.Value current.Value with
+                            | Some x -> x
+                            | None -> CSharp.UnresolvedBaseType
+                            |> Option.Some
                         else
                             match current |> Option.defaultWith (fun () -> previous.Value) with
                             | CSType.BaseType x ->
