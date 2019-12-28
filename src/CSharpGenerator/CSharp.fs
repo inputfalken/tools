@@ -55,7 +55,7 @@ type CSharp =
                                 current
                             else if hasSameName then
                                 { Name = current.Name
-                                  Type = CSharp.UnresolvedBaseType |> ArrType }
+                                  Type = CSharp.UnresolvedBaseType |> ArrayType }
                             else
                                 raise (Exception("Could not generate unresolved type when keys differ.")))
                         current.Members previous.Members
@@ -116,11 +116,11 @@ type CSharp =
                 |> Option.Some
             | Array x ->
                 x
-                |> stringifyArray
+                |> arrayType
                 |> Option.Some
             | Null -> Option.None
 
-        and stringifyArray (value: Value seq): CSType =
+        and arrayType (value: Value seq): CSType =
             if Seq.isEmpty value then
                 CSharp.UnresolvedBaseType
             else
@@ -147,7 +147,7 @@ type CSharp =
                             | x -> x |> Option.Some)
 
                 result |> Option.defaultValue CSharp.UnresolvedBaseType
-            |> CSType.ArrType
+            |> CSType.ArrayType
 
         and generatedType (records: Record seq): CSType =
             records
@@ -181,7 +181,7 @@ type CSharp =
         |> Option.map (fun x ->
             match x with
             | GeneratedType x -> x.ClassDeclaration rootObject
-            | ArrType x -> x.FormatArray rootObject
+            | ArrayType x -> x.FormatArray rootObject
             | BaseType x -> x.FormatProperty rootObject
             |> namespaceFormatter)
         |> Option.defaultValue String.Empty

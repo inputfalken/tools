@@ -15,7 +15,7 @@ type internal TypeInfo =
       Namespace: string
       Alias: string option
       Nullable: bool }
-    override this.ToString() = this.Alias |> Option.defaultValue (this.Namespace + "." + this.Name)
+    member this.ToString() = this.Alias |> Option.defaultValue (this.Namespace + "." + this.Name)
     member this.AsNullable =
         { Namespace = this.Namespace
           Name = this.Name + "?"
@@ -97,7 +97,7 @@ type internal GeneratedType =
             | GeneratedType x ->
                 x.ClassDeclaration property.Name + " "
                 + x.FormatProperty (x.NamePrefix + property.Name + x.NameSuffix) property.Name
-            | ArrType x -> x.FormatArray property.Name
+            | ArrayType x -> x.FormatArray property.Name
             | BaseType x -> x.FormatProperty property.Name)
         |> Seq.reduce (fun x y -> x + " " + y)
         |> (fun x -> Formatters.``class`` name x)
@@ -109,10 +109,10 @@ and internal Property =
 and internal CSType =
     | BaseType of BaseType
     | GeneratedType of GeneratedType
-    | ArrType of CSType
+    | ArrayType of CSType
     member this.FormatArray key =
         match this with
         | BaseType x -> x.FormatArray key
         | GeneratedType x ->
             x.ClassDeclaration key + " " + Formatters.arrayProperty (x.NamePrefix + key + x.NameSuffix) key
-        | ArrType x -> x.FormatArray key
+        | ArrayType x -> x.FormatArray key
