@@ -128,14 +128,13 @@ type CSharp =
                     value
                     |> Seq.map baseType
                     |> Seq.reduce (fun previous current ->
-                        if current = previous then
-                            current
-                        else if current.IsSome && previous.IsSome then
-                            match analyzeValues previous.Value current.Value with
-                            | Some x -> x
-                            | None -> CSharp.UnresolvedBaseType
+                        match previous, current with
+                        | previous, current when previous = current -> current
+                        | (Some previous, Some current) ->
+                            analyzeValues previous current
+                            |> Option.defaultValue CSharp.UnresolvedBaseType
                             |> Option.Some
-                        else
+                        | previous, current ->
                             match current |> Option.defaultWith (fun () -> previous.Value) with
                             | CSType.BaseType x ->
                                 match x with
