@@ -5,13 +5,6 @@ open CSharpGenerator.Types
 open CSharpGenerator.Arguments
 open Common
 open System
-open System
-open System
-open System
-open System
-open System
-open System
-open System.Collections.Generic
 
 module private stringValidators =
     let valueExists input =
