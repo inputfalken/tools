@@ -58,44 +58,29 @@ type CSharp =
                       Type = CSharp.UnresolvedBaseType |> ArrayType }
             | _ -> raise (Exception("Could not generate unresolved type when keys differ."))
 
+        let createGeneratedType members: CSType Option =
+            { Members = members
+              NamePrefix = classPrefix
+              NameSuffix = classSuffix }
+            |> CSType.GeneratedType
+            |> Option.Some
+
+        let resolveInbalancedProperties biggerList lesserList =
+            let filledList =
+                (lesserList.Members |> List.map Option.Some)
+                @ ([ 0 .. (biggerList.Members.Length - lesserList.Members.Length - 1) ]
+                   |> List.map (fun _ -> Option.None))
+            List.map2 (fun previous current -> tryCreateProperty previous (current |> Option.defaultValue previous))
+                biggerList.Members filledList |> createGeneratedType
+
         let analyzeValues previous current =
             match previous, current with
             | GeneratedType previous, GeneratedType current when previous.Members.Length = current.Members.Length ->
-                List.map2 tryCreateProperty previous.Members current.Members
-                |> (fun x ->
-                { Members = x
-                  NamePrefix = classPrefix
-                  NameSuffix = classSuffix })
-                |> Option.Some
-                |> Option.map CSType.GeneratedType
+                List.map2 tryCreateProperty previous.Members current.Members |> createGeneratedType
             | GeneratedType previous, GeneratedType current when previous.Members.Length < current.Members.Length ->
-                let previous =
-                    (previous.Members |> List.map Option.Some)
-                    @ ([ 0 .. (current.Members.Length - previous.Members.Length - 1) ]
-                       |> List.map (fun _ -> Option.None))
-                List.map2 (fun previous current ->
-                    let current = current |> Option.defaultValue previous
-                    tryCreateProperty previous current) current.Members previous
-                |> (fun x ->
-                { Members = x
-                  NamePrefix = classPrefix
-                  NameSuffix = classSuffix })
-                |> Option.Some
-                |> Option.map CSType.GeneratedType
+                resolveInbalancedProperties current previous
             | GeneratedType previous, GeneratedType current when previous.Members.Length > current.Members.Length ->
-                let current =
-                    (current.Members |> List.map Option.Some)
-                    @ ([ 0 .. (previous.Members.Length - current.Members.Length - 1) ]
-                       |> List.map (fun _ -> Option.None))
-                List.map2 (fun previous current ->
-                    let current = current |> Option.defaultValue previous
-                    tryCreateProperty previous current) previous.Members current
-                |> (fun x ->
-                { Members = x
-                  NamePrefix = classPrefix
-                  NameSuffix = classSuffix })
-                |> Option.Some
-                |> Option.map CSType.GeneratedType
+                resolveInbalancedProperties previous current
             | BaseType previous, BaseType current ->
                 match previous, current with
                 | BaseType.ValueType previous, BaseType.ValueType current ->
