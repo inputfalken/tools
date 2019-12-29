@@ -33,7 +33,7 @@ module public Json =
         { Key = x
           Value = map value casing })
 
-    let parse (input: string) (casing: Casing) =
+    let parse input casing =
         input
         |> JsonValue.Parse
         |> (fun x -> map x casing)

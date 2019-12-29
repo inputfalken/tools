@@ -6,7 +6,7 @@ module private Formatters =
     let ``class`` name content =
         sprintf "public class %s { %s }" name content
 
-    let property ``type`` name: string =
+    let property ``type`` name =
         sprintf "public %s %s { get; set; }" ``type`` name
 
     let arrayProperty ``type`` name =
@@ -92,7 +92,7 @@ type internal GeneratedType =
       NameSuffix: string
       Casing: Casing }
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
-    member this.ClassDeclaration name: string =
+    member this.ClassDeclaration name =
         let name = this.NamePrefix + name + this.NameSuffix
         this.Members
         |> Seq.map (fun property ->
