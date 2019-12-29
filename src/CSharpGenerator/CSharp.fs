@@ -30,6 +30,11 @@ type CSharp =
              |> stringValidators.valueExists
              |> Option.defaultValue "Model")
 
+        let casing =
+            settings.Casing
+            |> Casing.fromString
+            |> Option.defaultValue Casing.Pascal
+
         let tryConvertToNullableValueType current =
             match current.Type with
             | BaseType x ->
@@ -63,7 +68,8 @@ type CSharp =
                 |> (fun x ->
                 { Members = x
                   NamePrefix = classPrefix
-                  NameSuffix = classSuffix })
+                  NameSuffix = classSuffix
+                  Casing = casing })
                 |> Option.Some
                 |> Option.map CSType.GeneratedType
             | BaseType previous, BaseType current ->
@@ -154,7 +160,8 @@ type CSharp =
             |> (fun x ->
             { Members = x
               NameSuffix = classSuffix
-              NamePrefix = classPrefix })
+              NamePrefix = classPrefix
+              Casing = casing })
             |> (fun x ->
             if x.Members.IsEmpty then CSharp.UnresolvedBaseType
             else CSType.GeneratedType x)
@@ -165,10 +172,7 @@ type CSharp =
             |> Option.map (fun x -> sprintf "namespace %s { %s }" x)
             |> Option.defaultValue (sprintf "%s")
 
-        (input,
-         settings.Casing
-         |> Casing.fromString
-         |> Option.defaultValue Casing.Pascal)
+        (input, casing)
         ||> Json.parse
         |> baseType
         |> Option.map (fun x ->
