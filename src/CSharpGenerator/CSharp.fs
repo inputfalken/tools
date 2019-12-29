@@ -78,7 +78,6 @@ type CSharp =
                 |> Option.map CSType.BaseType
             | _ -> Option.None
 
-
         let rec baseType value =
             match value with
             | DateTime _ ->
@@ -119,29 +118,27 @@ type CSharp =
             if Seq.isEmpty values then
                 CSharp.UnresolvedBaseType
             else
-                let result =
-                    values
-                    |> Seq.map baseType
-                    |> Seq.reduce (fun previous current ->
-                        match previous, current with
-                        | previous, current when previous = current -> current
-                        | (Some previous, Some current) ->
-                            analyzeValues previous current
-                            |> Option.defaultValue CSharp.UnresolvedBaseType
-                            |> Option.Some
-                        | previous, current ->
-                            match current |> Option.defaultWith (fun () -> previous.Value) with
-                            | CSType.BaseType x ->
-                                match x with
-                                | BaseType.ValueType x ->
-                                    x.AsNullable
-                                    |> BaseType.ValueType
-                                    |> CSType.BaseType
-                                    |> Option.Some
-                                | _ -> option.None
-                            | x -> x |> Option.Some)
-
-                result |> Option.defaultValue CSharp.UnresolvedBaseType
+                values
+                |> Seq.map baseType
+                |> Seq.reduce (fun previous current ->
+                    match previous, current with
+                    | previous, current when previous = current -> current
+                    | (Some previous, Some current) ->
+                        analyzeValues previous current
+                        |> Option.defaultValue CSharp.UnresolvedBaseType
+                        |> Option.Some
+                    | previous, current ->
+                        match current |> Option.defaultWith (fun () -> previous.Value) with
+                        | CSType.BaseType x ->
+                            match x with
+                            | BaseType.ValueType x ->
+                                x.AsNullable
+                                |> BaseType.ValueType
+                                |> CSType.BaseType
+                                |> Option.Some
+                            | _ -> option.None
+                        | x -> x |> Option.Some)
+                |> Option.defaultValue CSharp.UnresolvedBaseType
             |> CSType.ArrayType
 
         and generatedType records =
