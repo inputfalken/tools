@@ -1,6 +1,8 @@
 module Tests
 
 open CSharpGenerator
+open CSharpGenerator.Arguments
+open Common
 open Xunit
 
 let objectEntryAssertion expected actual =
@@ -10,6 +12,17 @@ let objectEntryAssertion expected actual =
 let arrayEntryAssertion expected actual =
     Assert.Equal(expected, actual)
 
+[<Fact>]
+let ``Camel case works for generated classes``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Camel"))
+
+    let expected = "public class rootModel { public object[] fooBar { get; set; } }"
+    Assert.Equal(expected, result)
 
 [<Fact>]
 let ``Two array Objects next to each other``() =
@@ -272,7 +285,7 @@ let ``Array with numbers that are mixed with null values``() =
 
     let expected = "public decimal?[] Root { get; set; }"
     arrayEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Array mixed with strings and numbers``() =
     let result =

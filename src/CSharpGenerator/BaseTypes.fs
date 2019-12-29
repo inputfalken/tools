@@ -1,10 +1,12 @@
 namespace CSharpGenerator.Types
 
+open Common
+
 module private Formatters =
     let ``class`` name content =
         sprintf "public class %s { %s }" name content
 
-    let property ``type`` name: string =
+    let property ``type`` name =
         sprintf "public %s %s { get; set; }" ``type`` name
 
     let arrayProperty ``type`` name =
@@ -87,9 +89,10 @@ type internal BaseType =
 type internal GeneratedType =
     { Members: Property[]
       NamePrefix: string
-      NameSuffix: string }
+      NameSuffix: string
+      Casing: Casing }
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
-    member this.ClassDeclaration name: string =
+    member this.ClassDeclaration name =
         let name = this.NamePrefix + name + this.NameSuffix
         this.Members
         |> Seq.map (fun property ->
@@ -100,7 +103,7 @@ type internal GeneratedType =
             | ArrayType x -> x.FormatArray property.Name
             | BaseType x -> x.FormatProperty property.Name)
         |> Seq.reduce (fun x y -> x + " " + y)
-        |> (fun x -> Formatters.``class`` name x)
+        |> (fun x -> Formatters.``class`` (name |> Casing.apply this.Casing) x)
 
 and internal Property =
     { Name: string

@@ -30,6 +30,11 @@ type CSharp =
              |> stringValidators.valueExists
              |> Option.defaultValue "Model")
 
+        let casing =
+            settings.Casing
+            |> Casing.fromString
+            |> Option.defaultValue Casing.Pascal
+
         let tryConvertToNullableValueType current =
             match current.Type with
             | BaseType x ->
@@ -57,10 +62,11 @@ type CSharp =
                       Type = CSharp.UnresolvedBaseType |> ArrayType }
             | _ -> raise (Exception("Could not generate unresolved type when keys differ."))
 
-        let createGeneratedType members: CSType Option =
+        let createGeneratedType members =
             { Members = members
               NamePrefix = classPrefix
-              NameSuffix = classSuffix }
+              NameSuffix = classSuffix
+              Casing = casing }
             |> CSType.GeneratedType
             |> Option.Some
 
@@ -170,7 +176,8 @@ type CSharp =
             |> (fun x ->
             { Members = x
               NameSuffix = classSuffix
-              NamePrefix = classPrefix })
+              NamePrefix = classPrefix
+              Casing = casing })
             |> (fun x ->
             if x.Members.Length = 0 then CSharp.UnresolvedBaseType
             else CSType.GeneratedType x)
@@ -181,10 +188,7 @@ type CSharp =
             |> Option.map (fun x -> sprintf "namespace %s { %s }" x)
             |> Option.defaultValue (sprintf "%s")
 
-        (input,
-         settings.Casing
-         |> Casing.fromString
-         |> Option.defaultValue Casing.Pascal)
+        (input, casing)
         ||> Json.parse
         |> baseType
         |> Option.map (fun x ->
