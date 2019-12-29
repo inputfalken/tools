@@ -1,7 +1,6 @@
 namespace CSharpGenerator.Types
 
 open Common
-open Common
 
 module private Formatters =
     let ``class`` name content =
