@@ -62,8 +62,8 @@ type CSharp =
                       Type = CSharp.UnresolvedBaseType |> ArrayType }
             | _ -> raise (Exception("Could not generate unresolved type when keys differ."))
 
-        let createGeneratedType members: CSType Option =
-            { Members = x
+        let createGeneratedType members =
+            { Members = members
               NamePrefix = classPrefix
               NameSuffix = classSuffix
               Casing = casing }
