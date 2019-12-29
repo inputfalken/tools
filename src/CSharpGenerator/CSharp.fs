@@ -43,29 +43,46 @@ type CSharp =
                 | _ -> current
             | _ -> current
 
+        let tryCreateProperty previous current =
+            match previous, current with
+            | previous, current when previous = current -> previous
+            | previous, current when previous.Name = current.Name ->
+                match previous, current with
+                | previous, current when previous.Type = CSharp.UnresolvedBaseType ->
+                    tryConvertToNullableValueType current
+                | previous, current when current.Type = CSharp.UnresolvedBaseType ->
+                    tryConvertToNullableValueType previous
+                | previous, _ ->
+                    { Name = previous.Name
+                      Type = CSharp.UnresolvedBaseType |> ArrayType }
+            | _ -> raise (Exception("Could not generate unresolved type when keys differ."))
+
+        let createGeneratedType members: CSType Option =
+            { Members = members
+              NamePrefix = classPrefix
+              NameSuffix = classSuffix }
+            |> CSType.GeneratedType
+            |> Option.Some
+
+        let resolveInbalancedProperties biggerType lesserType =
+
+            let fillOut: Property Option [] =
+                [| 0 .. (biggerType.Members.Length - lesserType.Members.Length - 1) |]
+                |> Array.map (fun _ -> Option.None)
+            let values: Property Option [] = (lesserType.Members |> Array.map Option.Some)
+
+            Array.map2
+                (fun previous current -> tryCreateProperty previous (current |> Option.defaultValue previous))
+                biggerType.Members (Array.concat [ values; fillOut ]) |> createGeneratedType
+
         let analyzeValues previous current =
             match previous, current with
-            | GeneratedType previous, GeneratedType current ->
-                List.map2 (fun previous current ->
-                    match previous, current with
-                    | previous, current when previous = current -> previous
-                    | previous, current when previous.Name = current.Name ->
-                        match previous, current with
-                        | previous, current when previous.Type = CSharp.UnresolvedBaseType ->
-                            tryConvertToNullableValueType current
-                        | previous, current when current.Type = CSharp.UnresolvedBaseType ->
-                            tryConvertToNullableValueType previous
-                        | previous, _ ->
-                            { Name = previous.Name
-                              Type = CSharp.UnresolvedBaseType |> ArrayType }
-                    | _ -> raise (Exception("Could not generate unresolved type when keys differ."))) previous.Members
-                    current.Members
-                |> (fun x ->
-                { Members = x
-                  NamePrefix = classPrefix
-                  NameSuffix = classSuffix })
-                |> Option.Some
-                |> Option.map CSType.GeneratedType
+            | GeneratedType previous, GeneratedType current when previous.Members.Length = current.Members.Length ->
+                Array.map2 tryCreateProperty previous.Members current.Members |> createGeneratedType
+            | GeneratedType previous, GeneratedType current when previous.Members.Length < current.Members.Length ->
+                resolveInbalancedProperties current previous
+            | GeneratedType previous, GeneratedType current when previous.Members.Length > current.Members.Length ->
+                resolveInbalancedProperties previous current
             | BaseType previous, BaseType current ->
                 match previous, current with
                 | BaseType.ValueType previous, BaseType.ValueType current ->
@@ -116,12 +133,12 @@ type CSharp =
             | Null -> Option.None
 
         and arrayType values =
-            if Seq.isEmpty values then
+            if values.Length = 0 then
                 CSharp.UnresolvedBaseType
             else
                 values
-                |> Seq.map baseType
-                |> Seq.reduce (fun previous current ->
+                |> Array.map baseType
+                |> Array.reduce (fun previous current ->
                     match previous, current with
                     | previous, current when previous = current -> current
                     | (Some previous, Some current) ->
@@ -144,19 +161,18 @@ type CSharp =
 
         and generatedType records =
             records
-            |> Seq.map (fun x ->
+            |> Array.map (fun x ->
                 { Name = x.Key
                   Type =
                       x.Value
                       |> baseType
                       |> Option.defaultValue CSharp.UnresolvedBaseType })
-            |> Seq.toList
             |> (fun x ->
             { Members = x
               NameSuffix = classSuffix
               NamePrefix = classPrefix })
             |> (fun x ->
-            if x.Members.IsEmpty then CSharp.UnresolvedBaseType
+            if x.Members.Length = 0 then CSharp.UnresolvedBaseType
             else CSType.GeneratedType x)
 
         let namespaceFormatter =

@@ -19,11 +19,11 @@ module public Json =
         | JsonValue.Null -> Null
         | JsonValue.Array x ->
             x
-            |> Seq.map (fun x -> map x casing)
+            |> Array.map (fun x -> map x casing)
             |> Array
         | JsonValue.Record x ->
             x
-            |> Seq.map (fun (x, y) -> propertyMap x y casing)
+            |> Array.map (fun (x, y) -> propertyMap x y casing)
             |> Object
 
     and private propertyMap key value casing =

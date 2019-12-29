@@ -85,7 +85,7 @@ type internal BaseType =
         |> ReferenceType
 
 type internal GeneratedType =
-    { Members: Property list
+    { Members: Property[]
       NamePrefix: string
       NameSuffix: string }
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
