@@ -29,46 +29,38 @@ type CSharp =
              |> stringValidators.valueExists
              |> Option.defaultValue "Model")
 
+        let tryConvertToNullableValueType current =
+            match current.Type with
+            | BaseType x ->
+                match x with
+                | ValueType x ->
+                    { Name = current.Name
+                      Type =
+                          x.AsNullable
+                          |> BaseType.ValueType
+                          |> CSType.BaseType }
+                | _ -> current
+            | _ -> current
+
         let analyzeValues (previous: CSType) (current: CSType) =
             match current with
             | GeneratedType current ->
                 match previous with
                 | GeneratedType previous ->
                     List.map2 (fun previous current ->
-                        if previous = current then
-                            previous
-                        else
-                            let hasSameName = previous.Name = previous.Name
-                            if previous.Type = CSharp.UnresolvedBaseType && hasSameName then
-                                match current.Type with
-                                | BaseType x ->
-                                    match x with
-                                    | ValueType x ->
-                                        { Name = current.Name
-                                          Type =
-                                              x.AsNullable
-                                              |> BaseType.ValueType
-                                              |> CSType.BaseType }
-                                    | _ -> current
-                                | _ -> current
-                            else if current.Type = CSharp.UnresolvedBaseType && hasSameName then
-                                match previous.Type with
-                                | BaseType x ->
-                                    match x with
-                                    | ValueType x ->
-                                        { Name = previous.Name
-                                          Type =
-                                              x.AsNullable
-                                              |> BaseType.ValueType
-                                              |> CSType.BaseType }
-                                    | _ -> previous
-                                | _ -> previous
-                            else if hasSameName then
+                        match (previous: Property), (current: Property) with
+                        | previous, current when previous = current -> previous
+                        | previous, current when previous.Name = current.Name ->
+                            match previous, current with
+                            | previous, current when previous.Type = CSharp.UnresolvedBaseType ->
+                                tryConvertToNullableValueType current
+                            | previous, current when current.Type = CSharp.UnresolvedBaseType ->
+                                tryConvertToNullableValueType previous
+                            | previous, _ ->
                                 { Name = previous.Name
                                   Type = CSharp.UnresolvedBaseType |> ArrayType }
-                            else
-                                raise (Exception("Could not generate unresolved type when keys differ.")))
-                         previous.Members current.Members
+                        | _ -> raise (Exception("Could not generate unresolved type when keys differ.")))
+                        previous.Members current.Members
                     |> (fun x ->
                     { Members = x
                       NamePrefix = classPrefix
