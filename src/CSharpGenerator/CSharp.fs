@@ -43,48 +43,41 @@ type CSharp =
             | _ -> current
 
         let analyzeValues (previous: CSType) (current: CSType) =
-            match current with
-            | GeneratedType current ->
-                match previous with
-                | GeneratedType previous ->
-                    List.map2 (fun previous current ->
-                        match (previous: Property), (current: Property) with
-                        | previous, current when previous = current -> previous
-                        | previous, current when previous.Name = current.Name ->
-                            match previous, current with
-                            | previous, current when previous.Type = CSharp.UnresolvedBaseType ->
-                                tryConvertToNullableValueType current
-                            | previous, current when current.Type = CSharp.UnresolvedBaseType ->
-                                tryConvertToNullableValueType previous
-                            | previous, _ ->
-                                { Name = previous.Name
-                                  Type = CSharp.UnresolvedBaseType |> ArrayType }
-                        | _ -> raise (Exception("Could not generate unresolved type when keys differ.")))
-                        previous.Members current.Members
-                    |> (fun x ->
-                    { Members = x
-                      NamePrefix = classPrefix
-                      NameSuffix = classSuffix })
-                    |> Option.Some
-                | _ -> Option.None
+            match previous, current with
+            | GeneratedType previous, GeneratedType current ->
+                List.map2 (fun previous current ->
+                    match (previous: Property), (current: Property) with
+                    | previous, current when previous = current -> previous
+                    | previous, current when previous.Name = current.Name ->
+                        match previous, current with
+                        | previous, current when previous.Type = CSharp.UnresolvedBaseType ->
+                            tryConvertToNullableValueType current
+                        | previous, current when current.Type = CSharp.UnresolvedBaseType ->
+                            tryConvertToNullableValueType previous
+                        | previous, _ ->
+                            { Name = previous.Name
+                              Type = CSharp.UnresolvedBaseType |> ArrayType }
+                    | _ -> raise (Exception("Could not generate unresolved type when keys differ."))) previous.Members
+                    current.Members
+                |> (fun x ->
+                { Members = x
+                  NamePrefix = classPrefix
+                  NameSuffix = classSuffix })
+                |> Option.Some
                 |> Option.map CSType.GeneratedType
-            | BaseType current ->
-                match previous with
-                | BaseType previous ->
-                    match current with
-                    | BaseType.ValueType current ->
-                        match previous with
-                        | BaseType.ValueType previous ->
-                            if current = previous then current |> Option.Some
-                            else if current = previous.AsNullable then current |> Option.Some
-                            else if previous = current.AsNullable then previous |> Option.Some
-                            else Option.None
-                        | _ -> Option.None
+            | BaseType previous, BaseType current ->
+                match previous, current with
+                | BaseType.ValueType previous, BaseType.ValueType current ->
+                    match previous, current with
+                    | previous, current when previous = current -> current |> Option.Some
+                    | previous, current when current = previous.AsNullable -> current |> Option.Some
+                    | previous, current when previous = current.AsNullable -> previous |> Option.Some
                     | _ -> Option.None
                 | _ -> Option.None
                 |> Option.map BaseType.ValueType
                 |> Option.map CSType.BaseType
             | _ -> Option.None
+
 
         let rec baseType value: CSType Option =
             match value with
