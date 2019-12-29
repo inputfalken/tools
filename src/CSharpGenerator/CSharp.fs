@@ -3,6 +3,7 @@
 open JsonParser
 open CSharpGenerator.Types
 open CSharpGenerator.Arguments
+open Common
 open System
 
 module private stringValidators =
@@ -166,8 +167,8 @@ type CSharp =
 
         (input,
          settings.Casing
-         |> CasingRule.fromString
-         |> Option.defaultValue CasingRule.Pascal)
+         |> Casing.fromString
+         |> Option.defaultValue Casing.Pascal)
         ||> Json.parse
         |> baseType
         |> Option.map (fun x ->
