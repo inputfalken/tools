@@ -13,9 +13,9 @@ module private stringValidators =
         |> Option.map (fun x -> x.Trim())
 
 type CSharp =
-    static member CreateFile(input: string) = CSharp.CreateFile(input, Settings())
+    static member CreateFile input = CSharp.CreateFile(input, Settings())
     static member private UnresolvedBaseType = BaseType.Object |> CSType.BaseType
-    static member CreateFile(input: string, settings: Settings) =
+    static member CreateFile(input, settings) =
         let rootObject =
             settings.RootObjectName
             |> stringValidators.valueExists
@@ -42,11 +42,11 @@ type CSharp =
                 | _ -> current
             | _ -> current
 
-        let analyzeValues (previous: CSType) (current: CSType) =
+        let analyzeValues previous current =
             match previous, current with
             | GeneratedType previous, GeneratedType current ->
                 List.map2 (fun previous current ->
-                    match (previous: Property), (current: Property) with
+                    match previous, current with
                     | previous, current when previous = current -> previous
                     | previous, current when previous.Name = current.Name ->
                         match previous, current with
@@ -79,7 +79,7 @@ type CSharp =
             | _ -> Option.None
 
 
-        let rec baseType value: CSType Option =
+        let rec baseType value =
             match value with
             | DateTime _ ->
                 BaseType.DateTime
@@ -115,12 +115,12 @@ type CSharp =
                 |> Option.Some
             | Null -> Option.None
 
-        and arrayType (value: Value seq): CSType =
-            if Seq.isEmpty value then
+        and arrayType values =
+            if Seq.isEmpty values then
                 CSharp.UnresolvedBaseType
             else
                 let result =
-                    value
+                    values
                     |> Seq.map baseType
                     |> Seq.reduce (fun previous current ->
                         match previous, current with
@@ -144,7 +144,7 @@ type CSharp =
                 result |> Option.defaultValue CSharp.UnresolvedBaseType
             |> CSType.ArrayType
 
-        and generatedType (records: Record seq): CSType =
+        and generatedType records =
             records
             |> Seq.map (fun x ->
                 { Name = x.Key
