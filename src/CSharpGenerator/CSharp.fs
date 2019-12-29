@@ -29,17 +29,29 @@ type CSharp =
              |> stringValidators.valueExists
              |> Option.defaultValue "Model")
 
-        let analyzeValues (current: CSType) (previous: CSType) =
+        let analyzeValues (previous: CSType) (current: CSType) =
             match current with
             | GeneratedType current ->
                 match previous with
                 | GeneratedType previous ->
-                    List.map2 (fun current previous ->
-                        if current = previous then
-                            current
+                    List.map2 (fun previous current ->
+                        if previous = current then
+                            previous
                         else
-                            let hasSameName = current.Name = current.Name
-                            if current.Type = CSharp.UnresolvedBaseType && hasSameName then
+                            let hasSameName = previous.Name = previous.Name
+                            if previous.Type = CSharp.UnresolvedBaseType && hasSameName then
+                                match current.Type with
+                                | BaseType x ->
+                                    match x with
+                                    | ValueType x ->
+                                        { Name = current.Name
+                                          Type =
+                                              x.AsNullable
+                                              |> BaseType.ValueType
+                                              |> CSType.BaseType }
+                                    | _ -> current
+                                | _ -> current
+                            else if current.Type = CSharp.UnresolvedBaseType && hasSameName then
                                 match previous.Type with
                                 | BaseType x ->
                                     match x with
@@ -51,14 +63,12 @@ type CSharp =
                                               |> CSType.BaseType }
                                     | _ -> previous
                                 | _ -> previous
-                            else if previous.Type = CSharp.UnresolvedBaseType && hasSameName then
-                                current
                             else if hasSameName then
-                                { Name = current.Name
+                                { Name = previous.Name
                                   Type = CSharp.UnresolvedBaseType |> ArrayType }
                             else
                                 raise (Exception("Could not generate unresolved type when keys differ.")))
-                        current.Members previous.Members
+                         previous.Members current.Members
                     |> (fun x ->
                     { Members = x
                       NamePrefix = classPrefix
@@ -75,7 +85,7 @@ type CSharp =
                         | BaseType.ValueType previous ->
                             if current = previous then current |> Option.Some
                             else if current = previous.AsNullable then current |> Option.Some
-                            else if current.AsNullable = previous.AsNullable then previous |> Option.Some
+                            else if previous = current.AsNullable then previous |> Option.Some
                             else Option.None
                         | _ -> Option.None
                     | _ -> Option.None
