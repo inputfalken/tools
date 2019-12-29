@@ -31,12 +31,12 @@ type CSharpFactory() =
     [<Parameter(Mandatory = false, Position = 5 )>]
     member val ClassSuffix: string = "" with get, set
 
-    member val private Buffer: List<string> = new List<string>() with get
-
+    member val private Buffer: List<string> = List<string>() with get
+    
     override x.ProcessRecord() = x.Buffer.Add(x.InputObject)
     
     override x.EndProcessing() =
-        let settings = new Settings(
+        let settings = Settings(
                            Casing = x.Casing,
                            NameSpace = x.NameSpace,
                            ClassPrefix = x.ClassPrefix,
@@ -44,7 +44,7 @@ type CSharpFactory() =
                            RootObjectName = x.RootObjectName
                        )
         // TODO add proper support like https://github.com/PowerShell/PowerShell/blob/master/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/ConvertFromJsonCommand.cs
-        CSharp.CreateFile(System.String.Join(Environment.NewLine, x.Buffer), settings) |> x.WriteObject
+        CSharp.CreateFile(String.Join(Environment.NewLine, x.Buffer), settings) |> x.WriteObject
         
         
         
