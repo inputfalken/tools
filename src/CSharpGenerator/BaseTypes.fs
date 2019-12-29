@@ -15,7 +15,7 @@ type internal TypeInfo =
       Namespace: string
       Alias: string option
       Nullable: bool }
-    member this.ToString() = this.Alias |> Option.defaultValue (this.Namespace + "." + this.Name)
+    override this.ToString() = this.Alias |> Option.defaultValue (this.Namespace + "." + this.Name)
     member this.AsNullable =
         { Namespace = this.Namespace
           Name = this.Name + "?"
