@@ -87,7 +87,7 @@ type internal BaseType =
         |> ReferenceType
 
 type internal GeneratedType =
-    { Members: Property list
+    { Members: Property[]
       NamePrefix: string
       NameSuffix: string
       Casing: Casing }
