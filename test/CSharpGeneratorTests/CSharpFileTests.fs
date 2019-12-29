@@ -348,6 +348,26 @@ let ``Array with objects with properties whose values are mixed with null``() =
     arrayEntryAssertion expected result
     
 [<Fact>]
+let ``Array with objects with different amount of properties reversed``() =
+    let result =
+        CSharp.CreateFile """
+    [
+        {
+            "Foo" : null,
+            "Bar" : 2,
+            "test" : 2
+        },
+        {
+            "Foo" : "foobar",
+            "Bar" : 2
+        }
+    ]
+    """
+
+    let expected =
+        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } public decimal Test { get; set; } } public RootModel[] Root { get; set; }"
+    arrayEntryAssertion expected result
+[<Fact>]
 let ``Array with objects with different amount of properties``() =
     let result =
         CSharp.CreateFile """
@@ -365,7 +385,7 @@ let ``Array with objects with different amount of properties``() =
     """
 
     let expected =
-        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
+        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } public decimal Test { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result
 
 [<Fact>]

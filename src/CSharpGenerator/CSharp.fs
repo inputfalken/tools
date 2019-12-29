@@ -5,6 +5,7 @@ open CSharpGenerator.Types
 open CSharpGenerator.Arguments
 open Common
 open System
+open System.Collections.Generic
 
 module private stringValidators =
     let valueExists input =
@@ -43,23 +44,52 @@ type CSharp =
                 | _ -> current
             | _ -> current
 
+        let tryCreateProperty previous current =
+            match previous, current with
+            | previous, current when previous = current -> previous
+            | previous, current when previous.Name = current.Name ->
+                match previous, current with
+                | previous, current when previous.Type = CSharp.UnresolvedBaseType ->
+                    tryConvertToNullableValueType current
+                | previous, current when current.Type = CSharp.UnresolvedBaseType ->
+                    tryConvertToNullableValueType previous
+                | previous, _ ->
+                    { Name = previous.Name
+                      Type = CSharp.UnresolvedBaseType |> ArrayType }
+            | _ -> raise (Exception("Could not generate unresolved type when keys differ."))
+
         let analyzeValues previous current =
             match previous, current with
-            | GeneratedType previous, GeneratedType current ->
+            | GeneratedType previous, GeneratedType current when previous.Members.Length = current.Members.Length ->
+                List.map2 tryCreateProperty previous.Members current.Members
+                |> (fun x ->
+                { Members = x
+                  NamePrefix = classPrefix
+                  NameSuffix = classSuffix })
+                |> Option.Some
+                |> Option.map CSType.GeneratedType
+            | GeneratedType previous, GeneratedType current when previous.Members.Length < current.Members.Length ->
+                let previous =
+                    (previous.Members |> List.map Option.Some)
+                    @ ([ 0 .. (current.Members.Length - previous.Members.Length - 1) ]
+                       |> List.map (fun _ -> Option.None))
                 List.map2 (fun previous current ->
-                    match previous, current with
-                    | previous, current when previous = current -> previous
-                    | previous, current when previous.Name = current.Name ->
-                        match previous, current with
-                        | previous, current when previous.Type = CSharp.UnresolvedBaseType ->
-                            tryConvertToNullableValueType current
-                        | previous, current when current.Type = CSharp.UnresolvedBaseType ->
-                            tryConvertToNullableValueType previous
-                        | previous, _ ->
-                            { Name = previous.Name
-                              Type = CSharp.UnresolvedBaseType |> ArrayType }
-                    | _ -> raise (Exception("Could not generate unresolved type when keys differ."))) previous.Members
-                    current.Members
+                    let current = current |> Option.defaultValue previous
+                    tryCreateProperty previous current) current.Members previous
+                |> (fun x ->
+                { Members = x
+                  NamePrefix = classPrefix
+                  NameSuffix = classSuffix })
+                |> Option.Some
+                |> Option.map CSType.GeneratedType
+            | GeneratedType previous, GeneratedType current when previous.Members.Length > current.Members.Length ->
+                let current =
+                    (current.Members |> List.map Option.Some)
+                    @ ([ 0 .. (previous.Members.Length - current.Members.Length - 1) ]
+                       |> List.map (fun _ -> Option.None))
+                List.map2 (fun previous current ->
+                    let current = current |> Option.defaultValue previous
+                    tryCreateProperty previous current) previous.Members current
                 |> (fun x ->
                 { Members = x
                   NamePrefix = classPrefix
