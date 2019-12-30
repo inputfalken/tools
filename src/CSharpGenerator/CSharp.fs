@@ -79,7 +79,7 @@ type CSharp =
 
             Array.map2
                 (fun previous current -> tryCreateProperty previous (current |> Option.defaultValue previous))
-                biggerType.Members (Array.concat [ values; fillOut ]) |> createGeneratedType
+                biggerType.Members (Array.concat [| values; fillOut |]) |> createGeneratedType
 
         let analyzeValues previous current =
             match previous, current with
