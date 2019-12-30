@@ -402,6 +402,26 @@ let ``Array with objects with different amount of properties``() =
     arrayEntryAssertion expected result
 
 [<Fact>]
+let ``Array with missmatched properties ``() =
+    let result =
+        CSharp.CreateFile """
+    [
+        {
+            "Foo" : "foobar",
+            "John" : 2
+        },
+        {
+            "Bar" : null,
+            "Doe" : 2
+        }
+    ]
+    """
+
+    let expected =
+        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
+    arrayEntryAssertion expected result
+    
+[<Fact>]
 let ``Array with objects with properties whose values are mixed with null reversed``() =
     let result =
         CSharp.CreateFile """
