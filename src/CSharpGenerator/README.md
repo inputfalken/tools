@@ -1,6 +1,7 @@
-# Info
+# `JSON` | `C#` Transpiler
 
-This module is supposed to usable from C#.
+## Supports
 
-## TODO
-* Support nullable value types
+* Converting `JSON` Arrays into `C#` arrays.
+* Converting `JSON` Objects into `C#` objects.
+* Converting  `JSON` numbers mixed with `null` values into `C#` nullable value types.
