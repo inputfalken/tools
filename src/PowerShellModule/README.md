@@ -1,6 +1,7 @@
-# Install
+# Installation
 
-In order to install this module, you will have to run `dotnet publish` in this directory and then import the module from the publish folder.
+* `> dotnet publish --configuration Release --framework netcoreapp2.2`
+* `> Import-Module .\bin\Release\netcoreapp2.2\publish\PowerShellModule.dll`
 
 ## Cmdlets
 
