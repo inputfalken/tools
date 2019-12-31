@@ -5,6 +5,10 @@ open CSharpGenerator.Types
 open CSharpGenerator.Arguments
 open Common
 open System
+open System
+open System
+open System
+open System
 
 module private stringValidators =
     let valueExists input =
@@ -50,20 +54,21 @@ type CSharp =
 
         let tryCreateProperty previous current =
             match previous, current with
-            | previous, current when previous = current -> previous
+            | previous, current when previous = current ->
+                [| previous |]
             | previous, current when previous.Name = current.Name ->
                 match previous, current with
                 | previous, current when previous.Type = CSharp.UnresolvedBaseType ->
-                    tryConvertToNullableValueType current
+                    [| tryConvertToNullableValueType current |]
                 | previous, current when current.Type = CSharp.UnresolvedBaseType ->
-                    tryConvertToNullableValueType previous
+                    [| tryConvertToNullableValueType previous |]
                 | previous, _ ->
-                    { Name = previous.Name
-                      Type = CSharp.UnresolvedBaseType |> ArrayType }
-            | _ -> raise (Exception("Could not generate unresolved type when keys differ."))
+                    [| { Name = previous.Name
+                         Type = CSharp.UnresolvedBaseType |> ArrayType } |]
+            | _ -> [| previous; current |]
 
         let createGeneratedType members =
-            { Members = members
+            { Members = members 
               NamePrefix = classPrefix
               NameSuffix = classSuffix
               Casing = casing }
@@ -71,7 +76,6 @@ type CSharp =
             |> Option.Some
 
         let resolveInbalancedProperties biggerType lesserType =
-
             let fillOut: Property Option [] =
                 [| 0 .. (biggerType.Members.Length - lesserType.Members.Length - 1) |]
                 |> Array.map (fun _ -> Option.None)
@@ -79,12 +83,16 @@ type CSharp =
 
             Array.map2
                 (fun previous current -> tryCreateProperty previous (current |> Option.defaultValue previous))
-                biggerType.Members (Array.concat [| values; fillOut |]) |> createGeneratedType
+                biggerType.Members (Array.concat [| values; fillOut |])
+            |> Array.collect (fun x -> x)
+            |> createGeneratedType
 
         let analyzeValues previous current =
             match previous, current with
             | GeneratedType previous, GeneratedType current when previous.Members.Length = current.Members.Length ->
-                Array.map2 tryCreateProperty previous.Members current.Members |> createGeneratedType
+                Array.map2 tryCreateProperty previous.Members current.Members
+                |> Array.collect (fun x -> x)
+                |> createGeneratedType
             | GeneratedType previous, GeneratedType current when previous.Members.Length < current.Members.Length ->
                 resolveInbalancedProperties current previous
             | GeneratedType previous, GeneratedType current when previous.Members.Length > current.Members.Length ->
