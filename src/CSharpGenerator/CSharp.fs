@@ -9,6 +9,7 @@ open System
 open System
 open System
 open System
+open System
 
 module private stringValidators =
     let valueExists input =
@@ -68,7 +69,7 @@ type CSharp =
             | _ -> [| previous; current |]
 
         let createGeneratedType members =
-            { Members = members 
+            { Members = members |> Array.distinct
               NamePrefix = classPrefix
               NameSuffix = classSuffix
               Casing = casing }
@@ -152,6 +153,7 @@ type CSharp =
             else
                 values
                 |> Array.map baseType
+                |> Array.distinct
                 |> Array.reduce (fun previous current ->
                     match previous, current with
                     | previous, current when previous = current -> current
