@@ -6,6 +6,10 @@ open System.Management.Automation
 open CSharpGenerator.Arguments
 open CSharpGenerator
 
+/// <summary>
+/// The ConvertFrom-Json command.
+/// This command converts a Json string representation to a CSharp string.
+/// </summary>
 [<Cmdlet(VerbsCommon.New, "CSharpModel")>]
 type CSharpFactory() =
     inherit PSCmdlet()
