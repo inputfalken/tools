@@ -2,7 +2,6 @@ module Tests
 
 open CSharpGenerator
 open CSharpGenerator.Arguments
-open Common
 open Xunit
 
 let objectEntryAssertion expected actual =
@@ -11,6 +10,7 @@ let objectEntryAssertion expected actual =
 
 let arrayEntryAssertion expected actual =
     Assert.Equal(expected, actual)
+
 
 [<Fact>]
 let ``Camel case works for generated classes``() =
@@ -301,6 +301,54 @@ let ``Array mixed with strings and numbers``() =
     arrayEntryAssertion expected result
 
 [<Fact>]
+let ``Array with missmatched properties``() =
+    let result =
+        CSharp.CreateFile """
+    [
+        {
+            "Foo" : "foobar",
+            "John" : 2
+        },
+        {
+            "Bar" : null,
+            "Doe" : 2
+        }
+    ]
+    """
+
+    let expected =
+        "public class RootModel { public string Foo { get; set; } public object Bar { get; set; } public decimal John { get; set; } public decimal Doe { get; set; } } public RootModel[] Root { get; set; }"
+    arrayEntryAssertion expected result
+    
+[<Fact>]
+let ``Array with objects with two structures``() =
+    let result =
+        CSharp.CreateFile """
+    [
+        {
+            "Foo" : "foobar",
+            "John" : 2
+        },
+        {
+            "Bar" : null,
+            "Doe" : 2
+        },
+        {
+            "Foo" : null,
+            "John" : 2
+        },
+        {
+            "Bar" : null,
+            "Doe" : 2
+        }
+    ]
+    """
+
+    let expected =
+        "public class RootModel { public string Foo { get; set; } public object Bar { get; set; } public decimal John { get; set; } public decimal Doe { get; set; } } public RootModel[] Root { get; set; }"
+    arrayEntryAssertion expected result
+
+[<Fact>]
 let ``Array with objects with properties whose values are mixed with nullable value types``() =
     let result =
         CSharp.CreateFile """
@@ -359,7 +407,7 @@ let ``Array with objects with properties whose values are mixed with null``() =
     let expected =
         "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result
-    
+
 [<Fact>]
 let ``Array with objects with different amount of properties reversed``() =
     let result =
@@ -380,6 +428,7 @@ let ``Array with objects with different amount of properties reversed``() =
     let expected =
         "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } public decimal Test { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result
+
 [<Fact>]
 let ``Array with objects with different amount of properties``() =
     let result =
