@@ -1,6 +1,8 @@
 namespace CSharpGenerator.Types
 
 open Common.Casing
+open Common.StringUtils
+
 
 module private Formatters =
     let ``class`` name content =
@@ -17,11 +19,13 @@ type internal TypeInfo =
       Namespace: string
       Alias: string option
       Nullable: bool }
-    override this.ToString() = this.Alias |> Option.defaultValue (this.Namespace + "." + this.Name)
+    override this.ToString() = this.Alias |> Option.defaultValue ([ this.Namespace; "."; this.Name ] |> joinStrings)
     member this.AsNullable =
+        let nullableConcat x =
+            [ x; "?" ] |> joinStrings
         { Namespace = this.Namespace
-          Name = this.Name + "?"
-          Alias = this.Alias |> Option.map (fun x -> x + "?")
+          Name = nullableConcat this.Name
+          Alias = this.Alias |> Option.map nullableConcat
           Nullable = true }
 
 type internal BaseType =
@@ -87,22 +91,23 @@ type internal BaseType =
         |> ReferenceType
 
 type internal GeneratedType =
-    { Members: Property[]
+    { Members: Property []
       NamePrefix: string
       NameSuffix: string
       Casing: Casing }
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
     member this.ClassDeclaration name =
-        let name = this.NamePrefix + name + this.NameSuffix
+        let name = [ this.NamePrefix; name; this.NameSuffix ] |> joinStrings
         this.Members
         |> Seq.map (fun property ->
             match property.Type with
             | GeneratedType x ->
-                x.ClassDeclaration property.Name + " "
-                + x.FormatProperty (x.NamePrefix + property.Name + x.NameSuffix) property.Name
+                [ x.ClassDeclaration property.Name
+                  x.FormatProperty ([ x.NamePrefix; property.Name; x.NameSuffix ] |> joinStrings) property.Name ]
+                |> joinStringsWithSpaceSeparation
             | ArrayType x -> x.FormatArray property.Name
             | BaseType x -> x.FormatProperty property.Name)
-        |> Seq.reduce (fun x y -> x + " " + y)
+        |> joinStringsWithSpaceSeparation
         |> (fun x -> Formatters.``class`` (name |> Casing.apply this.Casing) x)
 
 and internal Property =
@@ -117,5 +122,7 @@ and internal CSType =
         match this with
         | BaseType x -> x.FormatArray key
         | GeneratedType x ->
-            x.ClassDeclaration key + " " + Formatters.arrayProperty (x.NamePrefix + key + x.NameSuffix) key
+            [ x.ClassDeclaration key
+              Formatters.arrayProperty ([ x.NamePrefix; key; x.NameSuffix ] |> joinStrings) key ]
+            |> joinStringsWithSpaceSeparation
         | ArrayType x -> x.FormatArray key
