@@ -48,7 +48,7 @@ type CSharp =
                 | _ -> current
             | _ -> current
 
-        let tryCreateProperty previous current =
+        let createProperties previous current =
             match previous, current with
             | previous, current when previous = current ->
                 [| previous |]
@@ -63,7 +63,7 @@ type CSharp =
                          Type = CSharp.UnresolvedBaseType |> ArrayType } |]
             | _ -> [| previous; current |]
 
-        let createGeneratedType members =
+        let generatedType members =
             { Members = members |> Array.distinct
               NamePrefix = classPrefix
               NameSuffix = classSuffix
@@ -78,17 +78,17 @@ type CSharp =
             let values: Property Option [] = (lesserType.Members |> Array.map Option.Some)
 
             Array.map2
-                (fun previous current -> tryCreateProperty previous (current |> Option.defaultValue previous))
+                (fun previous current -> createProperties previous (current |> Option.defaultValue previous))
                 biggerType.Members (Array.concat [| values; fillOut |])
             |> Array.collect (fun x -> x)
-            |> createGeneratedType
+            |> generatedType
 
         let analyzeValues previous current =
             match previous, current with
             | GeneratedType previous, GeneratedType current when previous.Members.Length = current.Members.Length ->
-                Array.map2 tryCreateProperty previous.Members current.Members
+                Array.map2 createProperties previous.Members current.Members
                 |> Array.collect (fun x -> x)
-                |> createGeneratedType
+                |> generatedType
             | GeneratedType previous, GeneratedType current when previous.Members.Length < current.Members.Length ->
                 resolveInbalancedProperties current previous
             | GeneratedType previous, GeneratedType current when previous.Members.Length > current.Members.Length ->
