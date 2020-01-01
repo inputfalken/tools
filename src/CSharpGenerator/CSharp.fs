@@ -3,31 +3,26 @@
 open JsonParser
 open CSharpGenerator.Types
 open CSharpGenerator.Arguments
-open Common
+open Common.Casing
+open Common.StringValidator
 open System
-
-module private stringValidators =
-    let valueExists input =
-        input
-        |> Option.Some
-        |> Option.filter (fun x -> not (System.String.IsNullOrWhiteSpace(x)))
-        |> Option.map (fun x -> x.Trim())
 
 type CSharp =
     static member CreateFile input = CSharp.CreateFile(input, Settings())
     static member private UnresolvedBaseType = BaseType.Object |> CSType.BaseType
     static member CreateFile(input, settings) =
+
         let rootObject =
             settings.RootObjectName
-            |> stringValidators.valueExists
+            |> valueExists
             |> Option.defaultValue "Root"
 
         let (classPrefix, classSuffix) =
             (settings.ClassPrefix
-             |> stringValidators.valueExists
+             |> valueExists
              |> Option.defaultValue String.Empty,
              settings.ClassSuffix
-             |> stringValidators.valueExists
+             |> valueExists
              |> Option.defaultValue "Model")
 
         let casing =
@@ -184,7 +179,7 @@ type CSharp =
 
         let namespaceFormatter =
             settings.NameSpace
-            |> stringValidators.valueExists
+            |> valueExists
             |> Option.map (fun x -> sprintf "namespace %s { %s }" x)
             |> Option.defaultValue (sprintf "%s")
 

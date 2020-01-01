@@ -1,6 +1,6 @@
 namespace JsonParser
 
-open Common
+open Common.Casing
 open FSharp.Data
 
 module public Json =

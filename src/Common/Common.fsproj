@@ -5,7 +5,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="UnionFunctions.fs" />
+        <Compile Include="Casing.fs" />
+        <Compile Include="StringValidator.fs" />
     </ItemGroup>
 
     <ItemGroup>

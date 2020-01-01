@@ -1,4 +1,4 @@
-﻿namespace Common
+﻿namespace Common.Casing
 
 open Microsoft.FSharp.Reflection
 open FSharp.Data.Runtime
@@ -22,3 +22,5 @@ type public Casing =
         function
         | Pascal -> NameUtils.nicePascalName
         | Camel -> NameUtils.niceCamelName
+        
+
