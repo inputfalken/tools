@@ -17,7 +17,7 @@ type internal TypeInfo =
       Namespace: string
       Alias: string option
       Nullable: bool }
-    override this.ToString() = this.Alias |> Option.defaultValue (this.Namespace + "." + this.Name)
+    member this.ToString() = this.Alias |> Option.defaultValue (this.Namespace + "." + this.Name)
     member this.AsNullable =
         { Namespace = this.Namespace
           Name = this.Name + "?"
@@ -87,7 +87,7 @@ type internal BaseType =
         |> ReferenceType
 
 type internal GeneratedType =
-    { Members: Property[]
+    { Members: Property []
       NamePrefix: string
       NameSuffix: string
       Casing: Casing }
@@ -98,11 +98,12 @@ type internal GeneratedType =
         |> Seq.map (fun property ->
             match property.Type with
             | GeneratedType x ->
-                x.ClassDeclaration property.Name + " "
-                + x.FormatProperty (x.NamePrefix + property.Name + x.NameSuffix) property.Name
+                [ x.ClassDeclaration property.Name
+                  x.FormatProperty (x.NamePrefix + property.Name + x.NameSuffix) property.Name ]
+                |> String.concat " "
             | ArrayType x -> x.FormatArray property.Name
             | BaseType x -> x.FormatProperty property.Name)
-        |> Seq.reduce (fun x y -> x + " " + y)
+        |> String.concat " "
         |> (fun x -> Formatters.``class`` (name |> Casing.apply this.Casing) x)
 
 and internal Property =
