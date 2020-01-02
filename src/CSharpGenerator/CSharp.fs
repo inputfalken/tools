@@ -12,23 +12,31 @@ type CSharp =
     static member private UnresolvedBaseType = BaseType.Object |> CSType.BaseType
     static member CreateFile(input, settings) =
 
-        let rootObject =
-            settings.RootObjectName
-            |> valueExists
-            |> Option.defaultValue "Root"
-
-        let (classPrefix, classSuffix) =
-            (settings.ClassPrefix
-             |> valueExists
-             |> Option.defaultValue String.Empty,
-             settings.ClassSuffix
-             |> valueExists
-             |> Option.defaultValue "Model")
-
         let casing =
             settings.Casing
             |> Casing.fromString
             |> Option.defaultValue Casing.Pascal
+            
+        let defaultValues = match casing with
+                            | Pascal -> {|Root = "Root" ; Model = "Model" |}
+                            | Camel -> {|Root = "root" ; Model = "Model" |}
+                            | None -> {|Root = "root" ; Model = "model" |}
+                
+        let rootObject =
+            settings.RootObjectName
+            |> valueExists
+            |> Option.defaultValue defaultValues.Root
+
+        let (classPrefix, classSuffix) =
+            (settings.ClassPrefix
+             |> valueExists
+             |> Option.map (fun x -> Casing.apply casing x)
+             |> Option.defaultValue String.Empty,
+             settings.ClassSuffix
+             |> valueExists
+             |> Option.map (fun x -> Casing.apply casing x)
+             |> Option.defaultValue defaultValues.Model)
+
 
         let tryConvertToNullableValueType current =
             match current.Type with

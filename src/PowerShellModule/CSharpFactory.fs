@@ -18,7 +18,7 @@ type CSharpFactory() =
     [<Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, HelpMessage = "The JSON.")>]
     member val InputObject: string = "" with get, set
 
-    [<ValidateSet("Camel", "Pascal")>]
+    [<ValidateSet("Camel", "Pascal", "None")>]
     [<Parameter(Mandatory = false, Position = 1, HelpMessage = "Sets the casing rules for class and property names.")>]
     member val Casing: string = "Pascal" with get, set
 

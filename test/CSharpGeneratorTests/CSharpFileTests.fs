@@ -25,6 +25,19 @@ let ``Camel case works for generated classes``() =
     Assert.Equal(expected, result)
 
 [<Fact>]
+let ``No case rules works``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "foobar" : []
+    }
+    """, Settings(Casing = "None"))
+        
+    let expected = "public class rootmodel { public object[] foobar { get; set; } }"
+    Assert.Equal(expected, result)
+    
+
+[<Fact>]
 let ``Two array Objects next to each other``() =
     let json = """
     [
