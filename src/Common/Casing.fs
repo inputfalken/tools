@@ -16,11 +16,13 @@ module private UnionFunctions =
 type public Casing =
     | Pascal
     | Camel
+    | None
     override this.ToString() = UnionFunctions.toString this
     static member fromString s = UnionFunctions.fromString<Casing> s
-    static member apply =
-        function
-        | Pascal -> NameUtils.nicePascalName
-        | Camel -> NameUtils.niceCamelName
+    member this.apply x : string =
+        match this with 
+        | Pascal -> NameUtils.nicePascalName x
+        | Camel -> NameUtils.niceCamelName x
+        | None -> x
         
 
