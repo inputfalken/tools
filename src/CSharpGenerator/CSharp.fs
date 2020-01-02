@@ -194,7 +194,7 @@ type CSharp =
             settings.NameSpace
             |> valueExists
             |> Option.map (fun x -> sprintf "namespace %s { %s }" x)
-            |> Option.defaultValue (sprintf "%s")
+            |> Option.defaultValue (fun x -> x)
 
         (input, casing)
         ||> Json.parse
