@@ -1,6 +1,7 @@
 namespace JsonParser
 
 open Common.Casing
+open Common.Casing
 open FSharp.Data
 
 module public Json =
@@ -26,12 +27,9 @@ module public Json =
             |> Array.map (fun (x, y) -> propertyMap x y casing)
             |> Object
 
-    and private propertyMap key value casing =
-        key
-        |> Casing.apply casing
-        |> (fun x ->
-        { Key = x
-          Value = map value casing })
+    and private propertyMap key value (casing: Casing) =
+        { Key = casing.apply key
+          Value = map value casing }
 
     let parse input casing =
         input

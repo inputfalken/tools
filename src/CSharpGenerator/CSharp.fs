@@ -37,13 +37,12 @@ type CSharp =
         let (classPrefix, classSuffix) =
             (settings.ClassPrefix
              |> valueExists
-             |> Option.map (fun x -> Casing.apply casing x)
+             |> Option.map (fun x -> casing.apply x)
              |> Option.defaultValue String.Empty,
              settings.ClassSuffix
              |> valueExists
-             |> Option.map (fun x -> Casing.apply casing x)
+             |> Option.map (fun x -> casing.apply x)
              |> Option.defaultValue defaultValues.Model)
-
 
         let tryConvertToNullableValueType current =
             match current.Type with

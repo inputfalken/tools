@@ -19,10 +19,10 @@ type public Casing =
     | None
     override this.ToString() = UnionFunctions.toString this
     static member fromString s = UnionFunctions.fromString<Casing> s
-    static member apply =
-        function
-        | Pascal -> NameUtils.nicePascalName
-        | Camel -> NameUtils.niceCamelName
-        | None -> fun x -> x
+    member this.apply x : string =
+        match this with 
+        | Pascal -> NameUtils.nicePascalName x
+        | Camel -> NameUtils.niceCamelName x
+        | None -> x
         
 

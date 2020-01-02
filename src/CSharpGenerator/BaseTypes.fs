@@ -108,7 +108,7 @@ type internal GeneratedType =
             | ArrayType x -> x.FormatArray property.Name
             | BaseType x -> x.FormatProperty property.Name)
         |> joinStringsWithSpaceSeparation
-        |> (fun x -> Formatters.``class`` (name |> Casing.apply this.Casing) x)
+        |> (fun x -> Formatters.``class`` (this.Casing.apply name) x)
 
 and internal Property =
     { Name: string
