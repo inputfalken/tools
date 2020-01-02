@@ -16,12 +16,19 @@ type CSharp =
             settings.Casing
             |> Casing.fromString
             |> Option.defaultValue Casing.Pascal
-            
-        let defaultValues = match casing with
-                            | Pascal -> {|Root = "Root" ; Model = "Model" |}
-                            | Camel -> {|Root = "root" ; Model = "Model" |}
-                            | None -> {|Root = "root" ; Model = "model" |}
-                
+
+        let defaultValues =
+            match casing with
+            | Pascal ->
+                {| Root = "Root"
+                   Model = "Model" |}
+            | Camel ->
+                {| Root = "root"
+                   Model = "Model" |}
+            | None ->
+                {| Root = "root"
+                   Model = "model" |}
+
         let rootObject =
             settings.RootObjectName
             |> valueExists
@@ -80,8 +87,7 @@ type CSharp =
                 |> Array.map (fun _ -> Option.None)
             let values: Property Option [] = (lesserType.Members |> Array.map Option.Some)
 
-            Array.map2
-                (fun previous current -> createProperties previous (current |> Option.defaultValue previous))
+            Array.map2 (fun previous current -> createProperties previous (current |> Option.defaultValue previous))
                 biggerType.Members (Array.concat [| values; fillOut |])
             |> Array.collect (fun x -> x)
             |> generatedType
@@ -194,15 +200,17 @@ type CSharp =
             settings.NameSpace
             |> valueExists
             |> Option.map (fun x -> sprintf "namespace %s { %s }" x)
-            |> Option.defaultValue (fun x -> x)
 
         (input, casing)
         ||> Json.parse
         |> baseType
-        |> Option.map (fun x ->
-            match x with
+        |> Option.map (fun csType ->
+            match csType with
             | GeneratedType x -> x.ClassDeclaration rootObject
             | ArrayType x -> x.FormatArray rootObject
             | BaseType x -> x.FormatProperty rootObject
-            |> namespaceFormatter)
+            |> (fun csharp ->
+            namespaceFormatter
+            |> Option.map (fun formatter -> formatter csharp)
+            |> Option.defaultValue csharp))
         |> Option.defaultValue String.Empty
