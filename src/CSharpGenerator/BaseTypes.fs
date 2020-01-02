@@ -6,13 +6,13 @@ open Common.StringUtils
 
 module private Formatters =
     let ``class`` name content =
-        sprintf "public class %s { %s }" name content
+        [ "public class"; name; "{"; content; "}" ] |> joinStringsWithSpaceSeparation
 
     let property ``type`` name =
-        sprintf "public %s %s { get; set; }" ``type`` name
+        [ "public"; ``type``; name; "{ get; set; }" ] |> joinStringsWithSpaceSeparation
 
     let arrayProperty ``type`` name =
-        property (sprintf "%s[]" ``type``) name
+        property ([``type``; "[]"] |> joinStrings) name
 
 type internal TypeInfo =
     { Name: string
