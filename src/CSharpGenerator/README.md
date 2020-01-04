@@ -1,4 +1,4 @@
-# `JSON` -> `C#` Transpiler
+# `JSON` -> `C#` Generator
 
 ## Supports
 
