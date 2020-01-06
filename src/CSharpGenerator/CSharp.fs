@@ -6,9 +6,6 @@ open CSharpGenerator.Arguments
 open Common.Casing
 open Common.StringValidator
 open System
-open System
-open System
-open System
 
 type CSharp =
     static member CreateFile input = CSharp.CreateFile(input, Settings())
@@ -61,25 +58,28 @@ type CSharp =
                 | _ -> current
             | _ -> current
 
-        let rec matchBaseType previous current: CSType Option =
+        let rec createBaseType previous current =
             match previous, current with
             | BaseType previous, BaseType current ->
                 match previous, current with
                 | BaseType.ValueType previous, BaseType.ValueType current ->
                     match previous, current with
-                    | previous, current when previous = current -> current |> Option.Some
-                    | previous, current when current = previous.AsNullable -> current |> Option.Some
-                    | previous, current when previous = current.AsNullable -> previous |> Option.Some
-                    | _ -> Option.None
-                | _ -> Option.None
-                |> Option.map BaseType.ValueType
-                |> Option.map CSType.BaseType
-            | ArrayType previous, ArrayType current ->
-                matchBaseType previous current
-                |> Option.defaultValue CSType.UnresolvedBaseType
-                |> CSType.ArrayType
-                |> Option.Some
-            | _ -> Option.None
+                    | previous, current when previous = current ->
+                        current
+                        |> BaseType.ValueType
+                        |> CSType.BaseType
+                    | previous, current when current = previous.AsNullable ->
+                        current
+                        |> BaseType.ValueType
+                        |> CSType.BaseType
+                    | previous, current when previous = current.AsNullable ->
+                        previous
+                        |> BaseType.ValueType
+                        |> CSType.BaseType
+                    | _ -> CSType.UnresolvedBaseType
+                | _ -> CSType.UnresolvedBaseType
+            | ArrayType previous, ArrayType current -> createBaseType previous current |> CSType.ArrayType
+            | _ -> CSType.UnresolvedBaseType
 
         let createProperty previous current =
             match previous, current with
@@ -91,10 +91,7 @@ type CSharp =
                 tryConvertToNullableValueType previous
             | previous, current ->
                 { Name = previous.Name
-                  Type =
-                      matchBaseType previous.Type.Value current.Type.Value
-                      |> Option.defaultValue CSType.UnresolvedBaseType
-                      |> Option.Some }
+                  Type = createBaseType previous.Type.Value current.Type.Value |> Option.Some }
 
         let analyzeValues previous current (parent: CSType Option []) =
             match previous, current with
@@ -112,8 +109,7 @@ type CSharp =
                   NameSuffix = classSuffix
                   Casing = casing }
                 |> CSType.GeneratedType
-                |> Option.Some
-            | previous, current -> matchBaseType previous current
+            | previous, current -> createBaseType previous current
 
         let rec baseType value =
             match value with
@@ -165,9 +161,7 @@ type CSharp =
                     match previous, current with
                     | previous, current when previous = current -> current
                     | (Some previous, Some current) ->
-                        analyzeValues previous current baseTypes
-                        |> Option.defaultValue CSType.UnresolvedBaseType
-                        |> Option.Some
+                        analyzeValues previous current baseTypes |> Option.Some
                     | previous, current ->
                         match current |> Option.defaultWith (fun () -> previous.Value) with
                         | CSType.BaseType x ->
