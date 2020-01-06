@@ -90,12 +90,11 @@ type CSharp =
             | previous, current when current.Type.IsNone || current.Type.Value = CSType.UnresolvedBaseType ->
                 tryConvertToNullableValueType previous
             | previous, current ->
-                match matchBaseType previous.Type.Value current.Type.Value with
-                | Some x -> x
-                | _ -> CSType.UnresolvedBaseType
-                |> (fun x ->
                 { Name = previous.Name
-                  Type = x |> Option.Some })
+                  Type =
+                      matchBaseType previous.Type.Value current.Type.Value
+                      |> Option.defaultValue CSType.UnresolvedBaseType
+                      |> Option.Some }
 
         let analyzeValues previous current (parent: CSType Option []) =
             match previous, current with
@@ -107,8 +106,8 @@ type CSharp =
                         let property = Array.reduce createProperty grouping
                         if grouping.Length = parent.Length then property
                         else tryConvertToNullableValueType property)
-                    
-                { Members = members 
+
+                { Members = members
                   NamePrefix = classPrefix
                   NameSuffix = classSuffix
                   Casing = casing }
