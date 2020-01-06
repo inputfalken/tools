@@ -100,9 +100,9 @@ type CSharp =
                     Array.concat [ previous.Members; current.Members ]
                     |> Array.groupBy (fun x -> x.Name)
                     |> Array.map (fun (_, grouping) ->
-                        let property = Array.reduce createProperty grouping
-                        if grouping.Length = parent.Length then property
-                        else tryConvertToNullableValueType property)
+                        match Array.reduce createProperty grouping with
+                        | property when grouping.Length = parent.Length -> property
+                        | property -> tryConvertToNullableValueType property)
 
                 { Members = members
                   NamePrefix = classPrefix
@@ -148,9 +148,9 @@ type CSharp =
             | Null -> Option.None
 
         and arrayType values =
-            if values.Length = 0 then
-                CSType.UnresolvedBaseType
-            else
+            match values with
+            | values when values.Length = 0 -> CSType.UnresolvedBaseType
+            | values ->
                 let baseTypes =
                     values
                     |> Array.map baseType
@@ -177,9 +177,9 @@ type CSharp =
             |> CSType.ArrayType
 
         and generatedType records =
-            if records.Length = 0 then
-                CSType.UnresolvedBaseType
-            else
+            match records with
+            | records when records.Length = 0 -> CSType.UnresolvedBaseType
+            | records ->
                 records
                 |> Array.map (fun x ->
                     { Name = x.Key
