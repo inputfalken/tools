@@ -100,7 +100,7 @@ type internal GeneratedType =
         let name = [ this.NamePrefix; name; this.NameSuffix ] |> joinStrings
         this.Members
         |> Seq.map (fun property ->
-            match property.Type with
+            match property.Type |> Option.defaultValue CSType.UnresolvedBaseType with
             | GeneratedType x ->
                 [ x.ClassDeclaration property.Name
                   x.FormatProperty ([ x.NamePrefix; property.Name; x.NameSuffix ] |> joinStrings) property.Name ]
@@ -112,12 +112,13 @@ type internal GeneratedType =
 
 and internal Property =
     { Name: string
-      Type: CSType }
+      Type: CSType Option }
 
 and internal CSType =
     | BaseType of BaseType
     | GeneratedType of GeneratedType
     | ArrayType of CSType
+    static member UnresolvedBaseType = BaseType.Object |> CSType.BaseType
     member this.FormatArray key =
         match this with
         | BaseType x -> x.FormatArray key
