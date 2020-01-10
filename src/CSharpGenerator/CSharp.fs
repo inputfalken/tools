@@ -44,19 +44,19 @@ type CSharp =
              |> Option.defaultValue defaultValues.Model)
 
         let tryConvertToNullableValueType current =
-            match current.Type |> Option.defaultValue CSType.UnresolvedBaseType with
+            match current with
             | BaseType x ->
                 match x with
                 | ValueType x ->
-                    { Name = current.Name
-                      Type =
-                          if x.Nullable then x
-                          else x.AsNullable
-                          |> BaseType.ValueType
-                          |> CSType.BaseType
-                          |> Option.Some }
+                    x.AsNullable
+                    |> BaseType.ValueType
+                    |> CSType.BaseType
                 | _ -> current
             | _ -> current
+
+        let tryConvertToNullableValueTypeProperty current =
+            { Name = current.Name
+              Type = current.Type |> Option.map tryConvertToNullableValueType }
 
         let rec createBaseType previous current =
             match previous, current with
@@ -86,9 +86,9 @@ type CSharp =
             | previous, current when previous = current ->
                 previous
             | previous, current when previous.Type.IsNone || previous.Type.Value = CSType.UnresolvedBaseType ->
-                tryConvertToNullableValueType current
+                tryConvertToNullableValueTypeProperty current
             | previous, current when current.Type.IsNone || current.Type.Value = CSType.UnresolvedBaseType ->
-                tryConvertToNullableValueType previous
+                tryConvertToNullableValueTypeProperty previous
             | previous, current ->
                 { Name = previous.Name
                   Type = createBaseType previous.Type.Value current.Type.Value |> Option.Some }
@@ -102,7 +102,7 @@ type CSharp =
                     |> Array.map (fun (_, grouping) ->
                         match Array.reduce createProperty grouping with
                         | property when grouping.Length = parent.Length -> property
-                        | property -> tryConvertToNullableValueType property)
+                        | property -> tryConvertToNullableValueTypeProperty property)
 
                 { Members = members
                   NamePrefix = classPrefix
@@ -163,16 +163,9 @@ type CSharp =
                     | (Some previous, Some current) ->
                         analyzeValues previous current baseTypes |> Option.Some
                     | previous, current ->
-                        match current |> Option.defaultWith (fun () -> previous.Value) with
-                        | CSType.BaseType x ->
-                            match x with
-                            | BaseType.ValueType x ->
-                                x.AsNullable
-                                |> BaseType.ValueType
-                                |> CSType.BaseType
-                                |> Option.Some
-                            | _ -> option.None
-                        | x -> x |> Option.Some)
+                        current
+                        |> Option.orElse previous
+                        |> Option.map tryConvertToNullableValueType)
                 |> Option.defaultValue CSType.UnresolvedBaseType
             |> CSType.ArrayType
 

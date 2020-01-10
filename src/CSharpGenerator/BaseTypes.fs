@@ -12,7 +12,7 @@ module private Formatters =
         [ "public"; ``type``; name; "{ get; set; }" ] |> joinStringsWithSpaceSeparation
 
     let arrayProperty ``type`` name =
-        property ([``type``; "[]"] |> joinStrings) name
+        property ([ ``type``; "[]" ] |> joinStrings) name
 
 type internal TypeInfo =
     { Name: string
@@ -21,12 +21,15 @@ type internal TypeInfo =
       Nullable: bool }
     override this.ToString() = this.Alias |> Option.defaultValue ([ this.Namespace; "."; this.Name ] |> joinStrings)
     member this.AsNullable =
-        let nullableConcat x =
-            [ x; "?" ] |> joinStrings
-        { Namespace = this.Namespace
-          Name = nullableConcat this.Name
-          Alias = this.Alias |> Option.map nullableConcat
-          Nullable = true }
+        if this.Nullable then
+            this
+        else
+            let nullableConcat x =
+                [ x; "?" ] |> joinStrings
+            { Namespace = this.Namespace
+              Name = nullableConcat this.Name
+              Alias = this.Alias |> Option.map nullableConcat
+              Nullable = true }
 
 type internal BaseType =
     | ReferenceType of TypeInfo
