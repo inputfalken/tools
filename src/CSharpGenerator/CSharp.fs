@@ -56,7 +56,7 @@ type CSharp =
 
         let tryConvertToNullableValueTypeProperty current =
             { Name = current.Name
-              Type = current.Type |> Option.map tryConvertToNullableValueType }
+              Type = Option.map tryConvertToNullableValueType current.Type }
 
         let rec createBaseType previous current =
             match previous, current with
@@ -91,7 +91,7 @@ type CSharp =
                 tryConvertToNullableValueTypeProperty previous
             | previous, current ->
                 { Name = previous.Name
-                  Type = createBaseType previous.Type.Value current.Type.Value |> Option.Some }
+                  Type = Option.map2 createBaseType previous.Type current.Type }
 
         let analyzeValues previous current (parent: CSType Option []) =
             match previous, current with
