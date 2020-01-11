@@ -37,6 +37,30 @@ let ``Allow suffix to be empty if prefix is set``() =
     Assert.Equal(expected, result)
     
 [<Fact>]
+let ``Uses default suffix if prefix and sufifx is set to empty string``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(ClassPrefix = System.String.Empty, ClassSuffix = System.String.Empty))
+
+    let expected = "public class RootModel { public object[] FooBar { get; set; } }"
+    Assert.Equal(expected, result)
+    
+[<Fact>]
+let ``Uses default suffix if prefix and sufifx is set to null``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(ClassPrefix = null, ClassSuffix = null))
+
+    let expected = "public class RootModel { public object[] FooBar { get; set; } }"
+    Assert.Equal(expected, result)
+    
+[<Fact>]
 let ``Camel case works for generated classes``() =
     let result =
         CSharp.CreateFile("""
