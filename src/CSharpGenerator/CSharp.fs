@@ -3,6 +3,7 @@
 open JsonParser
 open CSharpGenerator.Types
 open CSharpGenerator.Arguments
+open Common
 open Common.Casing
 open Common.StringValidator
 open System
@@ -184,16 +185,17 @@ type CSharp =
                   Casing = casing })
                 |> CSType.GeneratedType
 
-        Json.parse input casing
-        |> baseType
-        |> Option.map (function
+        let cSharp =
+            Json.parse input casing
+            |> baseType
+            |> Option.defaultValue CSType.UnresolvedBaseType
+            |> function
             | GeneratedType x -> x.ClassDeclaration
             | ArrayType x -> x.FormatArray
-            | BaseType x -> x.FormatProperty)
-        |> Option.map (fun x -> x rootObject)
-        |> Option.map (fun csharp ->
-            settings.NameSpace
-            |> valueExists
-            |> Option.map (fun x -> sprintf "namespace %s { %s }" x csharp)
-            |> Option.defaultValue csharp)
-        |> Option.defaultValue String.Empty
+            | BaseType x -> x.FormatProperty
+            <| rootObject
+
+        settings.NameSpace
+        |> valueExists
+        |> Option.map (fun x -> StringUtils.joinStringsWithSpaceSeparation [ "namespace"; x; "{"; cSharp; "}" ])
+        |> Option.defaultValue cSharp
