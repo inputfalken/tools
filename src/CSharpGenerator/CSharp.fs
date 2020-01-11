@@ -184,21 +184,16 @@ type CSharp =
                   Casing = casing })
                 |> CSType.GeneratedType
 
-        let namespaceFormatter =
+        Json.parse input casing
+        |> baseType
+        |> Option.map (function
+            | GeneratedType x -> x.ClassDeclaration
+            | ArrayType x -> x.FormatArray
+            | BaseType x -> x.FormatProperty)
+        |> Option.map (fun x -> x rootObject)
+        |> Option.map (fun csharp ->
             settings.NameSpace
             |> valueExists
-            |> Option.map (fun x -> sprintf "namespace %s { %s }" x)
-
-        (input, casing)
-        ||> Json.parse
-        |> baseType
-        |> Option.map (fun csType ->
-            match csType with
-            | GeneratedType x -> x.ClassDeclaration rootObject
-            | ArrayType x -> x.FormatArray rootObject
-            | BaseType x -> x.FormatProperty rootObject
-            |> (fun csharp ->
-            namespaceFormatter
-            |> Option.map (fun formatter -> formatter csharp)
-            |> Option.defaultValue csharp))
+            |> Option.map (fun x -> sprintf "namespace %s { %s }" x csharp)
+            |> Option.defaultValue csharp)
         |> Option.defaultValue String.Empty
