@@ -6,8 +6,6 @@ open CSharpGenerator.Arguments
 open Common
 open Common.Casing
 open Common.StringValidator
-open JsonParser
-open System
 
 type CSharp =
     static member CreateFile input = CSharp.CreateFile(input, Settings())
@@ -36,14 +34,11 @@ type CSharp =
             |> Option.defaultValue defaultValues.Root
 
         let (classPrefix, classSuffix) =
-            (settings.ClassPrefix
-             |> valueExists
-             |> Option.map casing.apply
-             |> Option.defaultValue String.Empty,
-             settings.ClassSuffix
-             |> valueExists
-             |> Option.map casing.apply
-             |> Option.defaultValue defaultValues.Model)
+            match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
+            | Some prefix, Some suffix -> (casing.apply prefix, casing.apply suffix)
+            | Some prefix, Option.None -> (casing.apply prefix, System.String.Empty)
+            | Option.None, Option.Some suffix -> (System.String.Empty, casing.apply suffix)
+            | Option.None, Option.None -> (System.String.Empty, defaultValues.Model)
 
         let tryConvertToNullableValueType current =
             match current with

@@ -13,6 +13,30 @@ let arrayEntryAssertion expected actual =
 
 
 [<Fact>]
+let ``Allow prefix to be empty if suffix is set``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(ClassSuffix = "foo", ClassPrefix = System.String.Empty))
+
+    let expected = "public class RootFoo { public object[] FooBar { get; set; } }"
+    Assert.Equal(expected, result)
+    
+[<Fact>]
+let ``Allow suffix to be empty if prefix is set``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(ClassPrefix = "foo", ClassSuffix = System.String.Empty))
+
+    let expected = "public class FooRoot { public object[] FooBar { get; set; } }"
+    Assert.Equal(expected, result)
+    
+[<Fact>]
 let ``Camel case works for generated classes``() =
     let result =
         CSharp.CreateFile("""
