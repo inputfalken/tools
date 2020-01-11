@@ -6,6 +6,7 @@ open CSharpGenerator.Arguments
 open Common
 open Common.Casing
 open Common.StringValidator
+open JsonParser
 open System
 
 type CSharp =
@@ -112,8 +113,8 @@ type CSharp =
                 |> CSType.GeneratedType
             | previous, current -> createBaseType previous current
 
-        let rec baseType value =
-            match value with
+        let rec baseType =
+            function
             | DateTime _ ->
                 BaseType.DateTime
                 |> CSType.BaseType
