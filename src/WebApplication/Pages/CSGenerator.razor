@@ -1,7 +1,7 @@
 ﻿@page "/CSGenerator"
 @using System.ComponentModel.DataAnnotations
 
-<h1>Generate C# from Json</h1>
+<h1>Generate C# from JSON</h1>
 
 <EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
     <div class="alert @StatusClass">@StatusMessage</div>
@@ -57,8 +57,8 @@
         [Required]
         public string Casing { get; set; } = CasingOptions[0];
 
-        public string ClassPrefix { get; set; }
-        public string ClassSuffix { get; set; } = "Model";
+        public string ClassPrefix { get; set; } = "Model";
+        public string ClassSuffix { get; set; }
         public string NameSpace { get; set; }
         public string RootName { get; set; }
     }
