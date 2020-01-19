@@ -18,4 +18,8 @@
         <ProjectReference Include="..\JsonParser\JsonParser.fsproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Lemonad.ErrorHandling" Version="0.9.5" />
+    </ItemGroup>
+
 </Project>

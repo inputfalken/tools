@@ -1,5 +1,6 @@
 ﻿namespace CSharpGenerator
 
+open System
 open JsonParser
 open CSharpGenerator.Types
 open CSharpGenerator.Arguments
@@ -192,11 +193,11 @@ type CSharp =
                 | BaseType x -> x.FormatProperty
                 <| rootObject
 
-            let result = settings.NameSpace
-                         |> valueExists
-                         |> Option.map (fun x -> StringUtils.joinStringsWithSpaceSeparation [ "namespace"; x; "{"; cSharp; "}" ])
-                         |> Option.defaultValue cSharp
+            settings.NameSpace
+            |> valueExists
+            |> Option.map (fun x -> StringUtils.joinStringsWithSpaceSeparation [ "namespace"; x; "{"; cSharp; "}" ])
+            |> Option.defaultValue cSharp
+            |> Lemonad.ErrorHandling.Result.Value
             
-            CSharpResult(Value = result)
         with
-        | ex -> CSharpResult(Error=ex)
+        | ex -> ex |> Lemonad.ErrorHandling.Result.Error
