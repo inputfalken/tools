@@ -1,0 +1,31 @@
+﻿@page "/CSGenerator"
+@using System.ComponentModel.DataAnnotations
+
+<h1>C# Generator</h1>
+
+<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <InputTextArea cols="40" rows="10" id="json" @bind-Value="@exampleModel.Json"/>
+    <button type="submit">Submit</button>
+</EditForm>
+
+<p>
+    @cSharp
+</p>
+
+@code {
+
+    class ExampleModel {
+        [Required]
+        public string Json { get; set; }
+    }
+
+    private ExampleModel exampleModel = new ExampleModel();
+    private string cSharp;
+
+    private void HandleValidSubmit() {
+        cSharp = CSharp.CreateFile(exampleModel.Json);
+    }
+
+}

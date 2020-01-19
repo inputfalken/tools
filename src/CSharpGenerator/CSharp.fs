@@ -8,8 +8,8 @@ open Common.Casing
 open Common.StringValidator
 
 type CSharp =
-    static member CreateFile input = CSharp.CreateFile(input, Settings())
-    static member CreateFile(input, settings) =
+    static member public  CreateFile input = CSharp.CreateFile(input, Settings())
+    static member public CreateFile(input, settings) =
 
         let casing =
             settings.Casing
