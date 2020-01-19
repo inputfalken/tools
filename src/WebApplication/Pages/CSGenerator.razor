@@ -1,38 +1,94 @@
 ﻿@page "/CSGenerator"
 @using System.ComponentModel.DataAnnotations
 
-<h1>C# Generator</h1>
+<h1>Generate C# from Json</h1>
 
-<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
+<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+    <div class="alert @StatusClass">@StatusMessage</div>
     <DataAnnotationsValidator/>
     <ValidationSummary/>
-    <InputTextArea cols="40" rows="10" id="json" @bind-Value="@exampleModel.Json"/>
-    <button type="submit">Submit</button>
+
+    <div class="form-group">
+        <label for="json">JSON: </label>
+        <InputTextArea class="form-control form-control-lg" id="json" @bind-Value="@exampleModel.Json"/>
+    </div>
+    <div class="form-group">
+        <label for="casingSelector">Casing Rule</label>
+        <InputSelect class="form-control form-control-lg" id="casingSelector" @bind-Value="@exampleModel.Casing">
+            @foreach (var casingOption in CasingOptions) {
+                <option>@casingOption</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="form-group">
+        <label for="classPrefix">Prefix: </label>
+        <InputText type="text" class="form-control form-control-lg " id="classPrefix" placeholder="_" @bind-Value="@exampleModel.ClassPrefix"></InputText>
+    </div>
+    <div class="form-group">
+        <label for="classSuffix">Suffix: </label>
+        <InputText type="text" class="form-control form-control-lg " placeHolder="_" id="classSuffix" @bind-Value="@exampleModel.ClassSuffix"></InputText>
+    </div>
+    <div class="form-group">
+        <label for="namespace">Namespace: </label>
+        <InputText type="text" class="form-control form-control-lg " id="namespace" placeholder="Application" @bind-Value="@exampleModel.NameSpace"></InputText>
+    </div>
+    <div class="form-group">
+        <label for="rootName">Root name: </label>
+        <InputText type="text" class="form-control form-control-lg " id="rootName" placeholder="Root" @bind-Value="@exampleModel.RootName"></InputText>
+    </div>
+    <button class="btn btn-primary" type="submit">Submit</button>
 </EditForm>
 
-<p>
-    @cSharp
-</p>
-<p style="color: red">
-    @error
-</p>
-
+<pre>
+    <code>
+        @cSharp
+    </code>
+</pre>
 
 @code {
+    private string StatusClass { get; set; } = string.Empty;
+    private string StatusMessage { get; set; } = string.Empty;
+    private static IReadOnlyList<string> CasingOptions { get; } = new List<string> {"Pascal", "Camel", "None"};
 
     class ExampleModel {
         [Required]
-        public string Json { get; set; }
+        public string Json { get; set; } = @"{""foo"":""bar""}";
+
+        [Required]
+        public string Casing { get; set; } = CasingOptions[0];
+
+        public string ClassPrefix { get; set; }
+        public string ClassSuffix { get; set; } = "Model";
+        public string NameSpace { get; set; }
+        public string RootName { get; set; }
     }
 
     private ExampleModel exampleModel = new ExampleModel();
+
     private string cSharp;
-    private string error;
 
     private void HandleValidSubmit() {
         cSharp = null;
-        error = null;
-        CSharp.CreateFile(exampleModel.Json).Match(x => cSharp = x, x => error = x.Message);
+        StatusClass = string.Empty;
+        StatusMessage = string.Empty;
+        CSharp.CreateFile(
+            exampleModel.Json,
+            new Settings {
+                Casing = exampleModel.Casing,
+                ClassPrefix = exampleModel.ClassPrefix,
+                ClassSuffix = exampleModel.ClassSuffix,
+                NameSpace = exampleModel.NameSpace,
+                RootObjectName = exampleModel.RootName
+            }
+            ).Match(x => cSharp = x, x => {
+                StatusMessage = x.Message;
+                HandleInvalidSubmit();
+            });
+    }
+
+    private void HandleInvalidSubmit() {
+        cSharp = null;
+        StatusClass = "alert-danger";
     }
 
 }

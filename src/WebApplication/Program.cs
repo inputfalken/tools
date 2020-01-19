@@ -12,5 +12,6 @@ namespace WebApplication
         public static IWebAssemblyHostBuilder CreateHostBuilder(string[] args) =>
             BlazorWebAssemblyHost.CreateDefaultBuilder()
                 .UseBlazorStartup<Startup>();
+        
     }
 }
