@@ -13,6 +13,10 @@
 <p>
     @cSharp
 </p>
+<p style="color: red">
+    @error
+</p>
+
 
 @code {
 
@@ -23,9 +27,12 @@
 
     private ExampleModel exampleModel = new ExampleModel();
     private string cSharp;
+    private string error;
 
     private void HandleValidSubmit() {
-        cSharp = CSharp.CreateFile(exampleModel.Json).Match(x => x, x => x.Message);
+        cSharp = null;
+        error = null;
+        CSharp.CreateFile(exampleModel.Json).Match(x => cSharp = x, x => error = x.Message);
     }
 
 }
