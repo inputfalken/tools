@@ -11,18 +11,19 @@ let objectEntryAssertion expected actual =
 let arrayEntryAssertion expected actual =
     Assert.Equal(expected, actual)
 
+
 [<Fact>]
 let ``Passing valid JSON sets a value in Value``() =
     let result = CSharp.CreateFile(""" { } """)
-    Assert.NotNull (result.Either.Value)
+    Assert.NotNull(result.Either.Value)
     Assert.Null(result.Either.Error)
-    
+
 [<Fact>]
 let ``Passing invalid JSON sets a value in Value``() =
     let result = CSharp.CreateFile("""abc""")
-    Assert.Null (result.Either.Value)
+    Assert.Null(result.Either.Value)
     Assert.NotNull(result.Either.Error)
-    
+
 [<Fact>]
 let ``Allow prefix to be empty if suffix is set``() =
     let result =
@@ -34,7 +35,7 @@ let ``Allow prefix to be empty if suffix is set``() =
 
     let expected = "public class RootFoo { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
-    
+
 [<Fact>]
 let ``Allow suffix to be empty if prefix is set``() =
     let result =
@@ -46,7 +47,7 @@ let ``Allow suffix to be empty if prefix is set``() =
 
     let expected = "public class FooRoot { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
-    
+
 [<Fact>]
 let ``Uses default suffix if prefix and sufifx is set to empty string``() =
     let result =
@@ -58,7 +59,7 @@ let ``Uses default suffix if prefix and sufifx is set to empty string``() =
 
     let expected = "public class RootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
-    
+
 [<Fact>]
 let ``Uses default suffix if prefix and sufifx is set to null``() =
     let result =
@@ -70,7 +71,43 @@ let ``Uses default suffix if prefix and sufifx is set to null``() =
 
     let expected = "public class RootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
+
+[<Fact>]
+let ``Camel case works for generated classes with explicit root argument``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Camel", RootObjectName = "root"))
+
+    let expected = "public class rootModel { public object[] fooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
     
+[<Fact>]
+let ``Camel case works for generated classes with explicit  suffix, root arguments``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Camel", ClassSuffix = "model", RootObjectName = "root"))
+
+    let expected = "public class rootModel { public object[] fooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+    
+[<Fact>]
+let ``Camel case works for generated classes with explicit prefix, suffix, root arguments``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Camel", ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
+
+    let expected = "public class xRootModel { public object[] fooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+
 [<Fact>]
 let ``Camel case works for generated classes``() =
     let result =
@@ -91,10 +128,10 @@ let ``No case rules works``() =
         "foobar" : []
     }
     """, Settings(Casing = "None"))
-        
+
     let expected = "public class rootmodel { public object[] foobar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
-    
+
 
 [<Fact>]
 let ``Two array Objects next to each other``() =
@@ -391,7 +428,7 @@ let ``Array with missmatched properties``() =
     let expected =
         "public class RootModel { public string Foo { get; set; } public decimal? John { get; set; } public object Bar { get; set; } public decimal? Doe { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result.Either.Value
-    
+
 [<Fact>]
 let ``Array with without values first``() =
     let result =
@@ -417,6 +454,7 @@ let ``Array with without values first``() =
     let expected =
         "public class RootModel { public string Foo { get; set; } public string John { get; set; } public decimal? Bar { get; set; } public decimal? Doe { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result.Either.Value
+
 [<Fact>]
 let ``Array with objects with two structures``() =
     let result =
