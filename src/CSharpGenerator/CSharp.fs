@@ -181,17 +181,22 @@ type CSharp =
                   Casing = casing })
                 |> CSType.GeneratedType
 
-        let cSharp =
-            Json.parse input casing
-            |> baseType
-            |> Option.defaultValue CSType.UnresolvedBaseType
-            |> function
-            | GeneratedType x -> x.ClassDeclaration
-            | ArrayType x -> x.FormatArray
-            | BaseType x -> x.FormatProperty
-            <| rootObject
+        try
+            let cSharp =
+                Json.parse input casing
+                |> baseType
+                |> Option.defaultValue CSType.UnresolvedBaseType
+                |> function
+                | GeneratedType x -> x.ClassDeclaration
+                | ArrayType x -> x.FormatArray
+                | BaseType x -> x.FormatProperty
+                <| rootObject
 
-        settings.NameSpace
-        |> valueExists
-        |> Option.map (fun x -> StringUtils.joinStringsWithSpaceSeparation [ "namespace"; x; "{"; cSharp; "}" ])
-        |> Option.defaultValue cSharp
+            let result = settings.NameSpace
+                         |> valueExists
+                         |> Option.map (fun x -> StringUtils.joinStringsWithSpaceSeparation [ "namespace"; x; "{"; cSharp; "}" ])
+                         |> Option.defaultValue cSharp
+            
+            CSharpResult(Value = result)
+        with
+        | ex -> CSharpResult(Error=ex)

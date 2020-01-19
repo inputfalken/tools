@@ -3,6 +3,8 @@
     <PropertyGroup>
         <RootNamespace>TemplateFactory</RootNamespace>
         <TargetFramework>netstandard2.1</TargetFramework>
+        <Nullable>enable</Nullable>
+
     </PropertyGroup>
 
     <ItemGroup>

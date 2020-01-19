@@ -25,7 +25,8 @@
     private string cSharp;
 
     private void HandleValidSubmit() {
-        cSharp = CSharp.CreateFile(exampleModel.Json);
+        var res = CSharp.CreateFile(exampleModel.Json);
+        cSharp = res?.Error.Message ?? res?.Value ?? "🤔";
     }
 
 }
