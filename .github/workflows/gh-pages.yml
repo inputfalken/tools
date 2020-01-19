@@ -1,11 +1,7 @@
 name: Deploy WASM App to GitHub Pages
 
-on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'src/*'
+on: [push]
+
 jobs:
   build:
     name: Update GIT branch gh-pages
