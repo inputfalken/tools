@@ -11,18 +11,19 @@ let objectEntryAssertion expected actual =
 let arrayEntryAssertion expected actual =
     Assert.Equal(expected, actual)
 
+
 [<Fact>]
 let ``Passing valid JSON sets a value in Value``() =
     let result = CSharp.CreateFile(""" { } """)
-    Assert.NotNull (result.Either.Value)
+    Assert.NotNull(result.Either.Value)
     Assert.Null(result.Either.Error)
-    
+
 [<Fact>]
 let ``Passing invalid JSON sets a value in Value``() =
     let result = CSharp.CreateFile("""abc""")
-    Assert.Null (result.Either.Value)
+    Assert.Null(result.Either.Value)
     Assert.NotNull(result.Either.Error)
-    
+
 [<Fact>]
 let ``Allow prefix to be empty if suffix is set``() =
     let result =
@@ -34,7 +35,7 @@ let ``Allow prefix to be empty if suffix is set``() =
 
     let expected = "public class RootFoo { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
-    
+
 [<Fact>]
 let ``Allow suffix to be empty if prefix is set``() =
     let result =
@@ -46,7 +47,7 @@ let ``Allow suffix to be empty if prefix is set``() =
 
     let expected = "public class FooRoot { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
-    
+
 [<Fact>]
 let ``Uses default suffix if prefix and sufifx is set to empty string``() =
     let result =
@@ -58,7 +59,7 @@ let ``Uses default suffix if prefix and sufifx is set to empty string``() =
 
     let expected = "public class RootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
-    
+
 [<Fact>]
 let ``Uses default suffix if prefix and sufifx is set to null``() =
     let result =
@@ -72,6 +73,145 @@ let ``Uses default suffix if prefix and sufifx is set to null``() =
     Assert.Equal(expected, result.Either.Value)
     
 [<Fact>]
+let ``None case does not try to change casing at all``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FOOBAR" : []
+    }
+    """, Settings(Casing = "None", ClassSuffix = "MODEL"))
+
+    let expected = "public class rootMODEL { public object[] FOOBAR { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+[<Fact>]
+let ``None case works for generated classes with explicit root argument``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "foobar" : []
+    }
+    """, Settings(Casing = "None", ClassSuffix = "model"))
+
+    let expected = "public class rootmodel { public object[] foobar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+[<Fact>]
+let ``None case works for generated classes with explicit  suffix, root arguments``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "foobar" : []
+    }
+    """, Settings(Casing = "None", ClassSuffix = "model", RootObjectName = "root"))
+
+    let expected = "public class rootmodel { public object[] foobar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+    
+[<Fact>]
+let ``None case works for generated classes with explicit prefix, suffix, root arguments``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "foobar" : []
+    }
+    """, Settings(Casing = "None", ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
+
+    let expected = "public class xrootmodel { public object[] foobar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+
+[<Fact>]
+let ``None case works for generated classes``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "foobar" : []
+    }
+    """, Settings(Casing = "None"))
+
+    let expected = "public class rootmodel { public object[] foobar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+[<Fact>]
+let ``Pascal case works for generated classes with explicit root argument``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Pascal", ClassSuffix = "model"))
+
+    let expected = "public class RootModel { public object[] FooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+[<Fact>]
+let ``Pascal case works for generated classes with explicit  suffix, root arguments``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Pascal", ClassSuffix = "model", RootObjectName = "root"))
+
+    let expected = "public class RootModel { public object[] FooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+    
+[<Fact>]
+let ``Pascal case works for generated classes with explicit prefix, suffix, root arguments``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Pascal", ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
+
+    let expected = "public class XRootModel { public object[] FooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+
+[<Fact>]
+let ``Pascal case works for generated classes``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Pascal"))
+
+    let expected = "public class RootModel { public object[] FooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+    
+[<Fact>]
+let ``Camel case works for generated classes with explicit root argument``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Camel", ClassSuffix = "model"))
+
+    let expected = "public class rootModel { public object[] fooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+[<Fact>]
+let ``Camel case works for generated classes with explicit  suffix, root arguments``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Camel", ClassSuffix = "model", RootObjectName = "root"))
+
+    let expected = "public class rootModel { public object[] fooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+    
+[<Fact>]
+let ``Camel case works for generated classes with explicit prefix, suffix, root arguments``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Camel", ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
+
+    let expected = "public class xRootModel { public object[] fooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+
+[<Fact>]
 let ``Camel case works for generated classes``() =
     let result =
         CSharp.CreateFile("""
@@ -83,18 +223,6 @@ let ``Camel case works for generated classes``() =
     let expected = "public class rootModel { public object[] fooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
 
-[<Fact>]
-let ``No case rules works``() =
-    let result =
-        CSharp.CreateFile("""
-    {
-        "foobar" : []
-    }
-    """, Settings(Casing = "None"))
-        
-    let expected = "public class rootmodel { public object[] foobar { get; set; } }"
-    Assert.Equal(expected, result.Either.Value)
-    
 
 [<Fact>]
 let ``Two array Objects next to each other``() =
@@ -126,6 +254,24 @@ let ``Two array Objects next to each other``() =
     arrayEntryAssertion expected result.Either.Value
 
 [<Fact>]
+let ``Camel case Object``() =
+    let result = CSharp.CreateFile("""{"foo": 2}""", Settings(Casing="Camel"))
+    let expected = "public decimal foo { get; set; }" |> sprintf "public class rootModel { %s }"
+    Assert.Equal(expected, result.Either.Value)
+    
+[<Fact>]
+let ``Pascal case Object``() =
+    let result = CSharp.CreateFile("""{"foo": 2}""", Settings(Casing="Pascal"))
+    let expected = "public decimal Foo { get; set; }"
+    objectEntryAssertion expected result.Either.Value
+    
+[<Fact>]
+let ``None case Object``() =
+    let result = CSharp.CreateFile("""{"FoO": 2}""", Settings(Casing="None"))
+    let expected = "public decimal FoO { get; set; }" |> sprintf "public class rootmodel { %s }"
+    Assert.Equal(expected, result.Either.Value)
+    
+[<Fact>]
 let Object() =
     let result = CSharp.CreateFile("""{"Foo": 2}""")
     let expected = "public decimal Foo { get; set; }"
@@ -134,12 +280,7 @@ let Object() =
 [<Fact>]
 let ``Object with Empty Array``() =
     let result =
-        CSharp.CreateFile """
-    {
-        "Foo" : []
-    }
-    """
-
+        CSharp.CreateFile """ { "Foo" : [] } """ 
     let expected = "public object[] Foo { get; set; }"
     objectEntryAssertion expected result.Either.Value
 
@@ -391,7 +532,7 @@ let ``Array with missmatched properties``() =
     let expected =
         "public class RootModel { public string Foo { get; set; } public decimal? John { get; set; } public object Bar { get; set; } public decimal? Doe { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result.Either.Value
-    
+
 [<Fact>]
 let ``Array with without values first``() =
     let result =
@@ -417,6 +558,7 @@ let ``Array with without values first``() =
     let expected =
         "public class RootModel { public string Foo { get; set; } public string John { get; set; } public decimal? Bar { get; set; } public decimal? Doe { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result.Either.Value
+
 [<Fact>]
 let ``Array with objects with two structures``() =
     let result =
