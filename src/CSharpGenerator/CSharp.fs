@@ -18,16 +18,8 @@ type CSharp =
             |> Option.defaultValue Casing.Pascal
 
         let defaultValues =
-            match casing with
-            | Pascal ->
-                {| Root = "Root"
-                   Model = "Model" |}
-            | Camel ->
-                {| Root = "root"
-                   Model = "Model" |}
-            | None ->
-                {| Root = "root"
-                   Model = "model" |}
+            {| Root = "root"
+               Model = "model" |}
 
         let rootObject =
             settings.RootObjectName
@@ -40,12 +32,15 @@ type CSharp =
                 match casing with
                 | Camel -> (prefix, Pascal.apply suffix, Pascal.apply rootObject)
                 | x -> (x.apply prefix, x.apply suffix, x.apply rootObject)
-            | Some prefix, Option.None -> (casing.apply prefix, System.String.Empty, rootObject)
+            | Some prefix, Option.None -> (casing.apply prefix, System.String.Empty, casing.apply rootObject)
             | Option.None, Option.Some suffix ->
                 match casing with
-                | None -> (System.String.Empty, suffix, rootObject)
-                | _ -> (System.String.Empty, Pascal.apply suffix, Camel.apply rootObject)
-            | Option.None, Option.None -> (System.String.Empty, defaultValues.Model, rootObject)
+                | None -> (System.String.Empty, suffix, casing.apply rootObject)
+                | _ -> (System.String.Empty, Pascal.apply suffix, casing.apply rootObject)
+            | Option.None, Option.None ->
+                match casing with
+                | None -> (System.String.Empty, defaultValues.Model, casing.apply rootObject)
+                | _ -> (System.String.Empty, Pascal.apply defaultValues.Model, casing.apply rootObject)
 
         let tryConvertToNullableValueType current =
             match current with
