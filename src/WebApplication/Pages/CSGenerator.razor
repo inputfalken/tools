@@ -26,7 +26,7 @@
     </div>
     <div class="form-group">
         <label for="classSuffix">Suffix: </label>
-        <InputText type="text" class="form-control form-control-lg " placeHolder="_" id="classSuffix" @bind-Value="@exampleModel.ClassSuffix"></InputText>
+        <InputText type="text" class="form-control form-control-lg " id="classSuffix" @bind-Value="@exampleModel.ClassSuffix"></InputText>
     </div>
     <div class="form-group">
         <label for="namespace">Namespace: </label>
@@ -34,7 +34,7 @@
     </div>
     <div class="form-group">
         <label for="rootName">Root name: </label>
-        <InputText type="text" class="form-control form-control-lg " id="rootName" placeholder="Root" @bind-Value="@exampleModel.RootName"></InputText>
+        <InputText type="text" class="form-control form-control-lg " id="rootName" @bind-Value="@exampleModel.RootName"></InputText>
     </div>
     <button class="btn btn-primary" type="submit">Submit</button>
 </EditForm>
@@ -57,10 +57,10 @@
         [Required]
         public string Casing { get; set; } = CasingOptions[0];
 
-        public string ClassPrefix { get; set; } = "Model";
-        public string ClassSuffix { get; set; }
+        public string ClassPrefix { get; set; } 
+        public string ClassSuffix { get; set; }= "Model";
         public string NameSpace { get; set; }
-        public string RootName { get; set; }
+        public string RootName { get; set; } = "Root";
     }
 
     private ExampleModel exampleModel = new ExampleModel();
