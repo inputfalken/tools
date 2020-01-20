@@ -48,7 +48,7 @@
 @code {
     private string StatusClass { get; set; } = string.Empty;
     private string StatusMessage { get; set; } = string.Empty;
-    private static IReadOnlyList<string> CasingOptions { get; } = new List<string> {"Pascal", "Camel", "None"};
+    private static IReadOnlyList<string> CasingOptions { get; } = Settings.Cases;
 
     class ExampleModel {
         [Required]

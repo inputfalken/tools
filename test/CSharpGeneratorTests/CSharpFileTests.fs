@@ -79,7 +79,7 @@ let ``None case does not try to change casing at all``() =
     {
         "FOOBAR" : []
     }
-    """, Settings(Casing = "None", ClassSuffix = "MODEL"))
+    """, Settings(Casing = Settings.None, ClassSuffix = "MODEL"))
 
     let expected = "public class rootMODEL { public object[] FOOBAR { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -90,7 +90,7 @@ let ``None case works for generated classes with explicit root argument``() =
     {
         "foobar" : []
     }
-    """, Settings(Casing = "None", ClassSuffix = "model"))
+    """, Settings(Casing = Settings.None, ClassSuffix = "model"))
 
     let expected = "public class rootmodel { public object[] foobar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -101,7 +101,7 @@ let ``None case works for generated classes with explicit  suffix, root argument
     {
         "foobar" : []
     }
-    """, Settings(Casing = "None", ClassSuffix = "model", RootObjectName = "root"))
+    """, Settings(Casing = Settings.None, ClassSuffix = "model", RootObjectName = "root"))
 
     let expected = "public class rootmodel { public object[] foobar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -113,7 +113,7 @@ let ``None case works for generated classes with explicit prefix, suffix, root a
     {
         "foobar" : []
     }
-    """, Settings(Casing = "None", ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
+    """, Settings(Casing = Settings.None, ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
 
     let expected = "public class xrootmodel { public object[] foobar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -125,7 +125,7 @@ let ``None case works for generated classes``() =
     {
         "foobar" : []
     }
-    """, Settings(Casing = "None"))
+    """, Settings(Casing = Settings.None))
 
     let expected = "public class rootmodel { public object[] foobar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -136,7 +136,7 @@ let ``Pascal case works for generated classes with explicit root argument``() =
     {
         "FooBar" : []
     }
-    """, Settings(Casing = "Pascal", ClassSuffix = "model"))
+    """, Settings(Casing = Settings.Pascal, ClassSuffix = "model"))
 
     let expected = "public class RootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -147,7 +147,7 @@ let ``Pascal case works for generated classes with explicit  suffix, root argume
     {
         "FooBar" : []
     }
-    """, Settings(Casing = "Pascal", ClassSuffix = "model", RootObjectName = "root"))
+    """, Settings(Casing = Settings.Pascal, ClassSuffix = "model", RootObjectName = "root"))
 
     let expected = "public class RootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -159,7 +159,7 @@ let ``Pascal case works for generated classes with explicit prefix, suffix, root
     {
         "FooBar" : []
     }
-    """, Settings(Casing = "Pascal", ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
+    """, Settings(Casing = Settings.Pascal, ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
 
     let expected = "public class XRootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -171,7 +171,7 @@ let ``Pascal case works for generated classes``() =
     {
         "FooBar" : []
     }
-    """, Settings(Casing = "Pascal"))
+    """, Settings(Casing = Settings.Pascal))
 
     let expected = "public class RootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -183,7 +183,7 @@ let ``Camel case works for generated classes with explicit root argument``() =
     {
         "FooBar" : []
     }
-    """, Settings(Casing = "Camel", ClassSuffix = "model"))
+    """, Settings(Casing = Settings.Camel, ClassSuffix = "model"))
 
     let expected = "public class rootModel { public object[] fooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -194,7 +194,7 @@ let ``Camel case works for generated classes with explicit  suffix, root argumen
     {
         "FooBar" : []
     }
-    """, Settings(Casing = "Camel", ClassSuffix = "model", RootObjectName = "root"))
+    """, Settings(Casing = Settings.Camel, ClassSuffix = "model", RootObjectName = "root"))
 
     let expected = "public class rootModel { public object[] fooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -206,7 +206,7 @@ let ``Camel case works for generated classes with explicit prefix, suffix, root 
     {
         "FooBar" : []
     }
-    """, Settings(Casing = "Camel", ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
+    """, Settings(Casing = Settings.Camel, ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
 
     let expected = "public class xRootModel { public object[] fooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -218,7 +218,7 @@ let ``Camel case works for generated classes``() =
     {
         "FooBar" : []
     }
-    """, Settings(Casing = "Camel"))
+    """, Settings(Casing = Settings.Camel))
 
     let expected = "public class rootModel { public object[] fooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
