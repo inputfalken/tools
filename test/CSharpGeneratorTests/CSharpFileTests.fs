@@ -71,7 +71,111 @@ let ``Uses default suffix if prefix and sufifx is set to null``() =
 
     let expected = "public class RootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
+    
+[<Fact>]
+let ``None case does not try to change casing at all``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FOOBAR" : []
+    }
+    """, Settings(Casing = "None", ClassSuffix = "MODEL"))
 
+    let expected = "public class rootMODEL { public object[] FOOBAR { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+[<Fact>]
+let ``None case works for generated classes with explicit root argument``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "foobar" : []
+    }
+    """, Settings(Casing = "None", ClassSuffix = "model"))
+
+    let expected = "public class rootmodel { public object[] foobar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+[<Fact>]
+let ``None case works for generated classes with explicit  suffix, root arguments``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "foobar" : []
+    }
+    """, Settings(Casing = "None", ClassSuffix = "model", RootObjectName = "root"))
+
+    let expected = "public class rootmodel { public object[] foobar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+    
+[<Fact>]
+let ``None case works for generated classes with explicit prefix, suffix, root arguments``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "foobar" : []
+    }
+    """, Settings(Casing = "None", ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
+
+    let expected = "public class xrootmodel { public object[] foobar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+
+[<Fact>]
+let ``None case works for generated classes``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "foobar" : []
+    }
+    """, Settings(Casing = "None"))
+
+    let expected = "public class rootmodel { public object[] foobar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+[<Fact>]
+let ``Pascal case works for generated classes with explicit root argument``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Pascal", ClassSuffix = "model"))
+
+    let expected = "public class RootModel { public object[] FooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+[<Fact>]
+let ``Pascal case works for generated classes with explicit  suffix, root arguments``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Pascal", ClassSuffix = "model", RootObjectName = "root"))
+
+    let expected = "public class RootModel { public object[] FooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+    
+[<Fact>]
+let ``Pascal case works for generated classes with explicit prefix, suffix, root arguments``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Pascal", ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
+
+    let expected = "public class XRootModel { public object[] FooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+
+[<Fact>]
+let ``Pascal case works for generated classes``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "FooBar" : []
+    }
+    """, Settings(Casing = "Pascal"))
+
+    let expected = "public class RootModel { public object[] FooBar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+    
 [<Fact>]
 let ``Camel case works for generated classes with explicit root argument``() =
     let result =
@@ -79,11 +183,10 @@ let ``Camel case works for generated classes with explicit root argument``() =
     {
         "FooBar" : []
     }
-    """, Settings(Casing = "Camel", RootObjectName = "root"))
+    """, Settings(Casing = "Camel", ClassSuffix = "model"))
 
     let expected = "public class rootModel { public object[] fooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
-    
 [<Fact>]
 let ``Camel case works for generated classes with explicit  suffix, root arguments``() =
     let result =
@@ -118,18 +221,6 @@ let ``Camel case works for generated classes``() =
     """, Settings(Casing = "Camel"))
 
     let expected = "public class rootModel { public object[] fooBar { get; set; } }"
-    Assert.Equal(expected, result.Either.Value)
-
-[<Fact>]
-let ``No case rules works``() =
-    let result =
-        CSharp.CreateFile("""
-    {
-        "foobar" : []
-    }
-    """, Settings(Casing = "None"))
-
-    let expected = "public class rootmodel { public object[] foobar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
 
 

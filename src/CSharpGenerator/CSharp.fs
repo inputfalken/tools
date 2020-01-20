@@ -9,7 +9,7 @@ open Common.Casing
 open Common.StringValidator
 
 type CSharp =
-    static member public  CreateFile input = CSharp.CreateFile(input, Settings())
+    static member public CreateFile input = CSharp.CreateFile(input, Settings())
     static member public CreateFile(input, settings) =
 
         let casing =
@@ -34,12 +34,18 @@ type CSharp =
             |> valueExists
             |> Option.defaultValue defaultValues.Root
 
-        let (classPrefix, classSuffix) =
+        let (classPrefix, classSuffix, rootObject) =
             match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
-            | Some prefix, Some suffix -> (casing.apply prefix, casing.apply suffix)
-            | Some prefix, Option.None -> (casing.apply prefix, System.String.Empty)
-            | Option.None, Option.Some suffix -> (System.String.Empty, casing.apply suffix)
-            | Option.None, Option.None -> (System.String.Empty, defaultValues.Model)
+            | Some prefix, Some suffix ->
+                match casing with
+                | Camel -> (prefix, Pascal.apply suffix, Pascal.apply rootObject)
+                | x -> (x.apply prefix, x.apply suffix, x.apply rootObject)
+            | Some prefix, Option.None -> (casing.apply prefix, System.String.Empty, rootObject)
+            | Option.None, Option.Some suffix ->
+                match casing with
+                | None -> (System.String.Empty, suffix, rootObject)
+                | _ -> (System.String.Empty, Pascal.apply suffix, Camel.apply rootObject)
+            | Option.None, Option.None -> (System.String.Empty, defaultValues.Model, rootObject)
 
         let tryConvertToNullableValueType current =
             match current with
@@ -198,6 +204,5 @@ type CSharp =
             |> Option.map (fun x -> StringUtils.joinStringsWithSpaceSeparation [ "namespace"; x; "{"; cSharp; "}" ])
             |> Option.defaultValue cSharp
             |> Lemonad.ErrorHandling.Result.Value
-            
-        with
-        | ex -> ex |> Lemonad.ErrorHandling.Result.Error
+
+        with ex -> ex |> Lemonad.ErrorHandling.Result.Error
