@@ -49,6 +49,18 @@ let ``Allow suffix to be empty if prefix is set``() =
     Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
+let ``Handle reserved words``() =
+    let result =
+        CSharp.CreateFile("""
+    {
+        "object" : []
+    }
+    """, Settings(ClassPrefix = "foo", ClassSuffix = System.String.Empty))
+
+    let expected = "public class FooRoot { public object[] Object { get; set; } }"
+    Assert.NotEqual<string>(expected, result.Either.Value)
+    
+[<Fact>]
 let ``Uses default suffix if prefix and sufifx is set to empty string``() =
     let result =
         CSharp.CreateFile("""
