@@ -55,10 +55,10 @@ let ``Handle reserved words``() =
     {
         "object" : []
     }
-    """, Settings(ClassPrefix = "foo", ClassSuffix = System.String.Empty))
+    """, Settings(ClassPrefix = "foo", ClassSuffix = System.String.Empty, Casing = Settings.None))
 
-    let expected = "public class FooRoot { public object[] Object { get; set; } }"
-    Assert.NotEqual<string>(expected, result.Either.Value)
+    let expected = "public class fooroot { public object[] @object { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
     
 [<Fact>]
 let ``Uses default suffix if prefix and sufifx is set to empty string``() =
