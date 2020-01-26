@@ -86,15 +86,25 @@ module private Formatters =
            "volatile"
            "while" |] |> Set
 
-    let resolveName name =
-        if keywords.Contains name then ["@"; name]
-        else [name]
+    let resolveName (name: string) =
+        if (name.ToLowerInvariant >> keywords.Contains)() then [ "@"; name ]
+        else [ name ]
         |> joinStrings
+
     let ``class`` name content =
-        [ "public class"; resolveName name; "{"; content; "}" ] |> joinStringsWithSpaceSeparation
+        [ "public class"
+          resolveName name
+          "{"
+          content
+          "}" ]
+        |> joinStringsWithSpaceSeparation
 
     let property ``type`` name =
-        [ "public"; ``type``; resolveName name; "{ get; set; }" ] |> joinStringsWithSpaceSeparation
+        [ "public"
+          ``type``
+          resolveName name
+          "{ get; set; }" ]
+        |> joinStringsWithSpaceSeparation
 
     let arrayProperty ``type`` name =
         property ([ ``type``; "[]" ] |> joinStrings) name
@@ -104,7 +114,7 @@ type internal TypeInfo =
       Namespace: string
       Alias: string option
       Nullable: bool }
-    override this.ToString() = this.Alias |> Option.defaultValue ([ this.Namespace; "."; this.Name ] |> joinStrings)
+    member this.ToString() = this.Alias |> Option.defaultValue ([ this.Namespace; "."; this.Name ] |> joinStrings)
     member this.AsNullable =
         if this.Nullable then
             this

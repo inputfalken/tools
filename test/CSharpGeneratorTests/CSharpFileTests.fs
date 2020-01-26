@@ -55,9 +55,9 @@ let ``Handle reserved words``() =
     {
         "object" : []
     }
-    """, Settings(ClassPrefix = "foo", ClassSuffix = System.String.Empty, Casing = Settings.None))
+    """, Settings(ClassPrefix = "foo", ClassSuffix = System.String.Empty))
 
-    let expected = "public class fooroot { public object[] @object { get; set; } }"
+    let expected = "public class FooRoot { public object[] @Object { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
     
 [<Fact>]
