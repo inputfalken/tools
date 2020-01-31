@@ -87,7 +87,7 @@ module private Formatters =
            "while" |] |> Set
 
     let resolveName (name: string) =
-        if (name.ToLowerInvariant >> keywords.Contains)() then [ "@"; name ]
+        if keywords.Contains name then [ "@"; name ]
         else [ name ]
         |> joinStrings
 
