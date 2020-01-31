@@ -2,6 +2,7 @@ module Tests
 
 open CSharpGenerator
 open CSharpGenerator.Arguments
+open Common.Casing
 open Xunit
 
 let objectEntryAssertion expected actual =
@@ -67,7 +68,7 @@ let ``Handle reserved words prefixing property name if casing is matched``() =
     {
         "object" : []
     }
-    """, Settings(ClassPrefix = "foo", ClassSuffix = System.String.Empty, Casing = Settings.None))
+    """, Settings(ClassPrefix = "foo", ClassSuffix = System.String.Empty, Casing = Casing.NoneCase))
 
     let expected = "public class fooroot { public object[] @object { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -103,7 +104,7 @@ let ``None case does not try to change casing at all``() =
     {
         "FOOBAR" : []
     }
-    """, Settings(Casing = Settings.None, ClassSuffix = "MODEL"))
+    """, Settings(Casing = Casing.NoneCase, ClassSuffix = "MODEL"))
 
     let expected = "public class rootMODEL { public object[] FOOBAR { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -114,7 +115,7 @@ let ``None case works for generated classes with explicit root argument``() =
     {
         "foobar" : []
     }
-    """, Settings(Casing = Settings.None, ClassSuffix = "model"))
+    """, Settings(Casing = Casing.NoneCase, ClassSuffix = "model"))
 
     let expected = "public class rootmodel { public object[] foobar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -125,7 +126,7 @@ let ``None case works for generated classes with explicit  suffix, root argument
     {
         "foobar" : []
     }
-    """, Settings(Casing = Settings.None, ClassSuffix = "model", RootObjectName = "root"))
+    """, Settings(Casing = Casing.NoneCase, ClassSuffix = "model", RootObjectName = "root"))
 
     let expected = "public class rootmodel { public object[] foobar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -137,7 +138,7 @@ let ``None case works for generated classes with explicit prefix, suffix, root a
     {
         "foobar" : []
     }
-    """, Settings(Casing = Settings.None, ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
+    """, Settings(Casing = Casing.NoneCase, ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
 
     let expected = "public class xrootmodel { public object[] foobar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -149,7 +150,7 @@ let ``None case works for generated classes``() =
     {
         "foobar" : []
     }
-    """, Settings(Casing = Settings.None))
+    """, Settings(Casing = Casing.NoneCase))
 
     let expected = "public class rootmodel { public object[] foobar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -160,7 +161,7 @@ let ``Pascal case works for generated classes with explicit root argument``() =
     {
         "FooBar" : []
     }
-    """, Settings(Casing = Settings.Pascal, ClassSuffix = "model"))
+    """, Settings(Casing = Casing.PascalCase, ClassSuffix = "model"))
 
     let expected = "public class RootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -171,7 +172,7 @@ let ``Pascal case works for generated classes with explicit  suffix, root argume
     {
         "FooBar" : []
     }
-    """, Settings(Casing = Settings.Pascal, ClassSuffix = "model", RootObjectName = "root"))
+    """, Settings(Casing = Casing.PascalCase, ClassSuffix = "model", RootObjectName = "root"))
 
     let expected = "public class RootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -183,7 +184,7 @@ let ``Pascal case works for generated classes with explicit prefix, suffix, root
     {
         "FooBar" : []
     }
-    """, Settings(Casing = Settings.Pascal, ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
+    """, Settings(Casing = Casing.PascalCase, ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
 
     let expected = "public class XRootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -195,7 +196,7 @@ let ``Pascal case works for generated classes``() =
     {
         "FooBar" : []
     }
-    """, Settings(Casing = Settings.Pascal))
+    """, Settings(Casing = Casing.PascalCase))
 
     let expected = "public class RootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -207,7 +208,7 @@ let ``Camel case works for generated classes with explicit root argument``() =
     {
         "FooBar" : []
     }
-    """, Settings(Casing = Settings.Camel, ClassSuffix = "model"))
+    """, Settings(Casing = Casing.CamelCase, ClassSuffix = "model"))
 
     let expected = "public class rootModel { public object[] fooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -218,7 +219,7 @@ let ``Camel case works for generated classes with explicit  suffix, root argumen
     {
         "FooBar" : []
     }
-    """, Settings(Casing = Settings.Camel, ClassSuffix = "model", RootObjectName = "root"))
+    """, Settings(Casing = Casing.CamelCase, ClassSuffix = "model", RootObjectName = "root"))
 
     let expected = "public class rootModel { public object[] fooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -230,7 +231,7 @@ let ``Camel case works for generated classes with explicit prefix, suffix, root 
     {
         "FooBar" : []
     }
-    """, Settings(Casing = Settings.Camel, ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
+    """, Settings(Casing = Casing.CamelCase, ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
 
     let expected = "public class xRootModel { public object[] fooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -242,7 +243,7 @@ let ``Camel case works for generated classes``() =
     {
         "FooBar" : []
     }
-    """, Settings(Casing = Settings.Camel))
+    """, Settings(Casing = Casing.CamelCase))
 
     let expected = "public class rootModel { public object[] fooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
