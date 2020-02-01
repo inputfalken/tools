@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CSharpGenerator\CSharpGenerator.fsproj" />
+    <ProjectReference Include="..\..\libs\CSharpGenerator\CSharpGenerator.fsproj" />
   </ItemGroup>
 
 </Project>

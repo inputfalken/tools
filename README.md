@@ -8,5 +8,4 @@ This repo contains the following
 
 ## Library Consumers
 * [PowerShell module](https://github.com/inputfalken/TemplateFactory/tree/master/src/PowerShellModule) which can be loaded into as a cmdlet.
-* [Azure function](https://github.com/inputfalken/TemplateFactory/tree/master/src/AzureFunction) that can be uploaded to Azure.
 * [Blazor client web app](https://github.com/inputfalken/TemplateFactory/tree/master/src/WebApplication) which is hosted on the GitHub pages of this repository.

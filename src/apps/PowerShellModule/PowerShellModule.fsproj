@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference PrivateAssets="Compile" Include="..\CSharpGenerator\CSharpGenerator.fsproj" />
+      <ProjectReference PrivateAssets="Compile" Include="..\..\libs\CSharpGenerator\CSharpGenerator.fsproj" />
     </ItemGroup>
 
 </Project>

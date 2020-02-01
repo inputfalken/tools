@@ -16,7 +16,7 @@
         <Compile Include="CSharpFileTests.fs" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\src\CSharpGenerator\CSharpGenerator.fsproj" />
+        <ProjectReference Include="..\..\src\libs\CSharpGenerator\CSharpGenerator.fsproj" />
     </ItemGroup>
 
 </Project>
