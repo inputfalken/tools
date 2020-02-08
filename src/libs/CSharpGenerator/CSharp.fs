@@ -117,6 +117,8 @@ type CSharp =
                 |> CSType.BaseType
                 |> Option.Some
             | Decimal _ ->
+                // IN order to achieve number prediction, decimal would need to be a part of Discriminated Unions
+                // Instead of a plain data object. Making all CsTypes generic could solve it as well but it would be a lot more complex.
                 BaseType.Decimal
                 |> CSType.BaseType
                 |> Option.Some
