@@ -2,6 +2,8 @@ namespace CSharpGenerator.Types
 
 open System
 open System
+open System
+open System
 open System.Collections.Generic
 open Common.Casing
 open Common.StringUtils
@@ -117,7 +119,7 @@ type internal TypeInfo =
       Namespace: string
       Alias: string option
       Nullable: bool }
-    member this.ToString() = this.Alias |> Option.defaultValue ([ this.Namespace; "."; this.Name ] |> joinStrings)
+    override this.ToString() = this.Alias |> Option.defaultValue ([ this.Namespace; "."; this.Name ] |> joinStrings)
     member this.AsNullable =
         if this.Nullable then
             this
@@ -132,6 +134,9 @@ type internal TypeInfo =
 type internal ValueTypePair<'T> =
     { Value: 'T
       Type: TypeInfo }
+    member pair.AsNullable =
+        { Value = pair.Value
+          Type = pair.Type.AsNullable }
 
 and internal ValueType =
     | Integer of ValueTypePair<int>
@@ -140,6 +145,15 @@ and internal ValueType =
     | Datetime of ValueTypePair<DateTime>
     | Decimal of ValueTypePair<decimal>
     | Double of ValueTypePair<double>
+    member valueType.AsNullable =
+        match valueType with
+        | Integer x -> x.AsNullable |> ValueType.Integer
+        | Guid x -> x.AsNullable |> ValueType.Guid
+        | Boolean x -> x.AsNullable |> ValueType.Boolean
+        | Datetime x -> x.AsNullable |> ValueType.Datetime
+        | Decimal x -> x.AsNullable |> ValueType.Decimal
+        | Double x -> x.AsNullable |> ValueType.Double
+
 
 and internal BaseType =
     | ReferenceType of TypeInfo

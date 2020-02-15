@@ -112,30 +112,33 @@ type CSharp =
 
         let rec baseType =
             function
-            | DateTime _ ->
-                BaseType.DateTime
+            | DateTime x ->
+                BaseType.DateTime x
+                |> BaseType.ValueType
                 |> CSType.BaseType
                 |> Option.Some
-            | Decimal _ ->
-                // IN order to achieve number prediction, decimal would need to be a part of Discriminated Unions
-                // Instead of a plain data object. Making all CsTypes generic could solve it as well but it would be a lot more complex.
-                BaseType.Decimal
+            | JsonParser.Decimal x ->
+                BaseType.Decimal x
+                |> BaseType.ValueType
                 |> CSType.BaseType
                 |> Option.Some
             | String _ ->
                 BaseType.String
                 |> CSType.BaseType
                 |> Option.Some
-            | Boolean _ ->
-                BaseType.Boolean
+            | JsonParser.Boolean x ->
+                BaseType.Boolean  x
+                |> BaseType.ValueType
                 |> CSType.BaseType
                 |> Option.Some
-            | Guid _ ->
-                BaseType.Guid
+            | JsonParser.Guid x ->
+                BaseType.Guid x
+                |> BaseType.ValueType
                 |> CSType.BaseType
                 |> Option.Some
-            | Double _ ->
-                BaseType.Double
+            | JsonParser.Double x ->
+                BaseType.Double x
+                |> BaseType.ValueType
                 |> CSType.BaseType
                 |> Option.Some
             | Object x ->
