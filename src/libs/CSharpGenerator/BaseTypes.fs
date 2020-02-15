@@ -1,5 +1,8 @@
 namespace CSharpGenerator.Types
 
+open System
+open System
+open System.Collections.Generic
 open Common.Casing
 open Common.StringUtils
 
@@ -114,7 +117,7 @@ type internal TypeInfo =
       Namespace: string
       Alias: string option
       Nullable: bool }
-    override this.ToString() = this.Alias |> Option.defaultValue ([ this.Namespace; "."; this.Name ] |> joinStrings)
+    member this.ToString() = this.Alias |> Option.defaultValue ([ this.Namespace; "."; this.Name ] |> joinStrings)
     member this.AsNullable =
         if this.Nullable then
             this
@@ -126,53 +129,82 @@ type internal TypeInfo =
               Alias = this.Alias |> Option.map nullableConcat
               Nullable = true }
 
-type internal BaseType =
+type internal ValueTypePair<'T> =
+    { Value: 'T
+      Type: TypeInfo }
+
+and internal ValueType =
+    | Integer of ValueTypePair<int>
+    | Guid of ValueTypePair<Guid>
+    | Boolean of ValueTypePair<bool>
+    | Datetime of ValueTypePair<DateTime>
+    | Decimal of ValueTypePair<decimal>
+    | Double of ValueTypePair<double>
+
+and internal BaseType =
     | ReferenceType of TypeInfo
-    | ValueType of TypeInfo
+    | ValueType of ValueType
 
     member private this.TypeInfo =
         match this with
         | ReferenceType x -> x
-        | ValueType x -> x
+        | ValueType x ->
+            match x with
+            | Integer x -> x.Type
+            | Guid x -> x.Type
+            | Boolean x -> x.Type
+            | Datetime x -> x.Type
+            | Decimal x -> x.Type
+            | Double x -> x.Type
 
     member this.FormatArray key = this.TypeInfo |> fun x -> Formatters.arrayProperty (x.ToString()) key
 
     member this.FormatProperty key = this.TypeInfo |> fun x -> Formatters.property (x.ToString()) key
 
-    static member Guid =
-        { Namespace = "System"
-          Name = "Guid"
-          Alias = option.None
-          Nullable = false }
-        |> ValueType
+    static member Guid x =
+        { Type =
+              { Namespace = "System"
+                Name = "Guid"
+                Alias = option.None
+                Nullable = false }
+          Value = x }
+        |> ValueType.Guid
 
-    static member Double =
-        { Namespace = "System"
-          Name = "Double"
-          Alias = option.Some "double"
-          Nullable = false }
-        |> ValueType
+    static member Double x =
+        { Type =
+              { Namespace = "System"
+                Name = "Double"
+                Alias = option.Some "double"
+                Nullable = false }
+          Value = x }
+        |> ValueType.Double
 
-    static member Boolean =
-        { Namespace = "System"
-          Name = "Boolean"
-          Alias = option.Some "bool"
-          Nullable = false }
-        |> ValueType
+    static member Boolean x =
+        { Type =
+              { Namespace = "System"
+                Name = "Boolean"
+                Alias = option.Some "bool"
+                Nullable = false }
+          Value = x }
+        |> ValueType.Boolean
 
-    static member DateTime =
-        { Namespace = "System"
-          Name = "DateTime"
-          Alias = option.None
-          Nullable = false }
-        |> ValueType
+    static member DateTime x =
+        { Type =
+              { Namespace = "System"
+                Name = "DateTime"
+                Alias = option.None
+                Nullable = false }
+          Value = x }
+        |> ValueType.Datetime
 
-    static member Decimal =
-        { Namespace = "System"
-          Name = "Decimal"
-          Alias = Option.Some "decimal"
-          Nullable = false }
-        |> ValueType
+    static member Decimal x =
+        { Type =
+              { Namespace = "System"
+                Name = "Decimal"
+                Alias = option.Some "decimal"
+                Nullable = false }
+          Value = x }
+        |> ValueType.Decimal
 
     static member Object =
         { Name = "Object"
