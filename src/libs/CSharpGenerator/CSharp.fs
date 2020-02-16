@@ -161,6 +161,8 @@ type CSharp =
 
                 baseTypes
                 |> Array.reduce (fun previous current ->
+                    // Since values are now kept, previous will not be equal to current unless the value behind the type is the same
+                    // We might as well start tracking the value from the reference types as well.
                     match previous, current with
                     | previous, current when previous = current -> current
                     | (Some previous, Some current) ->
