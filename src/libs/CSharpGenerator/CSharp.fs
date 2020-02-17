@@ -153,7 +153,6 @@ type CSharp =
                 let baseTypes =
                     values
                     |> Array.map baseType
-                    |> Array.distinct
 
                 baseTypes
                 |> Array.reduce (fun previous current ->
