@@ -2,9 +2,6 @@ namespace CSharpGenerator.Types
 
 open System
 open System
-open System
-open System
-open System.Collections.Generic
 open Common.Casing
 open Common.StringUtils
 
@@ -154,14 +151,21 @@ and internal ValueType =
         | Decimal x -> x.AsNullable |> ValueType.Decimal
         | Double x -> x.AsNullable |> ValueType.Double
 
+and internal ReferenceType =
+    | String of ValueTypePair<string>
+    | Object of TypeInfo
 
 and internal BaseType =
-    | ReferenceType of TypeInfo
+    | ReferenceType of ReferenceType
     | ValueType of ValueType
-
+    member this.TypeEquals (x: BaseType) =
+        this.TypeInfo = x.TypeInfo
     member private this.TypeInfo =
         match this with
-        | ReferenceType x -> x
+        | ReferenceType x ->
+            match x with
+            | String x -> x.Type
+            | Object x -> x
         | ValueType x ->
             match x with
             | Integer x -> x.Type
@@ -183,6 +187,7 @@ and internal BaseType =
                 Nullable = false }
           Value = x }
         |> ValueType.Guid
+        |> BaseType.ValueType
 
     static member Double x =
         { Type =
@@ -192,6 +197,7 @@ and internal BaseType =
                 Nullable = false }
           Value = x }
         |> ValueType.Double
+        |> BaseType.ValueType
 
     static member Boolean x =
         { Type =
@@ -201,6 +207,7 @@ and internal BaseType =
                 Nullable = false }
           Value = x }
         |> ValueType.Boolean
+        |> BaseType.ValueType
 
     static member DateTime x =
         { Type =
@@ -210,6 +217,7 @@ and internal BaseType =
                 Nullable = false }
           Value = x }
         |> ValueType.Datetime
+        |> BaseType.ValueType
 
     static member Decimal x =
         { Type =
@@ -219,20 +227,25 @@ and internal BaseType =
                 Nullable = false }
           Value = x }
         |> ValueType.Decimal
+        |> BaseType.ValueType
 
     static member Object =
         { Name = "Object"
           Namespace = "System"
           Alias = option.Some "object"
           Nullable = false }
-        |> ReferenceType
+        |> ReferenceType.Object
+        |> BaseType.ReferenceType
 
-    static member String =
-        { Namespace = "System"
-          Name = "String"
-          Alias = option.Some "string"
-          Nullable = false }
-        |> ReferenceType
+    static member String x =
+        { Type =
+              { Namespace = "System"
+                Name = "String"
+                Alias = option.Some "string"
+                Nullable = false }
+          Value = x }
+        |> ReferenceType.String
+        |> BaseType.ReferenceType
 
 type internal GeneratedType =
     { Members: Property []
@@ -263,6 +276,7 @@ and internal CSType =
     | GeneratedType of GeneratedType
     | ArrayType of CSType
     static member UnresolvedBaseType = BaseType.Object |> CSType.BaseType
+
     member this.FormatArray key =
         match this with
         | BaseType x -> x.FormatArray key

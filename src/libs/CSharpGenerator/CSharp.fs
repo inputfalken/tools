@@ -114,34 +114,29 @@ type CSharp =
             function
             | DateTime x ->
                 BaseType.DateTime x
-                |> BaseType.ValueType
                 |> CSType.BaseType
                 |> Option.Some
             | JsonParser.Decimal x ->
                 BaseType.Decimal x
-                |> BaseType.ValueType
                 |> CSType.BaseType
                 |> Option.Some
-            | String _ ->
-                BaseType.String
+            | JsonParser.String x ->
+                BaseType.String x
                 |> CSType.BaseType
                 |> Option.Some
             | JsonParser.Boolean x ->
                 BaseType.Boolean  x
-                |> BaseType.ValueType
                 |> CSType.BaseType
                 |> Option.Some
             | JsonParser.Guid x ->
                 BaseType.Guid x
-                |> BaseType.ValueType
                 |> CSType.BaseType
                 |> Option.Some
             | JsonParser.Double x ->
                 BaseType.Double x
-                |> BaseType.ValueType
                 |> CSType.BaseType
                 |> Option.Some
-            | Object x ->
+            | JsonParser.Object x ->
                 x
                 |> generatedType
                 |> Option.Some
@@ -159,10 +154,9 @@ type CSharp =
                     values
                     |> Array.map baseType
 
+                // TODO create a equals which only checks types and do not care about values.
                 baseTypes
                 |> Array.reduce (fun previous current ->
-                    // Since values are now kept, previous will not be equal to current unless the value behind the type is the same
-                    // We might as well start tracking the value from the reference types as well.
                     match previous, current with
                     | previous, current when previous = current -> current
                     | (Some previous, Some current) ->
