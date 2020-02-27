@@ -63,15 +63,15 @@ type CSharp =
                 match previous, current with
                 | BaseType.ValueType previous, BaseType.ValueType current ->
                     match previous, current with
-                    | previous, current when previous = current ->
+                    | previous, current when previous.TypeInfo = current.TypeInfo ->
                         current
                         |> BaseType.ValueType
                         |> CSType.BaseType
-                    | previous, current when current = previous.AsNullable ->
+                    | previous, current when current.TypeInfo = previous.TypeInfo.AsNullable ->
                         current
                         |> BaseType.ValueType
                         |> CSType.BaseType
-                    | previous, current when previous = current.AsNullable ->
+                    | previous, current when previous.TypeInfo = current.TypeInfo.AsNullable ->
                         previous
                         |> BaseType.ValueType
                         |> CSType.BaseType

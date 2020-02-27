@@ -150,30 +150,31 @@ and internal ValueType =
         | Datetime x -> x.AsNullable |> ValueType.Datetime
         | Decimal x -> x.AsNullable |> ValueType.Decimal
         | Double x -> x.AsNullable |> ValueType.Double
+    member this.TypeInfo =
+        match this with
+        | Integer x -> x.Type
+        | Guid x -> x.Type
+        | Boolean x -> x.Type
+        | Datetime x -> x.Type
+        | Decimal x -> x.Type
+        | Double x -> x.Type
+        
 
 and internal ReferenceType =
     | String of ValueTypePair<string>
     | Object of TypeInfo
+    member this.TypeInfo =
+        match this with
+        | String x -> x.Type
+        | Object x -> x
 
 and internal BaseType =
     | ReferenceType of ReferenceType
     | ValueType of ValueType
-    member this.TypeEquals (x: BaseType) =
-        this.TypeInfo = x.TypeInfo
-    member private this.TypeInfo =
+    member this.TypeInfo =
         match this with
-        | ReferenceType x ->
-            match x with
-            | String x -> x.Type
-            | Object x -> x
-        | ValueType x ->
-            match x with
-            | Integer x -> x.Type
-            | Guid x -> x.Type
-            | Boolean x -> x.Type
-            | Datetime x -> x.Type
-            | Decimal x -> x.Type
-            | Double x -> x.Type
+        | ReferenceType x -> x.TypeInfo
+        | ValueType x -> x.TypeInfo
 
     member this.FormatArray key = this.TypeInfo |> fun x -> Formatters.arrayProperty (x.ToString()) key
 
