@@ -76,6 +76,10 @@ type CSharp =
                         |> BaseType.ValueType
                         |> CSType.BaseType
                     | _ -> CSType.UnresolvedBaseType
+                | ReferenceType previous, ReferenceType current when previous.TypeInfo = current.TypeInfo ->
+                    previous
+                    |> BaseType.ReferenceType
+                    |> CSType.BaseType
                 | _ -> CSType.UnresolvedBaseType
             | ArrayType previous, ArrayType current -> createBaseType previous current |> CSType.ArrayType
             | _ -> CSType.UnresolvedBaseType
@@ -125,7 +129,7 @@ type CSharp =
                 |> CSType.BaseType
                 |> Option.Some
             | JsonParser.Boolean x ->
-                BaseType.Boolean  x
+                BaseType.Boolean x
                 |> CSType.BaseType
                 |> Option.Some
             | JsonParser.Guid x ->
@@ -151,8 +155,7 @@ type CSharp =
             | values when values.Length = 0 -> CSType.UnresolvedBaseType
             | values ->
                 let baseTypes =
-                    values
-                    |> Array.map baseType
+                    values |> Array.map baseType
 
                 // TODO create a equals which only checks types and do not care about values.
                 baseTypes
