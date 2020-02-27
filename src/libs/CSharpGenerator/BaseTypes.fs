@@ -253,6 +253,7 @@ type internal GeneratedType =
       NamePrefix: string
       NameSuffix: string
       Casing: Casing }
+    
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
     member this.ClassDeclaration name =
         let name = [ this.NamePrefix; name; this.NameSuffix ] |> joinStrings

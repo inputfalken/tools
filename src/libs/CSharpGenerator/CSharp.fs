@@ -82,6 +82,7 @@ type CSharp =
                     |> CSType.BaseType
                 | _ -> CSType.UnresolvedBaseType
             | ArrayType previous, ArrayType current -> createBaseType previous current |> CSType.ArrayType
+            | GeneratedType previous, GeneratedType current -> CSType.UnresolvedBaseType //TODO resolve previous and current
             | _ -> CSType.UnresolvedBaseType
 
         let createProperty previous current =
