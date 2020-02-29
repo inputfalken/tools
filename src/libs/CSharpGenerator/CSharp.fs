@@ -58,7 +58,7 @@ type CSharp =
             { Name = current.Name
               Type = Option.map tryConvertToNullableValueType current.Type }
 
-        let rec createBaseType previous current (parent: CSType Option []) =
+        let rec createBaseType previous current parentLength =
             match previous, current with
             | BaseType previous, BaseType current ->
                 match previous, current with
@@ -75,14 +75,15 @@ type CSharp =
                         |> CSType.BaseType
                     | _ -> CSType.UnresolvedBaseType
                 | _ -> CSType.UnresolvedBaseType
-            | ArrayType previous, ArrayType current -> createBaseType previous current parent |> CSType.ArrayType
+            | ArrayType previous, ArrayType current ->
+                createBaseType previous current parentLength |> CSType.ArrayType
             | GeneratedType previous, GeneratedType current ->
                 let members =
                     Array.concat [ previous.Members; current.Members ]
                     |> Array.groupBy (fun x -> x.Name)
                     |> Array.map (fun (_, grouping) ->
-                        match Array.reduce (fun x y -> createProperty x y parent) grouping with
-                        | property when grouping.Length = parent.Length -> property
+                        match Array.reduce (fun x y -> createProperty x y parentLength) grouping with
+                        | property when grouping.Length = parentLength -> property
                         | property -> tryConvertToNullableValueTypeProperty property)
 
                 { Members = members
@@ -92,7 +93,7 @@ type CSharp =
                 |> CSType.GeneratedType
             | _ -> CSType.UnresolvedBaseType
 
-        and createProperty (previous: Property) (current: Property) (parent: CSType Option []) =
+        and createProperty previous current parentLength =
             match previous, current with
             | previous, current when previous = current ->
                 previous
@@ -102,7 +103,7 @@ type CSharp =
                 tryConvertToNullableValueTypeProperty previous
             | previous, current ->
                 { Name = previous.Name
-                  Type = Option.map2 (fun x y -> createBaseType x y parent) previous.Type current.Type }
+                  Type = Option.map2 (fun x y -> createBaseType x y parentLength) previous.Type current.Type }
 
         let rec baseType =
             function
@@ -154,7 +155,8 @@ type CSharp =
                     |> Array.reduce (fun previous current ->
                         match previous, current with
                         | previous, current when previous = current -> current
-                        | (Some previous, Some current) -> createBaseType previous current baseTypes |> Option.Some
+                        | (Some previous, Some current) ->
+                            createBaseType previous current baseTypes.Length |> Option.Some
                         | previous, current ->
                             current
                             |> Option.orElse previous
