@@ -284,6 +284,7 @@ and internal CSType =
         match this with
         | BaseType x -> x.FormatArray key
         | GeneratedType x ->
+            // TODO find a different way to determine if we are working the root element.
             match x with
             | x when x.RootName = key -> x.ClassDeclaration key
             | x ->
