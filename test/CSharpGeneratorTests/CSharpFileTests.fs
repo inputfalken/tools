@@ -313,12 +313,6 @@ let ``Camel case Object``() =
 let ``Pascal case Object``() =
     let result = CSharp.CreateFile("""{"foo": 2}""", Settings(Casing="Pascal"))
     Assert.Equal("public class RootModel { public decimal Foo { get; set; } }", result.Either.Value)
-
-[<Fact>]
-let ``F``() =
-    let result = CSharp.CreateFile("""[{"foo":"bar"}, {"abc": 123}]""", Settings(Casing="Pascal"))
-    
-    Assert.Equal("public class RootModel { public decimal Foo { get; set; } }", result.Either.Value)
     
 [<Fact>]
 let Object() =
