@@ -277,6 +277,37 @@ let ``Two array Objects next to each other``() =
     let expected =
         "public class RootModel { public string[] Tags { get; set; } public class FriendsModel { public decimal Id { get; set; } public string Name { get; set; } } public FriendsModel[] Friends { get; set; } } public RootModel[] Root { get; set; }"
     arrayEntryAssertion expected result.Either.Value
+    
+[<Fact>]
+let ``Two array Objects next to each other with different properties should expand properties``() =
+    let json = """
+    [
+      {
+        "tags": [ "non" ],
+        "friends": [
+          {
+            "id": 0,
+            "name": "Henrietta Tillman"
+          }
+        ],
+        "john" : ""
+      },
+      {
+    "tags": [ "aliqua" ],
+    "friends": [
+      {
+        "id": 0,
+        "name": "Kristy Calhoun"
+      }
+    ],
+    "doe" : ""
+  }
+    ]
+    """
+    let result = CSharp.CreateFile json
+    let expected =
+        "public class RootModel { public string[] Tags { get; set; } public class FriendsModel { public decimal Id { get; set; } public string Name { get; set; } } public FriendsModel[] Friends { get; set; } public string John { get; set; } public string Doe { get; set; } } public RootModel[] Root { get; set; }"
+    arrayEntryAssertion expected result.Either.Value
 
 [<Fact>]
 let ``Camel case Object``() =
