@@ -252,7 +252,6 @@ type internal GeneratedType =
     { Members: Property []
       NamePrefix: string
       NameSuffix: string
-      RootName: string
       Casing: Casing }
     
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
@@ -265,7 +264,7 @@ type internal GeneratedType =
                 [ x.ClassDeclaration property.Name
                   x.FormatProperty ([ x.NamePrefix; property.Name; x.NameSuffix ] |> joinStrings) property.Name ]
                 |> joinStringsWithSpaceSeparation
-            | ArrayType x -> x.FormatArray property.Name
+            | ArrayType x -> x.FormatArray property.Name false
             | BaseType x -> x.FormatProperty property.Name)
         |> joinStringsWithSpaceSeparation
         |> (fun x -> Formatters.``class`` (this.Casing.apply name) x)
@@ -280,15 +279,13 @@ and internal CSType =
     | ArrayType of CSType
     static member UnresolvedBaseType = BaseType.Object |> CSType.BaseType
 
-    member this.FormatArray key =
+    member this.FormatArray key isRoot =
         match this with
         | BaseType x -> x.FormatArray key
         | GeneratedType x ->
-            // TODO find a different way to determine if we are working the root element.
-            match x with
-            | x when x.RootName = key -> x.ClassDeclaration key
-            | x ->
+            if isRoot then x.ClassDeclaration key
+            else
                 [ x.ClassDeclaration key
                   Formatters.arrayProperty ([ x.NamePrefix; key; x.NameSuffix ] |> joinStrings) key ]
                 |> joinStringsWithSpaceSeparation
-        | ArrayType x -> x.FormatArray key
+        | ArrayType x -> x.FormatArray key false
