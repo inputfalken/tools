@@ -5,14 +5,7 @@ open CSharpGenerator.Arguments
 open Common.Casing
 open Xunit
 
-let objectEntryAssertion expected actual =
-    let expected = expected |> sprintf "public class RootModel { %s }"
-    Assert.Equal(expected, actual)
-
-let arrayEntryAssertion expected actual =
-    Assert.Equal(expected, actual)
-
-
+    
 [<Fact>]
 let ``Passing valid JSON sets a value in Value``() =
     let result = CSharp.CreateFile(""" { } """)
@@ -275,8 +268,9 @@ let ``Two array Objects next to each other``() =
     """
     let result = CSharp.CreateFile json
     let expected =
-        "public class RootModel { public string[] Tags { get; set; } public class FriendsModel { public decimal Id { get; set; } public string Name { get; set; } } public FriendsModel[] Friends { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+        "public class RootModel { public string[] Tags { get; set; } public class FriendsModel { public decimal Id { get; set; } public string Name { get; set; } } public FriendsModel[] Friends { get; set; } }"
+        
+    Assert.Equal(expected, result.Either.Value)
     
 [<Fact>]
 let ``Two array Objects next to each other with different properties should expand properties``() =
@@ -306,8 +300,8 @@ let ``Two array Objects next to each other with different properties should expa
     """
     let result = CSharp.CreateFile json
     let expected =
-        "public class RootModel { public string[] Tags { get; set; } public class FriendsModel { public decimal Id { get; set; } public string Name { get; set; } } public FriendsModel[] Friends { get; set; } public string John { get; set; } public string Doe { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+        "public class RootModel { public string[] Tags { get; set; } public class FriendsModel { public decimal Id { get; set; } public string Name { get; set; } } public FriendsModel[] Friends { get; set; } public string John { get; set; } public string Doe { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Camel case Object``() =
@@ -318,27 +312,20 @@ let ``Camel case Object``() =
 [<Fact>]
 let ``Pascal case Object``() =
     let result = CSharp.CreateFile("""{"foo": 2}""", Settings(Casing="Pascal"))
-    let expected = "public decimal Foo { get; set; }"
-    objectEntryAssertion expected result.Either.Value
-    
-[<Fact>]
-let ``None case Object``() =
-    let result = CSharp.CreateFile("""{"FoO": 2}""", Settings(Casing="None"))
-    let expected = "public decimal FoO { get; set; }" |> sprintf "public class rootmodel { %s }"
-    Assert.Equal(expected, result.Either.Value)
+    Assert.Equal("public class RootModel { public decimal Foo { get; set; } }", result.Either.Value)
     
 [<Fact>]
 let Object() =
     let result = CSharp.CreateFile("""{"Foo": 2}""")
-    let expected = "public decimal Foo { get; set; }"
-    objectEntryAssertion expected result.Either.Value
+    let expected = "public class RootModel { public decimal Foo { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Object with Empty Array``() =
     let result =
         CSharp.CreateFile """ { "Foo" : [] } """ 
-    let expected = "public object[] Foo { get; set; }"
-    objectEntryAssertion expected result.Either.Value
+    let expected = "public class RootModel { public object[] Foo { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Object with Empty object``() =
@@ -349,50 +336,50 @@ let ``Object with Empty object``() =
     }
     """
 
-    let expected = "public object Foo { get; set; }"
-    objectEntryAssertion expected result.Either.Value
+    let expected = "public class RootModel { public object Foo { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Empty Array``() =
     let result = CSharp.CreateFile("""[]""")
     let expected = "public object[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Empty Object``() =
     let result = CSharp.CreateFile("""{}""")
     let expected = "public object Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with single number``() =
     let result = CSharp.CreateFile("""[1]""")
     let expected = "public decimal[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with single string``() =
     let result = CSharp.CreateFile("""["bar"]""")
     let expected = "public string[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with numbers``() =
     let result = CSharp.CreateFile("""[1,2,3,4]""")
     let expected = "public decimal[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with strings``() =
     let result = CSharp.CreateFile("""["foo","bar"]""")
     let expected = "public string[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with strings and numbers``() =
     let result = CSharp.CreateFile("""[1,2,3,"foo"]""")
     let expected = "public object[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with object with decimal property``() =
@@ -407,8 +394,8 @@ let ``Array with object with decimal property``() =
 ]
 """
 
-    let expected = "public class RootModel { public decimal Foo { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+    let expected = "public class RootModel { public decimal Foo { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with object with decimal and string properties``() =
@@ -426,8 +413,8 @@ let ``Array with object with decimal and string properties``() =
 """
 
     let expected =
-        "public class RootModel { public decimal Foo { get; set; } public string Bar { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+        "public class RootModel { public decimal Foo { get; set; } public string Bar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 
 [<Fact>]
@@ -443,8 +430,8 @@ let ``Array with object with array property with strings mixed items``() =
 ]
 """
 
-    let expected = "public class RootModel { public object[] Bar { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+    let expected = "public class RootModel { public object[] Bar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with object with array property with strings mixed items reversed order``() =
@@ -459,8 +446,8 @@ let ``Array with object with array property with strings mixed items reversed or
 ]
 """
 
-    let expected = "public class RootModel { public object[] Bar { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+    let expected = "public class RootModel { public object[] Bar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Object with nested string``() =
@@ -476,26 +463,26 @@ let ``Object with nested string``() =
 
 
             )
-    let expected = "public class ApsModel { public string Alert { get; set; } } public ApsModel Aps { get; set; }"
-    objectEntryAssertion expected result.Either.Value
+    let expected = "public class RootModel { public class ApsModel { public string Alert { get; set; } } public ApsModel Aps { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Two Objects``() =
     let result = CSharp.CreateFile """{"foo": 2, "bar": "this is a test"}"""
-    let expected = "public decimal Foo { get; set; } public string Bar { get; set; }"
-    objectEntryAssertion expected result.Either.Value
+    let expected = "public class RootModel { public decimal Foo { get; set; } public string Bar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Object with nested int array``() =
     let result = CSharp.CreateFile """{"foo": 2, "items": [1,2,3,4,5]}"""
-    let expected = "public decimal Foo { get; set; } public decimal[] Items { get; set; }"
-    objectEntryAssertion expected result.Either.Value
+    let expected = "public class RootModel { public decimal Foo { get; set; } public decimal[] Items { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Object with nested string array``() =
     let result = CSharp.CreateFile """{"foo": 2, "items": ["foo","bar", "doe"]}"""
-    let expected = "public decimal Foo { get; set; } public string[] Items { get; set; }"
-    objectEntryAssertion expected result.Either.Value
+    let expected = "public class RootModel { public decimal Foo { get; set; } public string[] Items { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Object with object array``() =
@@ -511,20 +498,20 @@ let ``Object with object array``() =
     """
 
     let expected =
-        "public class ModelsModel { public decimal Foo { get; set; } } public ModelsModel[] Models { get; set; }"
-    objectEntryAssertion expected result.Either.Value
+        "public class RootModel { public class ModelsModel { public decimal Foo { get; set; } } public ModelsModel[] Models { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Object with null value``() =
     let result = CSharp.CreateFile """{ "Foo" : null }"""
-    let expected = "public object Foo { get; set; }"
-    objectEntryAssertion expected result.Either.Value
+    let expected = "public class RootModel { public object Foo { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Object with null value and none null value``() =
     let result = CSharp.CreateFile """{ "Foo" : null, "Bar" : 1 }"""
-    let expected = "public object Foo { get; set; } public decimal Bar { get; set; }"
-    objectEntryAssertion expected result.Either.Value
+    let expected = "public class RootModel { public object Foo { get; set; } public decimal Bar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with strings that are mixed with null values``() =
@@ -538,7 +525,7 @@ let ``Array with strings that are mixed with null values``() =
     """
 
     let expected = "public string[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with numbers that are mixed with null values``() =
@@ -553,7 +540,7 @@ let ``Array with numbers that are mixed with null values``() =
     """
 
     let expected = "public decimal?[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array mixed with strings and numbers``() =
@@ -567,7 +554,7 @@ let ``Array mixed with strings and numbers``() =
     """
 
     let expected = "public object[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with missmatched properties``() =
@@ -586,8 +573,8 @@ let ``Array with missmatched properties``() =
     """
 
     let expected =
-        "public class RootModel { public string Foo { get; set; } public decimal? John { get; set; } public object Bar { get; set; } public decimal? Doe { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+        "public class RootModel { public string Foo { get; set; } public decimal? John { get; set; } public object Bar { get; set; } public decimal? Doe { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with without values first``() =
@@ -612,8 +599,8 @@ let ``Array with without values first``() =
     """
 
     let expected =
-        "public class RootModel { public string Foo { get; set; } public string John { get; set; } public decimal? Bar { get; set; } public decimal? Doe { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+        "public class RootModel { public string Foo { get; set; } public string John { get; set; } public decimal? Bar { get; set; } public decimal? Doe { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with objects with two structures``() =
@@ -640,8 +627,8 @@ let ``Array with objects with two structures``() =
     """
 
     let expected =
-        "public class RootModel { public string Foo { get; set; } public decimal? John { get; set; } public object Bar { get; set; } public decimal? Doe { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+        "public class RootModel { public string Foo { get; set; } public decimal? John { get; set; } public object Bar { get; set; } public decimal? Doe { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with objects with properties whose values are mixed with nullable value types``() =
@@ -660,8 +647,8 @@ let ``Array with objects with properties whose values are mixed with nullable va
     """
 
     let expected =
-        "public class RootModel { public decimal? Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+        "public class RootModel { public decimal? Foo { get; set; } public decimal Bar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with objects with properties whose values are mixed with nullable value types reversed``() =
@@ -680,9 +667,9 @@ let ``Array with objects with properties whose values are mixed with nullable va
     """
 
     let expected =
-        "public class RootModel { public decimal? Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
-
+        "public class RootModel { public decimal? Foo { get; set; } public decimal Bar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+    
 [<Fact>]
 let ``Array with objects with properties whose values are mixed with null``() =
     let result =
@@ -700,8 +687,8 @@ let ``Array with objects with properties whose values are mixed with null``() =
     """
 
     let expected =
-        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with objects with different amount of properties reversed``() =
@@ -721,8 +708,8 @@ let ``Array with objects with different amount of properties reversed``() =
     """
 
     let expected =
-        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } public decimal? Test { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } public decimal? Test { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with objects with different amount of properties``() =
@@ -742,8 +729,15 @@ let ``Array with objects with different amount of properties``() =
     """
 
     let expected =
-        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } public decimal? Test { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } public decimal? Test { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+    
+    
+[<Fact>]
+let ``Array with object does not leave trailing array``() =
+    let result = CSharp.CreateFile """[{"foo":"bar"}, {"abc": 123}]"""
+    let expected = "public class RootModel { public string Foo { get; set; } public decimal? Abc { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
 let ``Array with objects with properties whose values are mixed with null reversed``() =
@@ -762,5 +756,5 @@ let ``Array with objects with properties whose values are mixed with null revers
     """
 
     let expected =
-        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } } public RootModel[] Root { get; set; }"
-    arrayEntryAssertion expected result.Either.Value
+        "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
