@@ -252,6 +252,7 @@ type internal GeneratedType =
     { Members: Property []
       NamePrefix: string
       NameSuffix: string
+      RootName: string
       Casing: Casing }
     
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
@@ -283,7 +284,10 @@ and internal CSType =
         match this with
         | BaseType x -> x.FormatArray key
         | GeneratedType x ->
-            [ x.ClassDeclaration key
-              Formatters.arrayProperty ([ x.NamePrefix; key; x.NameSuffix ] |> joinStrings) key ]
-            |> joinStringsWithSpaceSeparation
+            match x with
+            | x when x.RootName = key -> x.ClassDeclaration key
+            | x ->
+                [ x.ClassDeclaration key
+                  Formatters.arrayProperty ([ x.NamePrefix; key; x.NameSuffix ] |> joinStrings) key ]
+                |> joinStringsWithSpaceSeparation
         | ArrayType x -> x.FormatArray key

@@ -89,6 +89,7 @@ type CSharp =
                 { Members = members
                   NamePrefix = classPrefix
                   NameSuffix = classSuffix
+                  RootName = rootObject
                   Casing = casing }
                 |> CSType.GeneratedType
             | _ -> CSType.UnresolvedBaseType
@@ -143,6 +144,7 @@ type CSharp =
                     { Members = x
                       NameSuffix = classSuffix
                       NamePrefix = classPrefix
+                      RootName = rootObject
                       Casing = casing })
                     |> CSType.GeneratedType
                 |> Option.Some
