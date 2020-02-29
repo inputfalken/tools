@@ -62,12 +62,9 @@ type CSharp =
             match previous, current with
             | BaseType previous, BaseType current ->
                 match previous, current with
+                | previous, current when previous.TypeInfo = current.TypeInfo -> current |> CSType.BaseType
                 | BaseType.ValueType previous, BaseType.ValueType current ->
                     match previous, current with
-                    | previous, current when previous.TypeInfo = current.TypeInfo ->
-                        current
-                        |> BaseType.ValueType
-                        |> CSType.BaseType
                     | previous, current when current.TypeInfo = previous.TypeInfo.AsNullable ->
                         current
                         |> BaseType.ValueType
@@ -77,10 +74,6 @@ type CSharp =
                         |> BaseType.ValueType
                         |> CSType.BaseType
                     | _ -> CSType.UnresolvedBaseType
-                | ReferenceType previous, ReferenceType current when previous.TypeInfo = current.TypeInfo ->
-                    previous
-                    |> BaseType.ReferenceType
-                    |> CSType.BaseType
                 | _ -> CSType.UnresolvedBaseType
             | ArrayType previous, ArrayType current -> createBaseType previous current parent |> CSType.ArrayType
             | GeneratedType previous, GeneratedType current ->
