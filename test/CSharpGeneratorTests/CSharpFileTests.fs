@@ -313,12 +313,12 @@ let ``Camel case Object``() =
 let ``Pascal case Object``() =
     let result = CSharp.CreateFile("""{"foo": 2}""", Settings(Casing="Pascal"))
     Assert.Equal("public class RootModel { public decimal Foo { get; set; } }", result.Either.Value)
-    
+
 [<Fact>]
-let ``None case Object``() =
-    let result = CSharp.CreateFile("""{"FoO": 2}""", Settings(Casing="None"))
-    let expected = "public decimal FoO { get; set; }" |> sprintf "public class rootmodel { %s }"
-    Assert.Equal(expected, result.Either.Value)
+let ``F``() =
+    let result = CSharp.CreateFile("""[{"foo":"bar"}, {"abc": 123}]""", Settings(Casing="Pascal"))
+    
+    Assert.Equal("public class RootModel { public decimal Foo { get; set; } }", result.Either.Value)
     
 [<Fact>]
 let Object() =
@@ -736,6 +736,13 @@ let ``Array with objects with different amount of properties``() =
 
     let expected =
         "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } public decimal? Test { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+    
+    
+[<Fact>]
+let ``Array with object does not leave trailing array``() =
+    let result = CSharp.CreateFile """[{"foo":"bar"}, {"abc": 123}]"""
+    let expected = "public class RootModel { public string Foo { get; set; } public decimal? Abc { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
 
 [<Fact>]
