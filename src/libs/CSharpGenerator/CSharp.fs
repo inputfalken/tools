@@ -83,24 +83,21 @@ type CSharp =
                     |> CSType.BaseType
                 | _ -> CSType.UnresolvedBaseType
             | ArrayType previous, ArrayType current -> createBaseType previous current parent |> CSType.ArrayType
-            | GeneratedType previous, GeneratedType current -> resolveGeneratedTypes previous current parent
+            | GeneratedType previous, GeneratedType current ->
+                let members =
+                    Array.concat [ previous.Members; current.Members ]
+                    |> Array.groupBy (fun x -> x.Name)
+                    |> Array.map (fun (_, grouping) ->
+                        match Array.reduce (fun x y -> createProperty x y parent) grouping with
+                        | property when grouping.Length = parent.Length -> property
+                        | property -> tryConvertToNullableValueTypeProperty property)
+
+                { Members = members
+                  NamePrefix = classPrefix
+                  NameSuffix = classSuffix
+                  Casing = casing }
+                |> CSType.GeneratedType
             | _ -> CSType.UnresolvedBaseType
-
-
-        and resolveGeneratedTypes previous current parent =
-            let members =
-                Array.concat [ previous.Members; current.Members ]
-                |> Array.groupBy (fun x -> x.Name)
-                |> Array.map (fun (_, grouping) ->
-                    match Array.reduce (fun x y -> createProperty x y parent) grouping with
-                    | property when grouping.Length = parent.Length -> property
-                    | property -> tryConvertToNullableValueTypeProperty property)
-
-            { Members = members
-              NamePrefix = classPrefix
-              NameSuffix = classSuffix
-              Casing = casing }
-            |> CSType.GeneratedType
 
         and createProperty (previous: Property) (current: Property) (parent: CSType Option []) =
             match previous, current with
