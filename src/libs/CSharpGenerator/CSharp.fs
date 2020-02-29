@@ -108,9 +108,8 @@ type CSharp =
             | previous, current when current.Type.IsNone || current.Type.Value = CSType.UnresolvedBaseType ->
                 tryConvertToNullableValueTypeProperty previous
             | previous, current ->
-                let baseTypeMapper x y = createBaseType x y parent
                 { Name = previous.Name
-                  Type = Option.map2 baseTypeMapper previous.Type current.Type }
+                  Type = Option.map2 (fun x y -> createBaseType x y parent) previous.Type current.Type }
 
         let rec baseType =
             function
@@ -140,7 +139,7 @@ type CSharp =
                 |> Option.Some
             | JsonParser.Object records ->
                 match records with
-                | records when records.Length = 0 -> CSType.UnresolvedBaseType 
+                | records when records.Length = 0 -> CSType.UnresolvedBaseType
                 | records ->
                     records
                     |> Array.map (fun x ->
