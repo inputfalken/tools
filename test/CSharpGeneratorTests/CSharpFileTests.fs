@@ -4,6 +4,7 @@ open CSharpGenerator
 open CSharpGenerator.Arguments
 open Common.Casing
 open Xunit
+open Xunit
 
     
 [<Fact>]
@@ -732,6 +733,13 @@ let ``Array with objects with different amount of properties``() =
         "public class RootModel { public string Foo { get; set; } public decimal Bar { get; set; } public decimal? Test { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
     
+[<Theory>]
+[<InlineData("""{"Root": {"foo":2}}""")>]
+[<InlineData("""{"Nested": {"Root": {"foo":2}}}""")>]
+let ``Member names is the same as their enclosing typex`` json =
+    let result = CSharp.CreateFile json
+    let expected = "Member names cannot be the same as their enclosing type"
+    Assert.Equal(expected, result.Either.Error.Message)
     
 [<Fact>]
 let ``Array with object does not leave trailing array``() =

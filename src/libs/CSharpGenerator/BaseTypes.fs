@@ -256,11 +256,14 @@ type internal GeneratedType =
     
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
     member this.ClassDeclaration name =
+        let set = Set.empty.Add name
         let name = [ this.NamePrefix; name; this.NameSuffix ] |> joinStrings
         this.Members
         |> Seq.map (fun property ->
             match property.Type |> Option.defaultValue CSType.UnresolvedBaseType with
             | GeneratedType x ->
+                if set.Contains property.Name then raise(System.ArgumentException("Member names cannot be the same as their enclosing type"))
+                else 
                 [ x.ClassDeclaration property.Name
                   x.FormatProperty ([ x.NamePrefix; property.Name; x.NameSuffix ] |> joinStrings) property.Name ]
                 |> joinStringsWithSpaceSeparation
