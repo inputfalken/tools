@@ -758,7 +758,14 @@ let ``Array with object does not leave trailing array``() =
 [<InlineData("""[{}, {}, {"foo":"bar"}, {}, {}]""")>]
 [<InlineData("""[{}, {"foo":"bar"}, {}, {}, {}]""")>]
 [<InlineData("""[{}, {}, {}, {"foo":"bar"}, {}]""")>]
-let ``Array with empty object should not resolve in object array`` json =
+[<InlineData("""[null, {"foo":"bar"}]""")>]
+[<InlineData("""[{"foo":"bar"}, null]""")>]
+[<InlineData("""[null, {"foo":"bar"}, null]""")>]
+[<InlineData("""[null, null, {"foo":"bar"}, null]""")>]
+[<InlineData("""[null, null, {"foo":"bar"}, null, null]""")>]
+[<InlineData("""[null, {"foo":"bar"}, null, null, null]""")>]
+[<InlineData("""[null, null, null, {"foo":"bar"}, null]""")>]
+let ``Array with empty object or null should not resolve in object array`` json =
     let result = CSharp.CreateFile json
     let expected = "public class RootModel { public string Foo { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
