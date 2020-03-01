@@ -6,6 +6,7 @@ open Common.Casing
 open Xunit
 open Xunit
 open Xunit
+open Xunit
 
     
 [<Fact>]
@@ -749,9 +750,16 @@ let ``Array with object does not leave trailing array``() =
     let expected = "public class RootModel { public string Foo { get; set; } public decimal? Abc { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
 
-[<Fact>]
-let ``Array with empty object should not resolve in object array``() =
-    let result = CSharp.CreateFile """[{"foo":"bar"}, {}]"""
+[<Theory>]
+[<InlineData("""[{}, {"foo":"bar"}]""")>]
+[<InlineData("""[{"foo":"bar"}, {}]""")>]
+[<InlineData("""[{}, {"foo":"bar"}, {}]""")>]
+[<InlineData("""[{}, {}, {"foo":"bar"}, {}]""")>]
+[<InlineData("""[{}, {}, {"foo":"bar"}, {}, {}]""")>]
+[<InlineData("""[{}, {"foo":"bar"}, {}, {}, {}]""")>]
+[<InlineData("""[{}, {}, {}, {"foo":"bar"}, {}]""")>]
+let ``Array with empty object should not resolve in object array`` json =
+    let result = CSharp.CreateFile json
     let expected = "public class RootModel { public string Foo { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
     
