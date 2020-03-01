@@ -5,6 +5,8 @@ open CSharpGenerator.Arguments
 open Common.Casing
 open Xunit
 open Xunit
+open Xunit
+open Xunit
 
     
 [<Fact>]
@@ -748,6 +750,26 @@ let ``Array with object does not leave trailing array``() =
     let expected = "public class RootModel { public string Foo { get; set; } public decimal? Abc { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
 
+[<Theory>]
+[<InlineData("""[{}, {"foo":"bar"}]""")>]
+[<InlineData("""[{"foo":"bar"}, {}]""")>]
+[<InlineData("""[{}, {"foo":"bar"}, {}]""")>]
+[<InlineData("""[{}, {}, {"foo":"bar"}, {}]""")>]
+[<InlineData("""[{}, {}, {"foo":"bar"}, {}, {}]""")>]
+[<InlineData("""[{}, {"foo":"bar"}, {}, {}, {}]""")>]
+[<InlineData("""[{}, {}, {}, {"foo":"bar"}, {}]""")>]
+[<InlineData("""[null, {"foo":"bar"}]""")>]
+[<InlineData("""[{"foo":"bar"}, null]""")>]
+[<InlineData("""[null, {"foo":"bar"}, null]""")>]
+[<InlineData("""[null, null, {"foo":"bar"}, null]""")>]
+[<InlineData("""[null, null, {"foo":"bar"}, null, null]""")>]
+[<InlineData("""[null, {"foo":"bar"}, null, null, null]""")>]
+[<InlineData("""[null, null, null, {"foo":"bar"}, null]""")>]
+let ``Array with empty object or null should not resolve in object array`` json =
+    let result = CSharp.CreateFile json
+    let expected = "public class RootModel { public string Foo { get; set; } }"
+    Assert.Equal(expected, result.Either.Value)
+    
 [<Fact>]
 let ``Array with objects with properties whose values are mixed with null reversed``() =
     let result =

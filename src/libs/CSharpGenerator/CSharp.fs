@@ -91,6 +91,10 @@ type CSharp =
                   NameSuffix = classSuffix
                   Casing = casing }
                 |> CSType.GeneratedType
+            | previous, GeneratedType current when previous = CSType.UnresolvedBaseType ->
+                current |> CSType.GeneratedType
+            | GeneratedType previous, current when current = CSType.UnresolvedBaseType ->
+                previous |> CSType.GeneratedType
             | _ -> CSType.UnresolvedBaseType
 
         and createProperty previous current parentLength =
