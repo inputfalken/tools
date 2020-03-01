@@ -1,5 +1,7 @@
 namespace CSharpGenerator.Types
 
+open System
+open System
 open Common.Casing
 open Common.StringUtils
 
@@ -126,87 +128,155 @@ type internal TypeInfo =
               Alias = this.Alias |> Option.map nullableConcat
               Nullable = true }
 
-type internal BaseType =
-    | ReferenceType of TypeInfo
-    | ValueType of TypeInfo
+type internal ValueTypePair<'T> =
+    { Value: 'T
+      Type: TypeInfo }
+    member pair.AsNullable =
+        { Value = pair.Value
+          Type = pair.Type.AsNullable }
 
-    member private this.TypeInfo =
+and internal ValueType =
+    | Integer of ValueTypePair<int>
+    | Guid of ValueTypePair<Guid>
+    | Boolean of ValueTypePair<bool>
+    | Datetime of ValueTypePair<DateTime>
+    | Decimal of ValueTypePair<decimal>
+    | Double of ValueTypePair<double>
+
+    member valueType.AsNullable =
+        match valueType with
+        | Integer x -> x.AsNullable |> ValueType.Integer
+        | Guid x -> x.AsNullable |> ValueType.Guid
+        | Boolean x -> x.AsNullable |> ValueType.Boolean
+        | Datetime x -> x.AsNullable |> ValueType.Datetime
+        | Decimal x -> x.AsNullable |> ValueType.Decimal
+        | Double x -> x.AsNullable |> ValueType.Double
+
+    member this.TypeInfo =
         match this with
-        | ReferenceType x -> x
-        | ValueType x -> x
+        | Integer x -> x.Type
+        | Guid x -> x.Type
+        | Boolean x -> x.Type
+        | Datetime x -> x.Type
+        | Decimal x -> x.Type
+        | Double x -> x.Type
+
+
+and internal ReferenceType =
+    | String of ValueTypePair<string>
+    | Object of TypeInfo
+    member this.TypeInfo =
+        match this with
+        | String x -> x.Type
+        | Object x -> x
+
+and internal BaseType =
+    | ReferenceType of ReferenceType
+    | ValueType of ValueType
+
+    member this.TypeInfo =
+        match this with
+        | ReferenceType x -> x.TypeInfo
+        | ValueType x -> x.TypeInfo
 
     member this.FormatArray key = this.TypeInfo |> fun x -> Formatters.arrayProperty (x.ToString()) key
 
     member this.FormatProperty key = this.TypeInfo |> fun x -> Formatters.property (x.ToString()) key
 
-    static member Guid =
-        { Namespace = "System"
-          Name = "Guid"
-          Alias = option.None
-          Nullable = false }
-        |> ValueType
+    static member Guid x =
+        { Type =
+              { Namespace = "System"
+                Name = "Guid"
+                Alias = option.None
+                Nullable = false }
+          Value = x }
+        |> ValueType.Guid
+        |> BaseType.ValueType
 
-    static member Double =
-        { Namespace = "System"
-          Name = "Double"
-          Alias = option.Some "double"
-          Nullable = false }
-        |> ValueType
+    static member Double x =
+        { Type =
+              { Namespace = "System"
+                Name = "Double"
+                Alias = option.Some "double"
+                Nullable = false }
+          Value = x }
+        |> ValueType.Double
+        |> BaseType.ValueType
 
-    static member Boolean =
-        { Namespace = "System"
-          Name = "Boolean"
-          Alias = option.Some "bool"
-          Nullable = false }
-        |> ValueType
+    static member Boolean x =
+        { Type =
+              { Namespace = "System"
+                Name = "Boolean"
+                Alias = option.Some "bool"
+                Nullable = false }
+          Value = x }
+        |> ValueType.Boolean
+        |> BaseType.ValueType
 
-    static member DateTime =
-        { Namespace = "System"
-          Name = "DateTime"
-          Alias = option.None
-          Nullable = false }
-        |> ValueType
+    static member DateTime x =
+        { Type =
+              { Namespace = "System"
+                Name = "DateTime"
+                Alias = option.None
+                Nullable = false }
+          Value = x }
+        |> ValueType.Datetime
+        |> BaseType.ValueType
 
-    static member Decimal =
-        { Namespace = "System"
-          Name = "Decimal"
-          Alias = Option.Some "decimal"
-          Nullable = false }
-        |> ValueType
+    static member Decimal x =
+        { Type =
+              { Namespace = "System"
+                Name = "Decimal"
+                Alias = option.Some "decimal"
+                Nullable = false }
+          Value = x }
+        |> ValueType.Decimal
+        |> BaseType.ValueType
 
     static member Object =
         { Name = "Object"
           Namespace = "System"
           Alias = option.Some "object"
           Nullable = false }
-        |> ReferenceType
+        |> ReferenceType.Object
+        |> BaseType.ReferenceType
 
-    static member String =
-        { Namespace = "System"
-          Name = "String"
-          Alias = option.Some "string"
-          Nullable = false }
-        |> ReferenceType
+    static member String x =
+        { Type =
+              { Namespace = "System"
+                Name = "String"
+                Alias = option.Some "string"
+                Nullable = false }
+          Value = x }
+        |> ReferenceType.String
+        |> BaseType.ReferenceType
 
 type internal GeneratedType =
     { Members: Property []
       NamePrefix: string
       NameSuffix: string
       Casing: Casing }
+
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
-    member this.ClassDeclaration name =
-        let name = [ this.NamePrefix; name; this.NameSuffix ] |> joinStrings
+
+    member private this.ClassDeclarationPrivate name (set: string Set) =
+        let formattedName = [ this.NamePrefix; name; this.NameSuffix ] |> joinStrings
+        let set = set.Add name
         this.Members
         |> Seq.map (fun property ->
             match property.Type |> Option.defaultValue CSType.UnresolvedBaseType with
+            | _ when set.Contains property.Name ->
+                raise (System.ArgumentException("Member names cannot be the same as their enclosing type"))
             | GeneratedType x ->
-                [ x.ClassDeclaration property.Name
+                [ x.ClassDeclarationPrivate property.Name set
                   x.FormatProperty ([ x.NamePrefix; property.Name; x.NameSuffix ] |> joinStrings) property.Name ]
                 |> joinStringsWithSpaceSeparation
-            | ArrayType x -> x.FormatArray property.Name
+            | ArrayType x -> x.FormatArray property.Name false
             | BaseType x -> x.FormatProperty property.Name)
         |> joinStringsWithSpaceSeparation
-        |> (fun x -> Formatters.``class`` (this.Casing.apply name) x)
+        |> (fun x -> Formatters.``class`` (this.Casing.apply formattedName) x)
+
+    member this.ClassDeclaration name = this.ClassDeclarationPrivate name Set.empty
 
 and internal Property =
     { Name: string
@@ -217,11 +287,15 @@ and internal CSType =
     | GeneratedType of GeneratedType
     | ArrayType of CSType
     static member UnresolvedBaseType = BaseType.Object |> CSType.BaseType
-    member this.FormatArray key =
+
+    member this.FormatArray key isRoot =
         match this with
         | BaseType x -> x.FormatArray key
         | GeneratedType x ->
-            [ x.ClassDeclaration key
-              Formatters.arrayProperty ([ x.NamePrefix; key; x.NameSuffix ] |> joinStrings) key ]
-            |> joinStringsWithSpaceSeparation
-        | ArrayType x -> x.FormatArray key
+            if isRoot then
+                x.ClassDeclaration key
+            else
+                [ x.ClassDeclaration key
+                  Formatters.arrayProperty ([ x.NamePrefix; key; x.NameSuffix ] |> joinStrings) key ]
+                |> joinStringsWithSpaceSeparation
+        | ArrayType x -> x.FormatArray key false

@@ -1,7 +1,7 @@
 # Installation
 
-* `> dotnet publish --configuration Release --framework netcoreapp2.2`
-* `> Import-Module .\bin\Release\netcoreapp2.2\publish\PowerShellModule.dll`
+* `> dotnet publish --configuration Release`
+* `> Import-Module .\bin\Release\netcoreapp3.1\publish\PowerShellModule.dll`
 
 ## Cmdlets
 
