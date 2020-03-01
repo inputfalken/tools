@@ -734,9 +734,10 @@ let ``Array with objects with different amount of properties``() =
     Assert.Equal(expected, result.Either.Value)
     
 [<Theory>]
-[<InlineData("""{"Root": {"foo":2}}""")>]
 [<InlineData("""{"Nested": {"Root": {"foo":2}}}""")>]
-let ``Member names is the same as their enclosing typex`` json =
+[<InlineData("""{"Nested": {"Root": []}}""")>]
+[<InlineData("""{"Nested": {"Root": 1}}""")>]
+let ``Member names is the same as their enclosing type`` json =
     let result = CSharp.CreateFile json
     let expected = "Member names cannot be the same as their enclosing type"
     Assert.Equal(expected, result.Either.Error.Message)

@@ -142,6 +142,7 @@ and internal ValueType =
     | Datetime of ValueTypePair<DateTime>
     | Decimal of ValueTypePair<decimal>
     | Double of ValueTypePair<double>
+
     member valueType.AsNullable =
         match valueType with
         | Integer x -> x.AsNullable |> ValueType.Integer
@@ -150,6 +151,7 @@ and internal ValueType =
         | Datetime x -> x.AsNullable |> ValueType.Datetime
         | Decimal x -> x.AsNullable |> ValueType.Decimal
         | Double x -> x.AsNullable |> ValueType.Double
+
     member this.TypeInfo =
         match this with
         | Integer x -> x.Type
@@ -158,7 +160,7 @@ and internal ValueType =
         | Datetime x -> x.Type
         | Decimal x -> x.Type
         | Double x -> x.Type
-        
+
 
 and internal ReferenceType =
     | String of ValueTypePair<string>
@@ -171,6 +173,7 @@ and internal ReferenceType =
 and internal BaseType =
     | ReferenceType of ReferenceType
     | ValueType of ValueType
+
     member this.TypeInfo =
         match this with
         | ReferenceType x -> x.TypeInfo
@@ -253,24 +256,27 @@ type internal GeneratedType =
       NamePrefix: string
       NameSuffix: string
       Casing: Casing }
-    
+
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
-    member this.ClassDeclaration name =
-        let set = Set.empty.Add name
-        let name = [ this.NamePrefix; name; this.NameSuffix ] |> joinStrings
+
+    member private this.ClassDeclarationPrivate name (set: string Set) =
+        let formattedName = [ this.NamePrefix; name; this.NameSuffix ] |> joinStrings
+        let set = set.Add name
         this.Members
         |> Seq.map (fun property ->
             match property.Type |> Option.defaultValue CSType.UnresolvedBaseType with
+            | _ when set.Contains property.Name ->
+                raise (System.ArgumentException("Member names cannot be the same as their enclosing type"))
             | GeneratedType x ->
-                if set.Contains property.Name then raise(System.ArgumentException("Member names cannot be the same as their enclosing type"))
-                else 
-                [ x.ClassDeclaration property.Name
+                [ x.ClassDeclarationPrivate property.Name set
                   x.FormatProperty ([ x.NamePrefix; property.Name; x.NameSuffix ] |> joinStrings) property.Name ]
                 |> joinStringsWithSpaceSeparation
             | ArrayType x -> x.FormatArray property.Name false
             | BaseType x -> x.FormatProperty property.Name)
         |> joinStringsWithSpaceSeparation
-        |> (fun x -> Formatters.``class`` (this.Casing.apply name) x)
+        |> (fun x -> Formatters.``class`` (this.Casing.apply formattedName) x)
+
+    member this.ClassDeclaration name = this.ClassDeclarationPrivate name Set.empty
 
 and internal Property =
     { Name: string
@@ -286,7 +292,8 @@ and internal CSType =
         match this with
         | BaseType x -> x.FormatArray key
         | GeneratedType x ->
-            if isRoot then x.ClassDeclaration key
+            if isRoot then
+                x.ClassDeclaration key
             else
                 [ x.ClassDeclaration key
                   Formatters.arrayProperty ([ x.NamePrefix; key; x.NameSuffix ] |> joinStrings) key ]
