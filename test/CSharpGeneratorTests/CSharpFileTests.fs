@@ -289,6 +289,13 @@ let Object json csharp =
     let result = CSharp.CreateFile json
     let expected = sprintf "public class RootModel { %s }" csharp
     Assert.Equal(expected, result.Either.Value)
+    
+[<Theory>]
+[<InlineData("""{"1337": {}}""", "Member names can only start with letters.")>]
+[<InlineData("""{"Foo": {"1337": {"bar": 2}}}""", "Member names can only start with letters.")>]
+let ```Type names or member names can not start with numbers`` json expected =
+    let result = CSharp.CreateFile json
+    Assert.Equal(expected, result.Either.Error.Message)
 
 [<Theory>]
 [<InlineData("""{"Nested": {"Root": {"foo":2}}}""")>]

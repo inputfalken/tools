@@ -267,6 +267,8 @@ type internal GeneratedType =
             match property.Type |> Option.defaultValue CSType.UnresolvedBaseType with
             | _ when set.Contains property.Name ->
                 raise (System.ArgumentException("Member names cannot be the same as their enclosing type"))
+            | _ when not (Char.IsLetter property.Name.[0]) ->
+                raise (System.ArgumentException("Member names can only start with letters."))
             | GeneratedType x ->
                 [ x.ClassDeclarationPrivate property.Name set
                   x.FormatProperty ([ x.NamePrefix; property.Name; x.NameSuffix ] |> joinStrings) property.Name ]
