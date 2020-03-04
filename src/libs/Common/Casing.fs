@@ -34,4 +34,4 @@ type public Casing =
         match this with
         | Pascal -> NameUtils.nicePascalName x
         | Camel -> NameUtils.niceCamelName x
-        | None -> x
+        | None -> x.Replace(" ", "")
