@@ -261,6 +261,8 @@ type internal GeneratedType =
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
 
     member private this.ClassDeclarationPrivate (name: string) (set: string Set) =
+        if name = "links" then
+            ()
         let set = set.Add(name.ToLowerInvariant())
         this.Members
         |> Seq.map (fun property ->
@@ -315,6 +317,6 @@ and internal CSType =
                 x.ClassDeclaration key
             else
                 [ x.ClassDeclaration key
-                  Formatters.arrayProperty ([ x.NamePrefix; key; x.NameSuffix ] |> joinStrings) key ]
+                  Formatters.arrayProperty ([ x.NamePrefix; key; x.NameSuffix ] |> joinStringsWithSpaceSeparation |> x.TypeCasing.apply) key ]
                 |> joinStringsWithSpaceSeparation
         | ArrayType x -> x.FormatArray key false
