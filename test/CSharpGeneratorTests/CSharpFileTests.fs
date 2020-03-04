@@ -2,14 +2,16 @@ module Tests
 
 open CSharpGenerator
 open CSharpGenerator.Arguments
-open Common.Casing
+open Xunit
 open Xunit
 
 
 [<Literal>]
 let CamelCase = "Camel"
+
 [<Literal>]
 let PascalCase = "Pascal"
+
 [<Literal>]
 let NoneCase = "None"
 
@@ -68,68 +70,83 @@ let ``Uses default suffix if prefix and sufifx is set to empty string or null`` 
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
-[<InlineData("""{ "FOOBAR" : [] }""")>]
-let ``Casing None  does not try to change casing at all`` json =
-    let result = CSharp.CreateFile(json, Settings(PropertyCasing = NoneCase, TypeCasing = NoneCase, ClassSuffix = "MODEL"))
-    let expected = "public class rootMODEL { public object[] FOOBAR { get; set; } }"
+[<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, CamelCase,
+             "public class rootModel { public class innerClassModel { public decimal fooBar { get; set; } } public innerClassModel innerClass { get; set; } }")>]
+[<InlineData("""{"InnerClass": {"FooBar": 2}}""", null, CamelCase,
+             "public class RootModel { public class InnerClassModel { public decimal fooBar { get; set; } } public InnerClassModel innerClass { get; set; } }")>]
+[<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, null,
+             "public class rootModel { public class innerClassModel { public decimal FooBar { get; set; } } public innerClassModel InnerClass { get; set; } }")>]
+let ``Casing Camel `` json typeCasing propertyCasing expected =
+    let result = CSharp.CreateFile(json, Settings(PropertyCasing = propertyCasing, TypeCasing = typeCasing))
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
-[<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, CamelCase,"public class rootModel { public class innerClassModel { public decimal fooBar { get; set; } } public innerClassModel innerClass { get; set; } }")>]
-[<InlineData("""{"InnerClass": {"FooBar": 2}}""", null, CamelCase,"public class RootModel { public class InnerClassModel { public decimal fooBar { get; set; } } public InnerClassModel innerClass { get; set; } }")>]
-[<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, null,"public class rootModel { public class innerClassModel { public decimal FooBar { get; set; } } public innerClassModel InnerClass { get; set; } }")>]
-let ``Casing Camel `` json typeCasing propertyCasing  expected =
+[<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, CamelCase,
+             "public class xRootModel { public class xInnerClassModel { public decimal fooBar { get; set; } } public xInnerClassModel innerClass { get; set; } }")>]
+[<InlineData("""{"InnerClass": {"FooBar": 2}}""", null, CamelCase,
+             "public class XRootModel { public class XInnerClassModel { public decimal fooBar { get; set; } } public XInnerClassModel innerClass { get; set; } }")>]
+[<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, null,
+             "public class xRootModel { public class xInnerClassModel { public decimal FooBar { get; set; } } public xInnerClassModel InnerClass { get; set; } }")>]
+let ``Casing Camel  works with arguments suffix, root and prefix`` json typeCasing propertyCasing expected =
+    let result =
+        CSharp.CreateFile
+            (json,
+             Settings
+                 (TypeCasing = typeCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
+                  RootObjectName = "root"))
+    Assert.Equal(expected, result.Either.Value)
+
+[<Theory>]
+[<InlineData("""{"INNERCLASS": {"FOOBAR": 2}}""", NoneCase, NoneCase,
+             "public class xrootmodel { public class xINNERCLASSmodel { public decimal FOOBAR { get; set; } } public xINNERCLASSmodel INNERCLASS { get; set; } }")>]
+[<InlineData("""{"innerClass": {"fooBar": 2}}""", null, NoneCase,
+             "public class XRootModel { public class XInnerClassModel { public decimal fooBar { get; set; } } public XInnerClassModel innerClass { get; set; } }")>]
+[<InlineData("""{"innerClass": {"fooBar": 2}}""", NoneCase, null,
+             "public class xrootmodel { public class xinnerClassmodel { public decimal FooBar { get; set; } } public xinnerClassmodel InnerClass { get; set; } }")>]
+let ``Casing None works with arguments suffix, root and prefix`` json typeCasing propertyCasing expected =
+    let result =
+        CSharp.CreateFile
+            (json,
+             Settings
+                 (TypeCasing = typeCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
+                  RootObjectName = "root"))
+    Assert.Equal(expected, result.Either.Value)
+
+[<Theory>]
+[<InlineData("""{"innerClass": {"FooBar": 2}}""", PascalCase, PascalCase)>]
+[<InlineData("""{"innerClass": {"FooBar": 2}}""", null, PascalCase)>]
+[<InlineData("""{"innerClass": {"FooBar": 2}}""", PascalCase, null)>]
+[<InlineData("""{"innerClass": {"FooBar": 2}}""", null, null)>]
+let ``Casing Pascal`` json typeCasing propertyCasing =
+    let expected =
+        "public class RootModel { public class InnerClassModel { public decimal FooBar { get; set; } } public InnerClassModel InnerClass { get; set; } }"
     let result = CSharp.CreateFile(json, Settings(PropertyCasing = propertyCasing, TypeCasing = typeCasing))
     Assert.Equal(expected, result.Either.Value)
-    
+
 [<Theory>]
-[<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, CamelCase,"public class xRootModel { public class xInnerClassModel { public decimal fooBar { get; set; } } public xInnerClassModel innerClass { get; set; } }")>]
-[<InlineData("""{"InnerClass": {"FooBar": 2}}""", null, CamelCase,"public class XRootModel { public class XInnerClassModel { public decimal fooBar { get; set; } } public XInnerClassModel innerClass { get; set; } }")>]
-[<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, null,"public class xRootModel { public class xInnerClassModel { public decimal FooBar { get; set; } } public xInnerClassModel InnerClass { get; set; } }")>]
-let ``Casing Camel  works with arguments suffix, root and prefix`` json typeCasing propertyCasing  expected =
+[<InlineData("""{"innerClass": {"fooBar": 2}}""", PascalCase, PascalCase)>]
+[<InlineData("""{"innerClass": {"fooBar": 2}}""", null, null)>]
+[<InlineData("""{"innerClass": {"fooBar": 2}}""", null, PascalCase)>]
+[<InlineData("""{"innerClass": {"fooBar": 2}}""", PascalCase, null)>]
+let ``Casing Pascal  works with arguments suffix, root and prefix`` json typeCasing propertyCasing =
+    let expected =
+        "public class XRootModel { public class XInnerClassModel { public decimal FooBar { get; set; } } public XInnerClassModel InnerClass { get; set; } }"
     let result =
         CSharp.CreateFile
             (json,
-             Settings(TypeCasing = typeCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
+             Settings
+                 (TypeCasing = typeCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
+                  RootObjectName = "root"))
     Assert.Equal(expected, result.Either.Value)
-    
+
 [<Theory>]
-[<InlineData("""{"INNERCLASS": {"FOOBAR": 2}}""", NoneCase, NoneCase,"public class xrootmodel { public class xINNERCLASSmodel { public decimal FOOBAR { get; set; } } public xINNERCLASSmodel INNERCLASS { get; set; } }")>]
-[<InlineData("""{"innerClass": {"fooBar": 2}}""", null, NoneCase,"public class XRootModel { public class XInnerClassModel { public decimal fooBar { get; set; } } public XInnerClassModel innerClass { get; set; } }")>]
-[<InlineData("""{"innerClass": {"fooBar": 2}}""", NoneCase, null,"public class xrootmodel { public class xinnerClassmodel { public decimal FooBar { get; set; } } public xinnerClassmodel InnerClass { get; set; } }")>]
-let ``Casing None works with arguments suffix, root and prefix`` json typeCasing propertyCasing  expected =
-    let result =
-        CSharp.CreateFile
-            (json,
-             Settings(TypeCasing = typeCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
-    Assert.Equal(expected, result.Either.Value)
-    
-[<Theory>]
-[<InlineData("""{"inner": {"FooBar": 2}}""", PascalCase, PascalCase, "public class RootModel { public class InnerModel { public decimal FooBar { get; set; } } public InnerModel Inner { get; set; } }")>]
-[<InlineData("""{"inner": {"FooBar": 2}}""", null, PascalCase, "public class RootModel { public class InnerModel { public decimal FooBar { get; set; } } public InnerModel Inner { get; set; } }")>]
-[<InlineData("""{"inner": {"FooBar": 2}}""", PascalCase, null, "public class RootModel { public class InnerModel { public decimal FooBar { get; set; } } public InnerModel Inner { get; set; } }")>]
-[<InlineData("""{"inner": {"FooBar": 2}}""", null, null, "public class RootModel { public class InnerModel { public decimal FooBar { get; set; } } public InnerModel Inner { get; set; } }")>]
-let ``Casing Pascal`` json typeCasing propertyCasing  expected =
-    let result = CSharp.CreateFile(json, Settings(PropertyCasing = propertyCasing, TypeCasing = typeCasing))
-    Assert.Equal(expected, result.Either.Value)
-    
-[<Theory>]
-[<InlineData("""{"innerClass": {"fooBar": 2}}""", PascalCase, PascalCase,"public class XRootModel { public class XInnerClassModel { public decimal FooBar { get; set; } } public XInnerClassModel InnerClass { get; set; } }")>]
-[<InlineData("""{"innerClass": {"fooBar": 2}}""", null, null,"public class XRootModel { public class XInnerClassModel { public decimal FooBar { get; set; } } public XInnerClassModel InnerClass { get; set; } }")>]
-[<InlineData("""{"innerClass": {"fooBar": 2}}""", null, PascalCase,"public class XRootModel { public class XInnerClassModel { public decimal FooBar { get; set; } } public XInnerClassModel InnerClass { get; set; } }")>]
-[<InlineData("""{"innerClass": {"fooBar": 2}}""", PascalCase, null,"public class XRootModel { public class XInnerClassModel { public decimal FooBar { get; set; } } public XInnerClassModel InnerClass { get; set; } }")>]
-let ``Casing Pascal  works with arguments suffix, root and prefix`` json typeCasing propertyCasing  expected =
-    let result =
-        CSharp.CreateFile
-            (json,
-             Settings(TypeCasing = typeCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
-    Assert.Equal(expected, result.Either.Value)
-    
-[<Theory>]
-[<InlineData("""{"INNER": {"FOOBAR": 2}}""", NoneCase, NoneCase, "public class rootmodel { public class INNERmodel { public decimal FOOBAR { get; set; } } public INNERmodel INNER { get; set; } }")>]
-[<InlineData("""{"INNER": {"FOOBAR": 2}}""", null, NoneCase, "public class RootModel { public class InnerModel { public decimal FOOBAR { get; set; } } public InnerModel INNER { get; set; } }")>]
-[<InlineData("""{"INNER": {"FOOBAR": 2}}""", NoneCase, null, "public class rootmodel { public class INNERmodel { public decimal Foobar { get; set; } } public INNERmodel Inner { get; set; } }")>]
-let ``Casing none`` json typeCasing propertyCasing  expected =
+[<InlineData("""{"INNER_CLASS": {"FOO_BAR": 2}}""", NoneCase, NoneCase,
+             "public class rootmodel { public class INNER_CLASSmodel { public decimal FOO_BAR { get; set; } } public INNER_CLASSmodel INNER_CLASS { get; set; } }")>]
+[<InlineData("""{"INNER_CLASS": {"FOO_BAR": 2}}""", null, NoneCase,
+             "public class RootModel { public class InnerClassModel { public decimal FOO_BAR { get; set; } } public InnerClassModel INNER_CLASS { get; set; } }")>]
+[<InlineData("""{"INNER_CLASS": {"FOO_BAR": 2}}""", NoneCase, null,
+             "public class rootmodel { public class INNER_CLASSmodel { public decimal FooBar { get; set; } } public INNER_CLASSmodel InnerClass { get; set; } }")>]
+let ``Casing none`` json typeCasing propertyCasing expected =
     let result = CSharp.CreateFile(json, Settings(PropertyCasing = propertyCasing, TypeCasing = typeCasing))
     Assert.Equal(expected, result.Either.Value)
 
@@ -147,6 +164,7 @@ let ``Two array Objects next to each other`` json =
 [<InlineData("""[ { "tags": [ "non" ], "friends": [ { "id": 0, "name": "Henrietta Tillman" } ], "john" : "" }, { "tags": [ "aliqua" ], "friends": [ { "id": 0, "name": "Kristy Calhoun" } ], "doe" : "" } ]""")>]
 [<InlineData("""[ { "tags": [ "non" ], "friends": [ { "id": 0, "name": "Henrietta Tillman" } ], "john" : "" }, { "tags": [ "aliqua" ], "doe" : "" } ]""")>]
 [<InlineData("""[ { "tags": [ "non" ], "friends": [ { "id": 0, "name": "Henrietta Tillman" } ], "john" : "" }, { "tags": [ "aliqua" ], "friends": [ { "id": 0 } ], "doe" : "" } ]""")>]
+[<InlineData("""[ { "Tags": [ "non" ], "friends": [ { "id": 0, "name": "Henrietta Tillman" } ], "john" : "" }, { "tags": [ "aliqua" ], "friends": [ { "id": 0 } ], "doe" : "" } ]""")>]
 let ``Two array Objects next to each other with different properties should expand properties`` json =
     let result = CSharp.CreateFile json
     let expected =

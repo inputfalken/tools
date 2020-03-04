@@ -84,7 +84,7 @@ type CSharp =
             | GeneratedType previous, GeneratedType current ->
                 let members =
                     Array.concat [ previous.Members; current.Members ]
-                    |> Array.groupBy (fun x -> x.Name)
+                    |> Array.groupBy (fun x -> x.Name.ToLowerInvariant())
                     |> Array.map (fun (_, grouping) ->
                         match Array.reduce (fun x y -> createProperty x y parentLength) grouping with
                         | property when grouping.Length = parentLength -> property
