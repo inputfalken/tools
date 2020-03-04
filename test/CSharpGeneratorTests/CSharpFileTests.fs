@@ -237,7 +237,8 @@ let ``Array with basetypes`` json ``type`` =
 [<InlineData("""["2020-01-01", null, "3/1/2020 9:05:20 PM"]""", "System.DateTime?")>]
 [<InlineData("""["2020-01-01", null]""", "System.DateTime?")>]
 [<InlineData("""["3/1/2020 9:05:20 PM", null]""", "System.DateTime?")>]
-[<InlineData("""["85a34f88-d688-46ce-9989-89d7a8698de7", "79607c8b-74b8-4293-8e01-ca2f77bf76a7", null]""", "System.Guid?")>]
+[<InlineData("""["85a34f88-d688-46ce-9989-89d7a8698de7", "79607c8b-74b8-4293-8e01-ca2f77bf76a7", null]""",
+             "System.Guid?")>]
 [<InlineData("""["85a34f88-d688-46ce-9989-89d7a8698de7", null,"79607c8b-74b8-4293-8e01-ca2f77bf76a7"]""", "System.Guid?")>]
 [<InlineData("""["85a34f88-d688-46ce-9989-89d7a8698de7", null]""", "System.Guid?")>]
 [<InlineData("""["foo", "bar", null]""", "string")>]
@@ -247,7 +248,8 @@ let ``Array with basetypes`` json ``type`` =
 [<InlineData("""[1, null]""", "decimal?")>]
 [<InlineData("""[1,null, 10]""", "decimal?")>]
 [<InlineData("""[null ,"2020-01-01", "3/1/2020 9:05:20 PM"]""", "System.DateTime?")>]
-[<InlineData("""[null ,"85a34f88-d688-46ce-9989-89d7a8698de7", "79607c8b-74b8-4293-8e01-ca2f77bf76a7"]""", "System.Guid?")>]
+[<InlineData("""[null ,"85a34f88-d688-46ce-9989-89d7a8698de7", "79607c8b-74b8-4293-8e01-ca2f77bf76a7"]""",
+             "System.Guid?")>]
 [<InlineData("""[null, {}, null]""", "object")>]
 [<InlineData("""[null,"foo", "bar"]""", "string")>]
 [<InlineData("""[null,1, 10]""", "decimal?")>]
@@ -260,36 +262,50 @@ let ``Array with basetypes mixed with null`` json ``type`` =
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
-[<InlineData("""[ { "foo": 1, "bar": "Hi" }, { "foo": 2, "bar": "Hi" } ] """, "public decimal Foo { get; set; } public string Bar { get; set; }")>]
+[<InlineData("""[ { "foo": 1, "bar": "Hi" }, { "foo": 2, "bar": "Hi" } ] """,
+             "public decimal Foo { get; set; } public string Bar { get; set; }")>]
 [<InlineData("""[ { "bar": [1, "foo"] }, { "bar": [1, 2] } ] """, "public object[] Bar { get; set; }")>]
 [<InlineData("""[ { "bar": [1, 2] }, { "bar": [1, "foo"] } ]""", "public object[] Bar { get; set; }")>]
-[<InlineData("""[ { "Foo" : "foobar", "John" : 2 }, { "Bar" : null, "Doe" : 2 } ]""", "public string Foo { get; set; } public decimal? John { get; set; } public object Bar { get; set; } public decimal? Doe { get; set; }")>]
-[<InlineData("""[ { "Foo" : null, "John" : null }, { "Bar" : null, "Doe" : null }, { "Foo" : "foo", "John" : "doo", "Bar" : 2, "Doe" : 4 } ]""", "public string Foo { get; set; } public string John { get; set; } public decimal? Bar { get; set; } public decimal? Doe { get; set; }")>]
-[<InlineData("""[ { "Foo" : "foobar", "John" : 2 }, { "Bar" : null, "Doe" : 2 }, { "Foo" : null, "John" : 2 }, { "Bar" : null, "Doe" : 2 } ]""", "public string Foo { get; set; } public decimal? John { get; set; } public object Bar { get; set; } public decimal? Doe { get; set; }")>]
-[<InlineData("""[ { "Foo" : null, "Bar" : 2 }, { "Foo" : 4, "Bar" : 2 } ]""", "public decimal? Foo { get; set; } public decimal Bar { get; set; }")>]
-[<InlineData("""[ { "Foo" : null, "Bar" : 2 }, { "Foo" : "foobar", "Bar" : 2 } ]""", "public string Foo { get; set; } public decimal Bar { get; set; }")>]
-[<InlineData("""[ { "Foo" : null, "Bar" : 2, "test" : 2 }, { "Foo" : "foobar", "Bar" : 2 } ]""", "public string Foo { get; set; } public decimal Bar { get; set; } public decimal? Test { get; set; }")>]
-[<InlineData("""[ { "Foo" : null, "Bar" : 2 }, { "Foo" : "foobar", "Bar" : 2, "test" : 2 } ]""", "public string Foo { get; set; } public decimal Bar { get; set; } public decimal? Test { get; set; }")>]
+[<InlineData("""[ { "Foo" : "foobar", "John" : 2 }, { "Bar" : null, "Doe" : 2 } ]""",
+             "public string Foo { get; set; } public decimal? John { get; set; } public object Bar { get; set; } public decimal? Doe { get; set; }")>]
+[<InlineData("""[ { "Foo" : null, "John" : null }, { "Bar" : null, "Doe" : null }, { "Foo" : "foo", "John" : "doo", "Bar" : 2, "Doe" : 4 } ]""",
+             "public string Foo { get; set; } public string John { get; set; } public decimal? Bar { get; set; } public decimal? Doe { get; set; }")>]
+[<InlineData("""[ { "Foo" : "foobar", "John" : 2 }, { "Bar" : null, "Doe" : 2 }, { "Foo" : null, "John" : 2 }, { "Bar" : null, "Doe" : 2 } ]""",
+             "public string Foo { get; set; } public decimal? John { get; set; } public object Bar { get; set; } public decimal? Doe { get; set; }")>]
+[<InlineData("""[ { "Foo" : null, "Bar" : 2 }, { "Foo" : 4, "Bar" : 2 } ]""",
+             "public decimal? Foo { get; set; } public decimal Bar { get; set; }")>]
+[<InlineData("""[ { "Foo" : null, "Bar" : 2 }, { "Foo" : "foobar", "Bar" : 2 } ]""",
+             "public string Foo { get; set; } public decimal Bar { get; set; }")>]
+[<InlineData("""[ { "Foo" : null, "Bar" : 2, "test" : 2 }, { "Foo" : "foobar", "Bar" : 2 } ]""",
+             "public string Foo { get; set; } public decimal Bar { get; set; } public decimal? Test { get; set; }")>]
+[<InlineData("""[ { "Foo" : null, "Bar" : 2 }, { "Foo" : "foobar", "Bar" : 2, "test" : 2 } ]""",
+             "public string Foo { get; set; } public decimal Bar { get; set; } public decimal? Test { get; set; }")>]
 let ``Array with objects`` json csharp =
     let result = CSharp.CreateFile json
     let expected = sprintf "public class RootModel { %s }" csharp
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
-[<InlineData("""{ "aps": { "alert":"tit}" } }""", "public class ApsModel { public string Alert { get; set; } } public ApsModel Aps { get; set; }")>]
+[<InlineData("""{ "aps": { "alert":"tit}" } }""",
+             "public class ApsModel { public string Alert { get; set; } } public ApsModel Aps { get; set; }")>]
 [<InlineData("""{"Foo": 2}""", "public decimal Foo { get; set; }")>]
-[<InlineData("""{"foo": 2, "bar": "this is a test"}""", "public decimal Foo { get; set; } public string Bar { get; set; }")>]
-[<InlineData("""{"foo": 2, "items": [1,2,3,4,5]}""", "public decimal Foo { get; set; } public decimal[] Items { get; set; }")>]
-[<InlineData("""{"foo": 2, "items": ["foo","bar", "doe"]}""", "public decimal Foo { get; set; } public string[] Items { get; set; }")>]
-[<InlineData("""{ "Models": [ { "foo": 1 }, { "foo": 2 } ]} """, "public class ModelsModel { public decimal Foo { get; set; } } public ModelsModel[] Models { get; set; }")>]
+[<InlineData("""{"foo": 2, "bar": "this is a test"}""",
+             "public decimal Foo { get; set; } public string Bar { get; set; }")>]
+[<InlineData("""{"foo": 2, "items": [1,2,3,4,5]}""",
+             "public decimal Foo { get; set; } public decimal[] Items { get; set; }")>]
+[<InlineData("""{"foo": 2, "items": ["foo","bar", "doe"]}""",
+             "public decimal Foo { get; set; } public string[] Items { get; set; }")>]
+[<InlineData("""{ "Models": [ { "foo": 1 }, { "foo": 2 } ]} """,
+             "public class ModelsModel { public decimal Foo { get; set; } } public ModelsModel[] Models { get; set; }")>]
 [<InlineData("""{ "Foo" : null }""", "public object Foo { get; set; }")>]
 [<InlineData("""{ "Foo" : null, "Bar" : 1 }""", "public object Foo { get; set; } public decimal Bar { get; set; }")>]
-[<InlineData(""" [ { "Foo" : "foobar", "Bar" : 2 }, { "Foo" : null, "Bar" : 2 } ] """, "public string Foo { get; set; } public decimal Bar { get; set; }")>]
+[<InlineData(""" [ { "Foo" : "foobar", "Bar" : 2 }, { "Foo" : null, "Bar" : 2 } ] """,
+             "public string Foo { get; set; } public decimal Bar { get; set; }")>]
 let Object json csharp =
     let result = CSharp.CreateFile json
     let expected = sprintf "public class RootModel { %s }" csharp
     Assert.Equal(expected, result.Either.Value)
-    
+
 [<Theory>]
 [<InlineData("""{"1337": {}}""", "Member names can only start with letters.")>]
 [<InlineData("""{"Foo": {"1337": {"bar": 2}}}""", "Member names can only start with letters.")>]
@@ -298,13 +314,15 @@ let ```Type names or member names can not start with numbers`` json expected =
     Assert.Equal(expected, result.Either.Error.Message)
 
 [<Theory>]
-[<InlineData("""{"Nested": {"Root": {"foo":2}}}""")>]
-[<InlineData("""{"Nested": {"Root": []}}""")>]
-[<InlineData("""{"Nested": {"Root": 1}}""")>]
-let ``Member names is the same as their enclosing type`` json =
+[<InlineData("""{"Nested": {"Root": {"foo":2}}}""",
+             "public class RootModel { public class NestedModel { public class NestedRootModel { public decimal Foo { get; set; } } public NestedRootModel Root { get; set; } } public NestedModel Nested { get; set; } }")>]
+[<InlineData("""{"Nested": {"Nested": {"Root": {"foo":2}}}}""",
+             "public class RootModel { public class NestedModel { public class NestedNestedModel { public class NestedNestedRootModel { public decimal Foo { get; set; } } public NestedNestedRootModel Root { get; set; } } public NestedNestedModel Nested { get; set; } } public NestedModel Nested { get; set; } }")>]
+[<InlineData("""{"data":{"name":"","token":"","user":{"data":{"name":"","email":""}},"quota":{"data":{"usage":25,"limit":100,"next_reset":"2020-04-01T00:00:00+02:00"}}}}""",
+             "public class RootModel { public class DataModel { public string Name { get; set; } public string Token { get; set; } public class UserModel { public class UserDataModel { public string Name { get; set; } public string Email { get; set; } } public UserDataModel Data { get; set; } } public UserModel User { get; set; } public class QuotaModel { public class QuotaDataModel { public decimal Usage { get; set; } public decimal Limit { get; set; } public System.DateTime NextReset { get; set; } } public QuotaDataModel Data { get; set; } } public QuotaModel Quota { get; set; } } public DataModel Data { get; set; } }")>]
+let ``Resolve class names when it's the same name as their enclosing type`` json expected =
     let result = CSharp.CreateFile json
-    let expected = "Member names cannot be the same as their enclosing type"
-    Assert.Equal(expected, result.Either.Error.Message)
+    Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
 [<InlineData("""[{}, {"foo":"bar"}]""")>]
