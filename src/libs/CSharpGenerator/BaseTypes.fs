@@ -1,6 +1,7 @@
 namespace CSharpGenerator.Types
 
 open System
+open System
 open Common.Casing
 open Common.StringUtils
 
@@ -115,7 +116,7 @@ type internal TypeInfo =
       Namespace: string
       Alias: string option
       Nullable: bool }
-    override this.ToString() = this.Alias |> Option.defaultValue ([ this.Namespace; "."; this.Name ] |> joinStrings)
+    member this.ToString() = this.Alias |> Option.defaultValue ([ this.Namespace; "."; this.Name ] |> joinStrings)
     member this.AsNullable =
         if this.Nullable then
             this
@@ -259,36 +260,40 @@ type internal GeneratedType =
 
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
 
-    member private this.ClassDeclarationPrivate name (set: string Set) =
-        let formattedName =
-            [ this.NamePrefix; name; this.NameSuffix ]
-            |> joinStringsWithSpaceSeparation
-            |> this.TypeCasing.apply
-
-        // TODO when tests are nailed, refactor!
-        let set = set.Add (name.ToLowerInvariant())
+    member private this.ClassDeclarationPrivate (name: string) (set: string Set) =
+        let set = set.Add(name.ToLowerInvariant())
         this.Members
         |> Seq.map (fun property ->
+            let casedPropertyName = this.PropertyCasing.apply property.Name 
             match property.Type |> Option.defaultValue CSType.UnresolvedBaseType with
             | _ when not (Char.IsLetter property.Name.[0]) ->
                 raise (System.ArgumentException("Member names can only start with letters."))
-            | GeneratedType x when set.Contains (property.Name.ToLowerInvariant()) ->
+            | GeneratedType x when set.Contains(property.Name.ToLowerInvariant()) ->
                 // This will make sure that class names do not collide with their outer members.
                 let className = joinStringsWithSpaceSeparation [ name; property.Name ] |> this.TypeCasing.apply
                 [ x.ClassDeclarationPrivate className set
-                  x.FormatProperty ([ x.NamePrefix; className; x.NameSuffix ] |> joinStringsWithSpaceSeparation |> this.TypeCasing.apply)
-                      (property.Name |> this.PropertyCasing.apply) ]
+                  x.FormatProperty
+                      ([ x.NamePrefix; className; x.NameSuffix ]
+                       |> joinStringsWithSpaceSeparation
+                       |> this.TypeCasing.apply) casedPropertyName ]
                 |> joinStringsWithSpaceSeparation
             | GeneratedType x ->
                 let className = property.Name |> this.TypeCasing.apply
                 [ x.ClassDeclarationPrivate className set
-                  x.FormatProperty ([ x.NamePrefix; className; x.NameSuffix ] |> joinStringsWithSpaceSeparation |> this.TypeCasing.apply)
-                      (property.Name |> this.PropertyCasing.apply ) ]
+                  x.FormatProperty
+                      ([ x.NamePrefix; className; x.NameSuffix ]
+                       |> joinStringsWithSpaceSeparation
+                       |> this.TypeCasing.apply) (casedPropertyName) ]
                 |> joinStringsWithSpaceSeparation
-            | ArrayType x -> x.FormatArray (property.Name |> this.PropertyCasing.apply) false
-            | BaseType x -> x.FormatProperty(property.Name |> this.PropertyCasing.apply))
+            | ArrayType x -> x.FormatArray (casedPropertyName) false
+            | BaseType x -> x.FormatProperty(casedPropertyName))
         |> joinStringsWithSpaceSeparation
-        |> (fun x -> Formatters.``class`` (formattedName) x)
+        |> (fun x ->
+        let formattedName =
+            [ this.NamePrefix; name; this.NameSuffix ]
+            |> joinStringsWithSpaceSeparation
+            |> this.TypeCasing.apply
+        Formatters.``class`` (formattedName) x)
 
     member this.ClassDeclaration name = this.ClassDeclarationPrivate name Set.empty
 
