@@ -185,6 +185,7 @@ type CSharp =
                 |> function
                 | GeneratedType x -> x.ClassDeclaration
                 | ArrayType x -> fun y -> x.FormatArray y true
+                // TODO apply property casing
                 | BaseType x -> x.FormatProperty
                 <| rootObject
 

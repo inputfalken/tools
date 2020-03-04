@@ -309,6 +309,7 @@ and internal CSType =
     | ArrayType of CSType
     static member UnresolvedBaseType = BaseType.Object |> CSType.BaseType
 
+    // TODO apply property casing
     member this.FormatArray key isRoot =
         match this with
         | BaseType x -> x.FormatArray key
