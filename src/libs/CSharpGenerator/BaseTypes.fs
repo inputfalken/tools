@@ -261,8 +261,6 @@ type internal GeneratedType =
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
 
     member private this.ClassDeclarationPrivate (name: string) (set: string Set) =
-        if name = "links" then
-            ()
         let set = set.Add(name.ToLowerInvariant())
         this.Members
         |> Seq.map (fun property ->
