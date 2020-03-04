@@ -15,8 +15,16 @@
         <InputTextArea class="form-control form-control-lg" id="json" @bind-Value="@_settings.Json"/>
     </div>
     <div class="form-group">
-        <label for="casingSelector">Casing Rule</label>
-        <InputSelect class="form-control form-control-lg" id="casingSelector" @bind-Value="@_settings.Casing">
+        <label for="propertyCasingSelector">Property Casing Rule: </label>
+        <InputSelect class="form-control form-control-lg" id="propertyCasingSelector" @bind-Value="@_settings.PropertyCasing">
+            @foreach (var casingOption in CasingOptions) {
+                <option>@casingOption</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="form-group">
+        <label for="classCasingSelector">Property Casing Rule: </label>
+        <InputSelect class="form-control form-control-lg" id="classCasingSelector" @bind-Value="@_settings.ClassCasing">
             @foreach (var casingOption in CasingOptions) {
                 <option>@casingOption</option>
             }
@@ -59,7 +67,9 @@
         public string Json { get; set; } = @"{""foo"":""bar""}";
 
         [Required]
-        public string Casing { get; set; } = CasingOptions[0];
+        public string PropertyCasing { get; set; } = CasingOptions[0];
+        [Required]
+        public string ClassCasing { get; set; } = CasingOptions[0];
 
         public string ClassPrefix { get; set; } = string.Empty;
         public string ClassSuffix { get; set; } = "Model";
@@ -78,11 +88,12 @@
         CSharpGenerator.CSharp.CreateFile(
             _settings.Json,
             new Settings {
-                PropertyCasing = _settings.Casing,
+                PropertyCasing = _settings.PropertyCasing,
                 ClassPrefix = _settings.ClassPrefix,
                 ClassSuffix = _settings.ClassSuffix,
                 NameSpace = _settings.NameSpace,
-                RootObjectName = _settings.RootName
+                RootObjectName = _settings.RootName,
+                TypeCasing = _settings.ClassCasing
             }
             )
             .Map(x => CSharpSyntaxTree.ParseText(x))
