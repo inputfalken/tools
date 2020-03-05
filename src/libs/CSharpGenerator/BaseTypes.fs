@@ -260,18 +260,18 @@ type internal GeneratedType =
 
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
 
-    member private this.ClassDeclarationPrivate (name: string) (set: string Set) =
+    member this.ClassDeclaration (name: string) (set: string Set) =
         let set = set.Add(name.ToLowerInvariant())
         this.Members
         |> Seq.map (fun property ->
-            let casedPropertyName = this.PropertyCasing.apply property.Name 
+            let casedPropertyName = this.PropertyCasing.apply property.Name
             match property.Type |> Option.defaultValue CSType.UnresolvedBaseType with
             | _ when not (Char.IsLetter property.Name.[0]) ->
                 raise (System.ArgumentException("Member names can only start with letters."))
             | GeneratedType x when set.Contains(property.Name.ToLowerInvariant()) ->
                 // This will make sure that class names do not collide with their outer members.
                 let className = joinStringsWithSpaceSeparation [ name; property.Name ] |> this.TypeCasing.apply
-                [ x.ClassDeclarationPrivate className set
+                [ x.ClassDeclaration className set
                   x.FormatProperty
                       ([ x.NamePrefix; className; x.NameSuffix ]
                        |> joinStringsWithSpaceSeparation
@@ -279,13 +279,13 @@ type internal GeneratedType =
                 |> joinStringsWithSpaceSeparation
             | GeneratedType x ->
                 let className = property.Name |> this.TypeCasing.apply
-                [ x.ClassDeclarationPrivate className set
+                [ x.ClassDeclaration className set
                   x.FormatProperty
                       ([ x.NamePrefix; className; x.NameSuffix ]
                        |> joinStringsWithSpaceSeparation
                        |> this.TypeCasing.apply) (casedPropertyName) ]
                 |> joinStringsWithSpaceSeparation
-            | ArrayType x -> x.FormatArray (casedPropertyName) false
+            | ArrayType x -> x.FormatArray (casedPropertyName) false set
             | BaseType x -> x.FormatProperty(casedPropertyName))
         |> joinStringsWithSpaceSeparation
         |> (fun x ->
@@ -295,7 +295,6 @@ type internal GeneratedType =
             |> this.TypeCasing.apply
         Formatters.``class`` (formattedName) x)
 
-    member this.ClassDeclaration name = this.ClassDeclarationPrivate name Set.empty
 
 and internal Property =
     { Name: string
@@ -308,14 +307,28 @@ and internal CSType =
     static member UnresolvedBaseType = BaseType.Object |> CSType.BaseType
 
     // TODO apply property casing
-    member this.FormatArray key isRoot =
+    member this.FormatArray key isRoot set =
         match this with
         | BaseType x -> x.FormatArray key
+        | GeneratedType x when set.Contains(key.ToLowerInvariant()) ->
+            // The type must built in this condtion.
+            let arrayProperty =
+                Formatters.arrayProperty
+                    ([ x.NamePrefix; key; x.NameSuffix ]
+                     |> joinStringsWithSpaceSeparation
+                     |> x.TypeCasing.apply) key
+            [ x.ClassDeclaration key set
+              arrayProperty ]
+            |> joinStringsWithSpaceSeparation
         | GeneratedType x ->
+            let classDecleration = x.ClassDeclaration key set
             if isRoot then
-                x.ClassDeclaration key
+                classDecleration
             else
-                [ x.ClassDeclaration key
-                  Formatters.arrayProperty ([ x.NamePrefix; key; x.NameSuffix ] |> joinStringsWithSpaceSeparation |> x.TypeCasing.apply) key ]
-                |> joinStringsWithSpaceSeparation
-        | ArrayType x -> x.FormatArray key false
+                let arrayProperty =
+                    Formatters.arrayProperty
+                        ([ x.NamePrefix; key; x.NameSuffix ]
+                         |> joinStringsWithSpaceSeparation
+                         |> x.TypeCasing.apply) key
+                [ classDecleration; arrayProperty ] |> joinStringsWithSpaceSeparation
+        | ArrayType x -> x.FormatArray key false set
