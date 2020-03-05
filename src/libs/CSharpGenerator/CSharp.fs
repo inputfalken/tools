@@ -185,7 +185,7 @@ type CSharp =
                 |> Option.defaultValue CSType.UnresolvedBaseType
                 |> function
                 | GeneratedType x -> fun y ->  x.ClassDeclaration y set
-                | ArrayType x -> fun y -> x.FormatArray y true set
+                | ArrayType x -> fun y -> x.FormatArray y true set Option.None
                 // TODO apply property casing
                 | BaseType x -> x.FormatProperty
                 <| rootObject

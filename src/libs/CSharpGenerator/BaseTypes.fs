@@ -285,7 +285,11 @@ type internal GeneratedType =
                        |> joinStringsWithSpaceSeparation
                        |> this.TypeCasing.apply) (casedPropertyName) ]
                 |> joinStringsWithSpaceSeparation
-            | ArrayType x -> x.FormatArray (casedPropertyName) false set
+            | ArrayType x ->
+                let className = joinStringsWithSpaceSeparation [ name; property.Name ]
+                                |> this.TypeCasing.apply
+                                |> Option.Some
+                x.FormatArray (casedPropertyName) false set className
             | BaseType x -> x.FormatProperty(casedPropertyName))
         |> joinStringsWithSpaceSeparation
         |> (fun x ->
@@ -307,17 +311,17 @@ and internal CSType =
     static member UnresolvedBaseType = BaseType.Object |> CSType.BaseType
 
     // TODO apply property casing
-    member this.FormatArray key isRoot set =
+    member this.FormatArray key isRoot set (typeName: string Option) =
         match this with
         | BaseType x -> x.FormatArray key
-        | GeneratedType x when set.Contains(key.ToLowerInvariant()) ->
-            // The type must built in this condtion.
+        | GeneratedType x when set.Contains(key.ToLowerInvariant()) && typeName.IsSome ->
+            let typeName = typeName.Value
             let arrayProperty =
                 Formatters.arrayProperty
-                    ([ x.NamePrefix; key; x.NameSuffix ]
+                    ([ x.NamePrefix; typeName; x.NameSuffix ]
                      |> joinStringsWithSpaceSeparation
                      |> x.TypeCasing.apply) key
-            [ x.ClassDeclaration key set
+            [ x.ClassDeclaration typeName set
               arrayProperty ]
             |> joinStringsWithSpaceSeparation
         | GeneratedType x ->
@@ -331,4 +335,4 @@ and internal CSType =
                          |> joinStringsWithSpaceSeparation
                          |> x.TypeCasing.apply) key
                 [ classDecleration; arrayProperty ] |> joinStringsWithSpaceSeparation
-        | ArrayType x -> x.FormatArray key false set
+        | ArrayType x -> x.FormatArray key false set Option.None
