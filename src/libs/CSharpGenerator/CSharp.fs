@@ -178,13 +178,14 @@ type CSharp =
             | Null -> Option.None
 
         try
+            let set = Set.empty
             let cSharp =
                 Json.parse input 
                 |> baseType
                 |> Option.defaultValue CSType.UnresolvedBaseType
                 |> function
-                | GeneratedType x -> x.ClassDeclaration
-                | ArrayType x -> fun y -> x.FormatArray y true
+                | GeneratedType x -> fun y -> x.ClassDeclaration y set
+                | ArrayType x -> fun y -> x.FormatArray y true set
                 // TODO apply property casing
                 | BaseType x -> x.FormatProperty
                 <| rootObject
