@@ -1,6 +1,5 @@
 ﻿namespace CSharpGenerator
 
-open System
 open JsonParser
 open CSharpGenerator.Types
 open CSharpGenerator.Arguments
@@ -12,8 +11,13 @@ type CSharp =
     static member public CreateFile input = CSharp.CreateFile(input, Settings())
     static member public CreateFile(input, settings) =
 
-        let casing =
-            settings.Casing
+        let propertyCasing =
+            settings.PropertyCasing
+            |> Casing.fromString
+            |> Option.defaultValue Casing.Pascal
+
+        let typeCasing =
+            settings.TypeCasing
             |> Casing.fromString
             |> Option.defaultValue Casing.Pascal
 
@@ -29,18 +33,18 @@ type CSharp =
         let (classPrefix, classSuffix, rootObject) =
             match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
             | Some prefix, Some suffix ->
-                match casing with
+                match typeCasing with
                 | Camel -> (prefix, Pascal.apply suffix, Pascal.apply rootObject)
                 | x -> (x.apply prefix, x.apply suffix, x.apply rootObject)
-            | Some prefix, Option.None -> (casing.apply prefix, System.String.Empty, casing.apply rootObject)
+            | Some prefix, Option.None -> (typeCasing.apply prefix, System.String.Empty, typeCasing.apply rootObject)
             | Option.None, Option.Some suffix ->
-                match casing with
-                | None -> (System.String.Empty, suffix, casing.apply rootObject)
-                | _ -> (System.String.Empty, Pascal.apply suffix, casing.apply rootObject)
+                match typeCasing with
+                | None -> (System.String.Empty, suffix, typeCasing.apply rootObject)
+                | _ -> (System.String.Empty, Pascal.apply suffix, typeCasing.apply rootObject)
             | Option.None, Option.None ->
-                match casing with
-                | None -> (System.String.Empty, defaultValues.Model, casing.apply rootObject)
-                | _ -> (System.String.Empty, Pascal.apply defaultValues.Model, casing.apply rootObject)
+                match typeCasing with
+                | None -> (System.String.Empty, defaultValues.Model, typeCasing.apply rootObject)
+                | _ -> (System.String.Empty, Pascal.apply defaultValues.Model, typeCasing.apply rootObject)
 
         let tryConvertToNullableValueType current =
             match current with
@@ -80,7 +84,7 @@ type CSharp =
             | GeneratedType previous, GeneratedType current ->
                 let members =
                     Array.concat [ previous.Members; current.Members ]
-                    |> Array.groupBy (fun x -> x.Name)
+                    |> Array.groupBy (fun x -> x.Name.ToLowerInvariant())
                     |> Array.map (fun (_, grouping) ->
                         match Array.reduce (fun x y -> createProperty x y parentLength) grouping with
                         | property when grouping.Length = parentLength -> property
@@ -89,7 +93,8 @@ type CSharp =
                 { Members = members
                   NamePrefix = classPrefix
                   NameSuffix = classSuffix
-                  Casing = casing }
+                  PropertyCasing = propertyCasing
+                  TypeCasing = typeCasing }
                 |> CSType.GeneratedType
             | previous, GeneratedType current when previous = CSType.UnresolvedBaseType ->
                 current |> CSType.GeneratedType
@@ -147,7 +152,9 @@ type CSharp =
                     { Members = x
                       NameSuffix = classSuffix
                       NamePrefix = classPrefix
-                      Casing = casing })
+                      PropertyCasing = propertyCasing
+                      TypeCasing = typeCasing
+                      })
                     |> CSType.GeneratedType
                 |> Option.Some
             | Array values ->
@@ -171,13 +178,15 @@ type CSharp =
             | Null -> Option.None
 
         try
+            let set = Set.empty
             let cSharp =
-                Json.parse input casing
+                Json.parse input 
                 |> baseType
                 |> Option.defaultValue CSType.UnresolvedBaseType
                 |> function
-                | GeneratedType x -> x.ClassDeclaration
-                | ArrayType x -> fun y -> x.FormatArray y true
+                | GeneratedType x -> fun y ->  x.ClassDeclaration y set
+                | ArrayType x -> fun y -> x.FormatArray y true set Option.None
+                // TODO apply property casing
                 | BaseType x -> x.FormatProperty
                 <| rootObject
 

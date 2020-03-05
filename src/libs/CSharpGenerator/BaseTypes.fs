@@ -255,34 +255,50 @@ type internal GeneratedType =
     { Members: Property []
       NamePrefix: string
       NameSuffix: string
-      Casing: Casing }
+      PropertyCasing: Casing
+      TypeCasing: Casing }
 
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
 
-    member private this.ClassDeclarationPrivate name (set: string Set) =
-        let formattedName = [ this.NamePrefix; name; this.NameSuffix ] |> joinStrings
-        let set = set.Add name
+    member this.ClassDeclaration (name: string) (set: string Set) =
+        let set = set.Add(name.ToLowerInvariant())
         this.Members
         |> Seq.map (fun property ->
+            let casedPropertyName = this.PropertyCasing.apply property.Name
             match property.Type |> Option.defaultValue CSType.UnresolvedBaseType with
             | _ when not (Char.IsLetter property.Name.[0]) ->
                 raise (System.ArgumentException("Member names can only start with letters."))
-            | GeneratedType x when set.Contains property.Name ->
+            | GeneratedType x when set.Contains(property.Name.ToLowerInvariant()) ->
                 // This will make sure that class names do not collide with their outer members.
-                let className = joinStrings [name; property.Name]
-                [ x.ClassDeclarationPrivate className set
-                  x.FormatProperty ([ x.NamePrefix; className; x.NameSuffix ] |> joinStrings) property.Name ]
+                let className = joinStringsWithSpaceSeparation [ name; property.Name ] |> this.TypeCasing.apply
+                [ x.ClassDeclaration className set
+                  x.FormatProperty
+                      ([ x.NamePrefix; className; x.NameSuffix ]
+                       |> joinStringsWithSpaceSeparation
+                       |> this.TypeCasing.apply) casedPropertyName ]
                 |> joinStringsWithSpaceSeparation
             | GeneratedType x ->
-                [ x.ClassDeclarationPrivate property.Name set
-                  x.FormatProperty ([ x.NamePrefix; property.Name; x.NameSuffix ] |> joinStrings) property.Name ]
+                let className = property.Name |> this.TypeCasing.apply
+                [ x.ClassDeclaration className set
+                  x.FormatProperty
+                      ([ x.NamePrefix; className; x.NameSuffix ]
+                       |> joinStringsWithSpaceSeparation
+                       |> this.TypeCasing.apply) (casedPropertyName) ]
                 |> joinStringsWithSpaceSeparation
-            | ArrayType x -> x.FormatArray property.Name false
-            | BaseType x -> x.FormatProperty property.Name)
+            | ArrayType x ->
+                let className = joinStringsWithSpaceSeparation [ name; property.Name ]
+                                |> this.TypeCasing.apply
+                                |> Option.Some
+                x.FormatArray (casedPropertyName) false set className
+            | BaseType x -> x.FormatProperty(casedPropertyName))
         |> joinStringsWithSpaceSeparation
-        |> (fun x -> Formatters.``class`` (this.Casing.apply formattedName) x)
+        |> (fun x ->
+        let formattedName =
+            [ this.NamePrefix; name; this.NameSuffix ]
+            |> joinStringsWithSpaceSeparation
+            |> this.TypeCasing.apply
+        Formatters.``class`` (formattedName) x)
 
-    member this.ClassDeclaration name = this.ClassDeclarationPrivate name Set.empty
 
 and internal Property =
     { Name: string
@@ -294,14 +310,29 @@ and internal CSType =
     | ArrayType of CSType
     static member UnresolvedBaseType = BaseType.Object |> CSType.BaseType
 
-    member this.FormatArray key isRoot =
+    // TODO apply property casing and avoid using option string to pass a potential state
+    member this.FormatArray key isRoot set (typeName: string Option) =
         match this with
         | BaseType x -> x.FormatArray key
+        | GeneratedType x when set.Contains(key.ToLowerInvariant()) && typeName.IsSome ->
+            let typeName = typeName.Value
+            let arrayProperty =
+                Formatters.arrayProperty
+                    ([ x.NamePrefix; typeName; x.NameSuffix ]
+                     |> joinStringsWithSpaceSeparation
+                     |> x.TypeCasing.apply) key
+            [ x.ClassDeclaration typeName set
+              arrayProperty ]
+            |> joinStringsWithSpaceSeparation
         | GeneratedType x ->
+            let classDecleration = x.ClassDeclaration key set
             if isRoot then
-                x.ClassDeclaration key
+                classDecleration
             else
-                [ x.ClassDeclaration key
-                  Formatters.arrayProperty ([ x.NamePrefix; key; x.NameSuffix ] |> joinStrings) key ]
-                |> joinStringsWithSpaceSeparation
-        | ArrayType x -> x.FormatArray key false
+                let arrayProperty =
+                    Formatters.arrayProperty
+                        ([ x.NamePrefix; key; x.NameSuffix ]
+                         |> joinStringsWithSpaceSeparation
+                         |> x.TypeCasing.apply) key
+                [ classDecleration; arrayProperty ] |> joinStringsWithSpaceSeparation
+        | ArrayType x -> x.FormatArray key false set Option.None

@@ -10,7 +10,7 @@ module public Json =
         | TryParse.Guid x -> Guid x
         | x -> Value.String x
 
-    let rec private map value casing =
+    let rec private map value =
         match value with
         | JsonValue.Number x -> Decimal(x)
         | JsonValue.Float x -> Decimal(decimal x)
@@ -19,18 +19,18 @@ module public Json =
         | JsonValue.Null -> Null
         | JsonValue.Array x ->
             x
-            |> Array.map (fun x -> map x casing)
+            |> Array.map map
             |> Array
         | JsonValue.Record x ->
             x
-            |> Array.map (fun (x, y) -> propertyMap x y casing)
+            |> Array.map (fun (x, y) -> propertyMap x y )
             |> Object
 
-    and private propertyMap key value (casing: Casing) =
-        { Key = casing.apply key
-          Value = map value casing }
+    and private propertyMap key value  =
+        { Key =  key
+          Value = map value }
 
-    let parse input casing =
+    let parse input =
         input
         |> JsonValue.Parse
-        |> (fun x -> map x casing)
+        |> (fun x -> map x )
