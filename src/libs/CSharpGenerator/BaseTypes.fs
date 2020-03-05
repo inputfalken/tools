@@ -310,7 +310,7 @@ and internal CSType =
     | ArrayType of CSType
     static member UnresolvedBaseType = BaseType.Object |> CSType.BaseType
 
-    // TODO apply property casing
+    // TODO apply property casing and avoid using option string to pass a potential state
     member this.FormatArray key isRoot set (typeName: string Option) =
         match this with
         | BaseType x -> x.FormatArray key
