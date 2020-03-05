@@ -317,71 +317,16 @@ let ``Array with empty object or null should not resolve in object array`` json 
     let result = CSharp.CreateFile json
     let expected = "public class RootModel { public string Foo { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
-
+    
 [<Theory>]
-[<InlineData("""
-{
-  "orgnr": "",
-  "name": "",
-  "children": [
-      {
-          "orgnr": "",
-          "name": "",
-          "children": []
-      },
-      {
-          "orgnr": "",
-          "name": "",
-          "children": []
-      },
-      {
-          "orgnr": "",
-          "name": "",
-          "children": []
-      },
-      {
-          "orgnr": "",
-          "name": "",
-          "children": [
-              {
-                  "orgnr": "",
-                  "name": "",
-                  "children": [
-                      {
-                          "orgnr": "",
-                          "name": ""
-                      }
-                  ]
-              }
-          ]
-      }
-  ]
-}
-""","public class RootModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } } public ChildrenChildrenChildrenModel[] Children { get; set; } } public ChildrenChildrenModel[] Children { get; set; } } public ChildrenModel[] Children { get; set; } }")>]
-[<InlineData("""
-{
-  "orgnr": "",
-  "name": "",
-  "children": {
-      {
-          "orgnr": "",
-          "name": "",
-          "children": {
-              {
-                  "orgnr": "",
-                  "name": "",
-                  "children": {
-                      {
-                          "orgnr": "",
-                          "name": ""
-                      }
-                  }
-              }
-          }
-      }
-  }
-}
-""","public class RootModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } } public ChildrenChildrenChildrenModel Children { get; set; } } public ChildrenChildrenModel Children { get; set; } } public ChildrenModel Children { get; set; } }")>]
-let ``Nested identical children`` json expected =
+[<InlineData(""" { "orgnr": "", "name": "", "children": { "orgnr": "", "name": "", "children": { "orgnr": "", "name": "", "children": { "orgnr": "", "name": "" } } } } """, "public class RootModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } } public ChildrenChildrenChildrenModel Children { get; set; } } public ChildrenChildrenModel Children { get; set; } } public ChildrenModel Children { get; set; } }")>]
+let ``Nested identical children with Object`` json expected =
     let result = CSharp.CreateFile json
-    Assert.Equal(expected, result)
+    Assert.Equal(expected, result.Either.Value)
+    
+[<Theory>]
+[<InlineData(""" { "orgnr": "", "name": "", "children": [ { "orgnr": "", "name": "", "children": [ { "orgnr": "", "name": "", "children": [ { "orgnr": "", "name": "" } ] } ] } ] } """, "public class RootModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } } public ChildrenChildrenChildrenModel[] Children { get; set; } } public ChildrenChildrenModel[] Children { get; set; } } public ChildrenModel[] Children { get; set; } }")>]
+let ``Nested identical children with Array`` json expected =
+    let result = CSharp.CreateFile json
+    Assert.Equal(expected, result.Either.Value)
+
