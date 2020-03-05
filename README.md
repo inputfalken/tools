@@ -7,5 +7,5 @@ This repo contains the following
 * [Common](https://github.com/inputfalken/JSON2Class/tree/master/src/libs/Common) a shared library with utility functions and fields used across all assemblies.
 
 ## Library Consumers
-* [PowerShell module](https://github.com/inputfalken/TemplateFactory/tree/master/src/apps/PowerShellModule) which can be loaded into as a cmdlet.
+* [PowerShell module](https://github.com/inputfalken/TemplateFactory/tree/master/src/apps/PowerShellModule)
 * [Blazor client web app](https://github.com/inputfalken/TemplateFactory/tree/master/src/apps/GitHubPage) which is hosted on the GitHub pages of this repository.
