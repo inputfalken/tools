@@ -3,7 +3,6 @@ module Tests
 open CSharpGenerator
 open CSharpGenerator.Arguments
 open Xunit
-open Xunit
 
 
 [<Literal>]

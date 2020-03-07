@@ -7,6 +7,7 @@
     <ItemGroup>
         <Compile Include="Casing.fs" />
         <Compile Include="StringValidator.fs" />
+        <Compile Include="CaseInsensitiveString.fs" />
     </ItemGroup>
 
     <ItemGroup>
