@@ -12,41 +12,6 @@ type CSharp =
     static member public CreateFile input = CSharp.CreateFile(input, Settings())
     static member public CreateFile(input, settings) =
 
-        let propertyCasing =
-            settings.PropertyCasing
-            |> Casing.fromString
-            |> Option.defaultValue Casing.Pascal
-
-        let typeCasing =
-            settings.TypeCasing
-            |> Casing.fromString
-            |> Option.defaultValue Casing.Pascal
-
-        let defaultValues =
-            {| Root = "root"
-               Model = "model" |}
-
-        let rootObject =
-            settings.RootObjectName
-            |> valueExists
-            |> Option.defaultValue defaultValues.Root
-
-        let (classPrefix, classSuffix, rootObject) =
-            match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
-            | Some prefix, Some suffix ->
-                match typeCasing with
-                | Camel -> (prefix, Pascal.apply suffix, Pascal.apply rootObject)
-                | x -> (x.apply prefix, x.apply suffix, x.apply rootObject)
-            | Some prefix, Option.None -> (typeCasing.apply prefix, System.String.Empty, typeCasing.apply rootObject)
-            | Option.None, Option.Some suffix ->
-                match typeCasing with
-                | None -> (System.String.Empty, suffix, typeCasing.apply rootObject)
-                | _ -> (System.String.Empty, Pascal.apply suffix, typeCasing.apply rootObject)
-            | Option.None, Option.None ->
-                match typeCasing with
-                | None -> (System.String.Empty, defaultValues.Model, typeCasing.apply rootObject)
-                | _ -> (System.String.Empty, Pascal.apply defaultValues.Model, typeCasing.apply rootObject)
-
         let tryConvertToNullableValueType current =
             match current with
             | BaseType x ->
@@ -168,11 +133,24 @@ type CSharp =
 
         let set: CIString Set = Set.empty
 
+        let (classPrefix, classSuffix) =
+            match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
+            | Some prefix, Some suffix -> (prefix, suffix)
+            | Some prefix, Option.None -> (prefix, System.String.Empty)
+            | Option.None, Option.Some suffix -> (System.String.Empty, suffix)
+            | Option.None, Option.None -> (System.String.Empty, "model")
+
         let csharpSettings =
             { Prefix = classPrefix
               Suffix = classSuffix
-              PropertyCasing = propertyCasing
-              TypeCasing = typeCasing }
+              PropertyCasing =
+                  settings.PropertyCasing
+                  |> Casing.fromString
+                  |> Option.defaultValue Casing.Pascal
+              TypeCasing =
+                  settings.TypeCasing
+                  |> Casing.fromString
+                  |> Option.defaultValue Casing.Pascal }
 
         try
             let cSharp =
@@ -188,7 +166,9 @@ type CSharp =
                         |> StringUtils.joinStringsWithSpaceSeparation
                         |> csharpSettings.PropertyCasing.apply
                         |> x.FormatProperty
-                <| rootObject
+                <| (settings.RootObjectName
+                    |> valueExists
+                    |> Option.defaultValue "root")
 
             settings.NameSpace
             |> valueExists
