@@ -8,6 +8,7 @@ type CIString =
         match x with
         | :? CIString as s -> StringComparer.OrdinalIgnoreCase.Equals(this.string, s.string) 
         | :? string as s -> StringComparer.OrdinalIgnoreCase.Equals(this.string, s) 
+        | x when x = null && this.string = null -> true
         | _ -> false
     member this.string =
         match this with

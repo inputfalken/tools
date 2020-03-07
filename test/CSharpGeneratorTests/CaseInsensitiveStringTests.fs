@@ -14,6 +14,16 @@ let ```Equal`` left right =
     let left = left |> CI
     let  right = right |>  CI
     Assert.Equal<CIString>(left, right)
+    
+[<Theory>]
+[<InlineData("foo","foo")>]
+[<InlineData("Foo", "foo")>]
+[<InlineData("FOO", "fOo")>]
+[<InlineData(null, null)>]
+[<InlineData("", "")>]
+let ```Equal works on string`` left right =
+    let left = left |> CI
+    Assert.True(left.Equals(right))
         
 
 [<Theory>]
