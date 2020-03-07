@@ -8,8 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Setttings.fs" />
         <Compile Include="BaseTypes.fs" />
+        <Compile Include="CSharpFactory.fs" />
+        <Compile Include="Setttings.fs" />
         <Compile Include="CSharp.fs" />
     </ItemGroup>
 

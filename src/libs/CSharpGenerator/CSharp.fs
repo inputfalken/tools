@@ -1,5 +1,4 @@
 ﻿namespace CSharpGenerator
-
 open JsonParser
 open CSharpGenerator.Types
 open CSharpGenerator.Arguments
@@ -7,6 +6,7 @@ open Common
 open Common.CaseInsensitiveString
 open Common.Casing
 open Common.StringValidator
+open CSharpFactory
 
 type CSharp =
     static member public CreateFile input = CSharp.CreateFile(input, Settings())
@@ -43,32 +43,32 @@ type CSharp =
                         previous
                         |> BaseType.ValueType
                         |> CSType.BaseType
-                    | _ -> CSType.UnresolvedBaseType
-                | _ -> CSType.UnresolvedBaseType
+                    | _ -> UnresolvedBaseType
+                | _ -> UnresolvedBaseType
             | ArrayType previous, ArrayType current ->
                 createBaseType previous current parentLength |> CSType.ArrayType
             | GeneratedType previous, GeneratedType current ->
                 let members =
-                    Array.concat [ previous.Members; current.Members ]
+                    Array.concat [ previous; current ]
                     |> Array.groupBy (fun x -> x.Name |> CI)
                     |> Array.map (fun (_, grouping) ->
                         match Array.reduce (fun x y -> createProperty x y parentLength) grouping with
                         | property when grouping.Length = parentLength -> property
                         | property -> tryConvertToNullableValueTypeProperty property)
-                { Members = members } |> CSType.GeneratedType
-            | previous, GeneratedType current when previous = CSType.UnresolvedBaseType ->
+                members |> CSType.GeneratedType
+            | previous, GeneratedType current when previous = UnresolvedBaseType ->
                 current |> CSType.GeneratedType
-            | GeneratedType previous, current when current = CSType.UnresolvedBaseType ->
+            | GeneratedType previous, current when current = UnresolvedBaseType ->
                 previous |> CSType.GeneratedType
-            | _ -> CSType.UnresolvedBaseType
+            | _ -> UnresolvedBaseType
 
         and createProperty previous current parentLength =
             match previous, current with
             | previous, current when previous = current ->
                 previous
-            | previous, current when previous.Type.IsNone || previous.Type.Value = CSType.UnresolvedBaseType ->
+            | previous, current when previous.Type.IsNone || previous.Type.Value = UnresolvedBaseType ->
                 tryConvertToNullableValueTypeProperty current
-            | previous, current when current.Type.IsNone || current.Type.Value = CSType.UnresolvedBaseType ->
+            | previous, current when current.Type.IsNone || current.Type.Value = UnresolvedBaseType ->
                 tryConvertToNullableValueTypeProperty previous
             | previous, current ->
                 { Name = previous.Name
@@ -102,18 +102,17 @@ type CSharp =
                 |> Option.Some
             | JsonParser.Object records ->
                 match records with
-                | records when records.Length = 0 -> CSType.UnresolvedBaseType
+                | records when records.Length = 0 -> UnresolvedBaseType
                 | records ->
                     records
                     |> Array.map (fun x ->
                         { Name = x.Key
                           Type = baseType x.Value })
-                    |> (fun x -> { Members = x })
                     |> CSType.GeneratedType
                 |> Option.Some
             | Array values ->
                 match values with
-                | values when values.Length = 0 -> CSType.UnresolvedBaseType
+                | values when values.Length = 0 -> UnresolvedBaseType
                 | values ->
                     let baseTypes = values |> Array.map baseType
                     baseTypes
@@ -126,7 +125,7 @@ type CSharp =
                             current
                             |> Option.orElse previous
                             |> Option.map tryConvertToNullableValueType)
-                    |> Option.defaultValue CSType.UnresolvedBaseType
+                    |> Option.defaultValue UnresolvedBaseType
                 |> CSType.ArrayType
                 |> Option.Some
             | Null -> Option.None
@@ -156,16 +155,16 @@ type CSharp =
             let cSharp =
                 Json.parse input
                 |> baseType
-                |> Option.defaultValue CSType.UnresolvedBaseType
+                |> Option.defaultValue UnresolvedBaseType
                 |> function
-                | GeneratedType x -> fun y -> x.ClassDeclaration y set csharpSettings
-                | ArrayType x -> fun y -> x.FormatArray y set Option.None csharpSettings
+                | GeneratedType x -> fun y -> CSharpClass x y set csharpSettings
+                | ArrayType x -> fun y -> CSharpArray x y set Option.None csharpSettings
                 | BaseType x ->
                     fun y ->
                         [ csharpSettings.Prefix; y; csharpSettings.Suffix ]
                         |> StringUtils.joinStringsWithSpaceSeparation
                         |> csharpSettings.PropertyCasing.apply
-                        |> x.FormatProperty
+                        |> CSharpProperty x
                 <| (settings.RootObjectName
                     |> valueExists
                     |> Option.defaultValue "root")
