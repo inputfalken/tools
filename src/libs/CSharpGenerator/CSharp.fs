@@ -4,6 +4,7 @@ open JsonParser
 open CSharpGenerator.Types
 open CSharpGenerator.Arguments
 open Common
+open Common.CaseInsensitiveString
 open Common.Casing
 open Common.StringValidator
 
@@ -84,7 +85,7 @@ type CSharp =
             | GeneratedType previous, GeneratedType current ->
                 let members =
                     Array.concat [ previous.Members; current.Members ]
-                    |> Array.groupBy (fun x -> x.Name.ToLowerInvariant())
+                    |> Array.groupBy (fun x -> x.Name |> CI)
                     |> Array.map (fun (_, grouping) ->
                         match Array.reduce (fun x y -> createProperty x y parentLength) grouping with
                         | property when grouping.Length = parentLength -> property
@@ -178,7 +179,7 @@ type CSharp =
             | Null -> Option.None
 
         try
-            let set = Set.empty
+            let set = Set.empty : CIString Set
             let cSharp =
                 Json.parse input 
                 |> baseType

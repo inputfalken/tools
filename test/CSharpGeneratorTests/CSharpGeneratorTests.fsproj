@@ -14,6 +14,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="CSharpFileTests.fs" />
+        <Compile Include="CaseInsensitiveStringTests.fs" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\libs\CSharpGenerator\CSharpGenerator.fsproj" />

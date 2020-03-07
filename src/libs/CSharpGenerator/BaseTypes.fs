@@ -1,9 +1,10 @@
 namespace CSharpGenerator.Types
 
-open System
+open Common.CaseInsensitiveString
 open System
 open Common.Casing
 open Common.StringUtils
+
 
 
 module private Formatters =
@@ -260,15 +261,15 @@ type internal GeneratedType =
 
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
 
-    member this.ClassDeclaration (name: string) (set: string Set) =
-        let set = set.Add(name.ToLowerInvariant())
+    member this.ClassDeclaration (name: string) (set: CIString Set) =
+        let set = name |> CI |> set.Add
         this.Members
         |> Seq.map (fun property ->
             let casedPropertyName = this.PropertyCasing.apply property.Name
             match property.Type |> Option.defaultValue CSType.UnresolvedBaseType with
             | _ when not (Char.IsLetter property.Name.[0]) ->
                 raise (System.ArgumentException("Member names can only start with letters."))
-            | GeneratedType x when set.Contains(property.Name.ToLowerInvariant()) ->
+            | GeneratedType x when property.Name |> CI |> set.Contains ->
                 // This will make sure that class names do not collide with their outer members.
                 let className = joinStringsWithSpaceSeparation [ name; property.Name ] |> this.TypeCasing.apply
                 [ x.ClassDeclaration className set
@@ -278,10 +279,9 @@ type internal GeneratedType =
                        |> this.TypeCasing.apply) casedPropertyName ]
                 |> joinStringsWithSpaceSeparation
             | GeneratedType x ->
-                let className = property.Name |> this.TypeCasing.apply
-                [ x.ClassDeclaration className set
+                [ x.ClassDeclaration property.Name set
                   x.FormatProperty
-                      ([ x.NamePrefix; className; x.NameSuffix ]
+                      ([ x.NamePrefix; property.Name; x.NameSuffix ]
                        |> joinStringsWithSpaceSeparation
                        |> this.TypeCasing.apply) (casedPropertyName) ]
                 |> joinStringsWithSpaceSeparation
@@ -314,7 +314,7 @@ and internal CSType =
     member this.FormatArray key isRoot set (typeName: string Option) =
         match this with
         | BaseType x -> x.FormatArray key
-        | GeneratedType x when set.Contains(key.ToLowerInvariant()) && typeName.IsSome ->
+        | GeneratedType x when key |> CI |> set.Contains && typeName.IsSome ->
             let typeName = typeName.Value
             let arrayProperty =
                 Formatters.arrayProperty
