@@ -131,7 +131,6 @@ type CSharp =
                 |> Option.Some
             | Null -> Option.None
 
-        let set: CIString Set = Set.empty
 
         let (classPrefix, classSuffix) =
             match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
@@ -152,6 +151,7 @@ type CSharp =
                   |> Casing.fromString
                   |> Option.defaultValue Casing.Pascal }
 
+        let set: CIString Set = Set.empty
         try
             let cSharp =
                 Json.parse input

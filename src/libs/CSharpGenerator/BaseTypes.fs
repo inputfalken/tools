@@ -261,7 +261,7 @@ type internal GeneratedType =
 
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
 
-    member this.ClassDeclaration (name: string) (typeSet: CIString Set) (settings: Settings) =
+    member this.ClassDeclaration name (typeSet: CIString Set) settings =
         let set =
             name
             |> CI
