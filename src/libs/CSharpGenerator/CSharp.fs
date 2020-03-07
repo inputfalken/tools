@@ -4,6 +4,7 @@ open JsonParser
 open CSharpGenerator.Types
 open CSharpGenerator.Arguments
 open Common
+open Common
 open Common.CaseInsensitiveString
 open Common.Casing
 open Common.StringValidator
@@ -90,12 +91,7 @@ type CSharp =
                         match Array.reduce (fun x y -> createProperty x y parentLength) grouping with
                         | property when grouping.Length = parentLength -> property
                         | property -> tryConvertToNullableValueTypeProperty property)
-
-                { Members = members
-                  NamePrefix = classPrefix
-                  NameSuffix = classSuffix
-                  PropertyCasing = propertyCasing
-                  TypeCasing = typeCasing }
+                { Members = members }
                 |> CSType.GeneratedType
             | previous, GeneratedType current when previous = CSType.UnresolvedBaseType ->
                 current |> CSType.GeneratedType
@@ -150,12 +146,7 @@ type CSharp =
                         { Name = x.Key
                           Type = baseType x.Value })
                     |> (fun x ->
-                    { Members = x
-                      NameSuffix = classSuffix
-                      NamePrefix = classPrefix
-                      PropertyCasing = propertyCasing
-                      TypeCasing = typeCasing
-                      })
+                    { Members = x })
                     |> CSType.GeneratedType
                 |> Option.Some
             | Array values ->
@@ -178,17 +169,26 @@ type CSharp =
                 |> Option.Some
             | Null -> Option.None
 
+        let set = Set.empty : CIString Set
+        let csharpSettings = {
+            Prefix = classPrefix
+            Suffix = classSuffix
+            PropertyCasing= propertyCasing
+            TypeCasing = typeCasing
+        }
+        
         try
-            let set = Set.empty : CIString Set
             let cSharp =
                 Json.parse input 
                 |> baseType
                 |> Option.defaultValue CSType.UnresolvedBaseType
                 |> function
-                | GeneratedType x -> fun y ->  x.ClassDeclaration y set
-                | ArrayType x -> fun y -> x.FormatArray y true set Option.None
-                // TODO apply property casing
-                | BaseType x -> x.FormatProperty
+                | GeneratedType x -> fun y ->  x.ClassDeclaration y set csharpSettings
+                | ArrayType x -> fun y -> x.FormatArray y set Option.None csharpSettings
+                | BaseType x -> fun y ->  [csharpSettings.Prefix;y;csharpSettings.Suffix]
+                                         |> StringUtils.joinStringsWithSpaceSeparation
+                                         |> csharpSettings.PropertyCasing.apply
+                                         |> x.FormatProperty
                 <| rootObject
 
             settings.NameSpace

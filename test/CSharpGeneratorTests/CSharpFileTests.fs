@@ -15,17 +15,25 @@ let PascalCase = "Pascal"
 let NoneCase = "None"
 
 [<Theory>]
+[<InlineData("""[123]""", "decimal[]")>]
+[<InlineData("""{}""", "object")>]
+let ``Casing gets applied to rootObject`` json ``type`` =
+    let result = CSharp.CreateFile(json, Settings(ClassPrefix = "x", ClassSuffix = "Model"))
+    let expected = sprintf "public %s XRootModel { get; set; }"  ``type``
+    Assert.Equal(expected, result.Either.Value)
+    
+[<Theory>]
 [<InlineData("""{}""")>]
 let ``Empty object is valid`` json =
     let result = CSharp.CreateFile json
-    let expected = "public object Root { get; set; }"
+    let expected = "public object RootModel { get; set; }"
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
 [<InlineData("""[]""")>]
 let ``Empty Array is valid`` json =
     let result = CSharp.CreateFile json
-    let expected = "public object[] Root { get; set; }"
+    let expected = "public object[] RootModel { get; set; }"
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -202,7 +210,7 @@ let ``Object with Empty or null object`` json =
 [<InlineData("""[{}]""", "object")>]
 let ``Array with basetypes`` json ``type`` =
     let result = CSharp.CreateFile json
-    let expected = sprintf "public %s[] Root { get; set; }" ``type``
+    let expected = sprintf "public %s[] RootModel { get; set; }" ``type``
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -231,7 +239,7 @@ let ``Array with basetypes`` json ``type`` =
 [<InlineData("""[{}, {}, null]""", "object")>]
 let ``Array with basetypes mixed with null`` json ``type`` =
     let result = CSharp.CreateFile json
-    let expected = sprintf "public %s[] Root { get; set; }" ``type``
+    let expected = sprintf "public %s[] RootModel { get; set; }" ``type``
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
