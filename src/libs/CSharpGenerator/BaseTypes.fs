@@ -3,7 +3,6 @@ namespace CSharpGenerator.Types
 open Common.CaseInsensitiveString
 open System
 open Common.Casing
-open Common.Casing
 open Common.StringUtils
 
 module private Formatters =
@@ -110,7 +109,12 @@ module private Formatters =
 
     let arrayProperty ``type`` name =
         property ([ ``type``; "[]" ] |> joinStrings) name
-type Settings = {TypeCasing : Casing ; PropertyCasing : Casing ; Prefix: string ; Suffix: string }
+
+type Settings =
+    { TypeCasing: Casing
+      PropertyCasing: Casing
+      Prefix: string
+      Suffix: string }
 
 type internal TypeInfo =
     { Name: string
@@ -257,7 +261,7 @@ type internal GeneratedType =
 
     member this.FormatProperty ``type`` name = Formatters.property ``type`` name
 
-    member this.ClassDeclaration (name: string) (typeSet: CIString Set) (settings : Settings) =
+    member this.ClassDeclaration (name: string) (typeSet: CIString Set) (settings: Settings) =
         let set =
             name
             |> CI
@@ -323,7 +327,7 @@ and internal CSType =
             if not typeSet.IsEmpty then
                 x.FormatArray key
             else
-                [settings.Prefix;key; settings.Suffix]
+                [ settings.Prefix; key; settings.Suffix ]
                 |> joinStringsWithSpaceSeparation
                 |> settings.PropertyCasing.apply
                 |> x.FormatArray
