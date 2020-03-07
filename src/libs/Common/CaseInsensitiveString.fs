@@ -6,8 +6,8 @@ type CIString =
     | CI of string
     override this.Equals x =
         match x with
-        | :? CIString as s -> StringComparer.OrdinalIgnoreCase.Compare(this.string, s.string) = 0
-        | :? string as s -> StringComparer.OrdinalIgnoreCase.Compare(this.string, s) = 0
+        | :? CIString as s -> StringComparer.OrdinalIgnoreCase.Equals(this.string, s.string) 
+        | :? string as s -> StringComparer.OrdinalIgnoreCase.Equals(this.string, s) 
         | _ -> false
     member this.string =
         match this with
