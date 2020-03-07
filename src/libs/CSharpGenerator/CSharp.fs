@@ -12,41 +12,6 @@ type CSharp =
     static member public CreateFile input = CSharp.CreateFile(input, Settings())
     static member public CreateFile(input, settings) =
 
-        let propertyCasing =
-            settings.PropertyCasing
-            |> Casing.fromString
-            |> Option.defaultValue Casing.Pascal
-
-        let typeCasing =
-            settings.TypeCasing
-            |> Casing.fromString
-            |> Option.defaultValue Casing.Pascal
-
-        let defaultValues =
-            {| Root = "root"
-               Model = "model" |}
-
-        let rootObject =
-            settings.RootObjectName
-            |> valueExists
-            |> Option.defaultValue defaultValues.Root
-
-        let (classPrefix, classSuffix, rootObject) =
-            match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
-            | Some prefix, Some suffix ->
-                match typeCasing with
-                | Camel -> (prefix, Pascal.apply suffix, Pascal.apply rootObject)
-                | x -> (x.apply prefix, x.apply suffix, x.apply rootObject)
-            | Some prefix, Option.None -> (typeCasing.apply prefix, System.String.Empty, typeCasing.apply rootObject)
-            | Option.None, Option.Some suffix ->
-                match typeCasing with
-                | None -> (System.String.Empty, suffix, typeCasing.apply rootObject)
-                | _ -> (System.String.Empty, Pascal.apply suffix, typeCasing.apply rootObject)
-            | Option.None, Option.None ->
-                match typeCasing with
-                | None -> (System.String.Empty, defaultValues.Model, typeCasing.apply rootObject)
-                | _ -> (System.String.Empty, Pascal.apply defaultValues.Model, typeCasing.apply rootObject)
-
         let tryConvertToNullableValueType current =
             match current with
             | BaseType x ->
@@ -90,13 +55,7 @@ type CSharp =
                         match Array.reduce (fun x y -> createProperty x y parentLength) grouping with
                         | property when grouping.Length = parentLength -> property
                         | property -> tryConvertToNullableValueTypeProperty property)
-
-                { Members = members
-                  NamePrefix = classPrefix
-                  NameSuffix = classSuffix
-                  PropertyCasing = propertyCasing
-                  TypeCasing = typeCasing }
-                |> CSType.GeneratedType
+                { Members = members } |> CSType.GeneratedType
             | previous, GeneratedType current when previous = CSType.UnresolvedBaseType ->
                 current |> CSType.GeneratedType
             | GeneratedType previous, current when current = CSType.UnresolvedBaseType ->
@@ -149,13 +108,7 @@ type CSharp =
                     |> Array.map (fun x ->
                         { Name = x.Key
                           Type = baseType x.Value })
-                    |> (fun x ->
-                    { Members = x
-                      NameSuffix = classSuffix
-                      NamePrefix = classPrefix
-                      PropertyCasing = propertyCasing
-                      TypeCasing = typeCasing
-                      })
+                    |> (fun x -> { Members = x })
                     |> CSType.GeneratedType
                 |> Option.Some
             | Array values ->
@@ -178,18 +131,44 @@ type CSharp =
                 |> Option.Some
             | Null -> Option.None
 
+
+        let (classPrefix, classSuffix) =
+            match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
+            | Some prefix, Some suffix -> (prefix, suffix)
+            | Some prefix, Option.None -> (prefix, System.String.Empty)
+            | Option.None, Option.Some suffix -> (System.String.Empty, suffix)
+            | Option.None, Option.None -> (System.String.Empty, "model")
+
+        let csharpSettings =
+            { Prefix = classPrefix
+              Suffix = classSuffix
+              PropertyCasing =
+                  settings.PropertyCasing
+                  |> Casing.fromString
+                  |> Option.defaultValue Casing.Pascal
+              TypeCasing =
+                  settings.TypeCasing
+                  |> Casing.fromString
+                  |> Option.defaultValue Casing.Pascal }
+
+        let set: CIString Set = Set.empty
         try
-            let set = Set.empty : CIString Set
             let cSharp =
-                Json.parse input 
+                Json.parse input
                 |> baseType
                 |> Option.defaultValue CSType.UnresolvedBaseType
                 |> function
-                | GeneratedType x -> fun y ->  x.ClassDeclaration y set
-                | ArrayType x -> fun y -> x.FormatArray y true set Option.None
-                // TODO apply property casing
-                | BaseType x -> x.FormatProperty
-                <| rootObject
+                | GeneratedType x -> fun y -> x.ClassDeclaration y set csharpSettings
+                | ArrayType x -> fun y -> x.FormatArray y set Option.None csharpSettings
+                | BaseType x ->
+                    fun y ->
+                        [ csharpSettings.Prefix; y; csharpSettings.Suffix ]
+                        |> StringUtils.joinStringsWithSpaceSeparation
+                        |> csharpSettings.PropertyCasing.apply
+                        |> x.FormatProperty
+                <| (settings.RootObjectName
+                    |> valueExists
+                    |> Option.defaultValue "root")
 
             settings.NameSpace
             |> valueExists
