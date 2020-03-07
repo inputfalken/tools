@@ -13,7 +13,7 @@ open Common.CaseInsensitiveString
 let ```Equal`` left right =
     let left = left |> CI
     let  right = right |>  CI
-    Assert.Equal<CIString>(left, right)
+    Assert.Equal(left, right)
     
 [<Theory>]
 [<InlineData("foo","foo")>]
@@ -34,7 +34,7 @@ let ```Equal works on string`` left right =
 let ```Not equal`` left right =
     let left = left |> CI
     let  right = right |>  CI
-    Assert.NotEqual<CIString>(left, right)
+    Assert.NotEqual(left, right)
     
 [<Theory>]
 [<InlineData("foo","foo")>]
@@ -43,7 +43,7 @@ let ```Not equal`` left right =
 [<InlineData(null, null)>]
 [<InlineData("", "")>]
 let ```Set does contain`` left right =
-    let set = Set.empty : Set<CIString>
+    let set = Set.empty 
     let set  = left  |> CI |> set.Add
     let right = right |> CI
     Assert.True(set.Contains right)
@@ -54,7 +54,7 @@ let ```Set does contain`` left right =
 [<InlineData("FOO", "fOo2")>]
 [<InlineData(null, "")>]
 let ```Set does not contain`` left right =
-    let set = Set.empty : Set<CIString>
+    let set = Set.empty 
     let set  = left  |> CI |> set.Add
     let right = right |> CI
     Assert.False(set.Contains right)
