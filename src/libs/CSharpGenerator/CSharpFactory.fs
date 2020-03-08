@@ -114,8 +114,6 @@ module internal CSharpFactory =
     let private classProperty ``type`` name = Formatters.property ``type`` name
     let private baseTypeArray (this: BaseType) key =
         this.TypeInfo |> fun x -> Formatters.arrayProperty (x.ToString()) key
-    let private CSharpProperty (this: BaseType) key =
-        this.TypeInfo |> fun x -> Formatters.property (x.ToString()) key
     let internal UnresolvedBaseType = BaseType.Object |> CSType.BaseType
 
 
@@ -164,7 +162,7 @@ module internal CSharpFactory =
                     |> Option.Some
 
                 CSharpArray x casedPropertyName set className settings
-            | BaseType x -> CSharpProperty x casedPropertyName)
+            | x -> CSharpFactoryPrivate x casedPropertyName settings set)
         |> joinStringsWithSpaceSeparation
         |> (fun x ->
 
@@ -177,14 +175,6 @@ module internal CSharpFactory =
 
     and private CSharpArray ``type`` key (typeSet: CIString Set) (typeName: string Option) settings =
         match ``type`` with
-        | BaseType x ->
-            if not typeSet.IsEmpty then
-                baseTypeArray x key
-            else
-                [ settings.Prefix; key; settings.Suffix ]
-                |> joinStringsWithSpaceSeparation
-                |> settings.PropertyCasing.apply
-                |> baseTypeArray x
         | GeneratedType x when key
                                |> CI
                                |> typeSet.Contains
@@ -214,16 +204,27 @@ module internal CSharpFactory =
                     <| key
 
                 [ ``class``; property ] |> joinStringsWithSpaceSeparation
-        | ArrayType x -> CSharpArray x key typeSet Option.None settings
-
-    let internal CSharpFactory ``type`` root settings =
-        match ``type`` with
-        | GeneratedType x -> fun y -> CSharpClass x y Set.empty settings
-        | ArrayType x -> fun y -> CSharpArray x y Set.empty Option.None settings
+        | ArrayType x -> CSharpFactoryPrivate x key settings typeSet
         | BaseType x ->
-            fun y ->
-                [ settings.Prefix; y; settings.Suffix ]
+            if not typeSet.IsEmpty then
+                baseTypeArray x key
+            else
+                [ settings.Prefix; key; settings.Suffix ]
                 |> joinStringsWithSpaceSeparation
                 |> settings.PropertyCasing.apply
-                |> CSharpProperty x
-        <| root
+                |> baseTypeArray x
+
+    and private CSharpFactoryPrivate ``type`` key settings set =
+        match ``type`` with
+        | GeneratedType x -> CSharpClass x key set settings
+        | ArrayType x -> CSharpArray x key set Option.None settings
+        | BaseType x ->
+                let casedKey =
+                    if set.IsEmpty then [ settings.Prefix; key; settings.Suffix ] |> joinStringsWithSpaceSeparation
+                    else key
+                let casedKey = casedKey |> settings.PropertyCasing.apply
+                let property = Formatters.property (x.TypeInfo.ToString()) casedKey
+                property
+
+    let internal CSharpFactory ``type`` root settings =
+        CSharpFactoryPrivate ``type`` root settings Set.empty
