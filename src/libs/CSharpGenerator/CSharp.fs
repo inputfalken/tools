@@ -1,4 +1,5 @@
 ﻿namespace CSharpGenerator
+
 open JsonParser
 open CSharpGenerator.Types
 open CSharpGenerator.Arguments
@@ -150,24 +151,17 @@ type CSharp =
                   |> Casing.fromString
                   |> Option.defaultValue Casing.Pascal }
 
-        let set: CIString Set = Set.empty
         try
+            let root = settings.RootObjectName
+                    |> valueExists
+                    |> Option.defaultValue "root"
             let cSharp =
                 Json.parse input
                 |> baseType
                 |> Option.defaultValue UnresolvedBaseType
-                |> function
-                | GeneratedType x -> fun y -> CSharpClass x y set csharpSettings
-                | ArrayType x -> fun y -> CSharpArray x y set Option.None csharpSettings
-                | BaseType x ->
-                    fun y ->
-                        [ csharpSettings.Prefix; y; csharpSettings.Suffix ]
-                        |> StringUtils.joinStringsWithSpaceSeparation
-                        |> csharpSettings.PropertyCasing.apply
-                        |> CSharpProperty x
-                <| (settings.RootObjectName
-                    |> valueExists
-                    |> Option.defaultValue "root")
+                |> CSharpFactory
+                <| root
+                <| csharpSettings
 
             settings.NameSpace
             |> valueExists

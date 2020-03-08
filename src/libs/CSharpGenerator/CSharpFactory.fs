@@ -114,11 +114,12 @@ module internal CSharpFactory =
     let private classProperty ``type`` name = Formatters.property ``type`` name
     let private baseTypeArray (this: BaseType) key =
         this.TypeInfo |> fun x -> Formatters.arrayProperty (x.ToString()) key
-    let internal CSharpProperty (this: BaseType) key =
+    let private CSharpProperty (this: BaseType) key =
         this.TypeInfo |> fun x -> Formatters.property (x.ToString()) key
     let internal UnresolvedBaseType = BaseType.Object |> CSType.BaseType
 
-    let rec CSharpClass members name (typeSet: CIString Set) settings =
+
+    let rec private CSharpClass members name (typeSet: CIString Set) settings =
         let set =
             name
             |> CI
@@ -174,7 +175,7 @@ module internal CSharpFactory =
 
         Formatters.``class`` name x)
 
-    and CSharpArray ``type`` key (typeSet: CIString Set) (typeName: string Option) settings =
+    and private CSharpArray ``type`` key (typeSet: CIString Set) (typeName: string Option) settings =
         match ``type`` with
         | BaseType x ->
             if not typeSet.IsEmpty then
@@ -214,3 +215,15 @@ module internal CSharpFactory =
 
                 [ ``class``; property ] |> joinStringsWithSpaceSeparation
         | ArrayType x -> CSharpArray x key typeSet Option.None settings
+
+    let internal CSharpFactory ``type`` root settings =
+        match ``type`` with
+        | GeneratedType x -> fun y -> CSharpClass x y Set.empty settings
+        | ArrayType x -> fun y -> CSharpArray x y Set.empty Option.None settings
+        | BaseType x ->
+            fun y ->
+                [ settings.Prefix; y; settings.Suffix ]
+                |> joinStringsWithSpaceSeparation
+                |> settings.PropertyCasing.apply
+                |> CSharpProperty x
+        <| root
