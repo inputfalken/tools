@@ -118,10 +118,7 @@ module internal CSharpFactory =
 
 
     let rec private CSharpClass members name (typeSet: CIString Set) settings =
-        let typeSet =
-            name
-            |> CI
-            |> typeSet.Add
+        let typeSet = typeSet.Add <| CI name
         members
         |> Seq.map (fun property ->
             let casedPropertyName = settings.PropertyCasing.apply property.Name
@@ -165,7 +162,7 @@ module internal CSharpFactory =
 
         Formatters.``class`` name x)
 
-    and private CSharpArray ``type`` key (typeSet: CIString Set) (typeName: string Option) settings =
+    and private CSharpArray ``type`` key typeSet typeName settings =
         match ``type`` with
         | GeneratedType x when key
                                |> CI
