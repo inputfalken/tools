@@ -155,12 +155,10 @@ module internal CSharpFactory =
         |> (fun x ->
 
         let formattedName =
-            if true then
                 [ settings.Prefix; name; settings.Suffix ]
                 |> joinStringsWithSpaceSeparation
                 |> settings.TypeCasing.apply
-            else
-                name
+                
         Formatters.``class`` formattedName x)
     and CSharpArray ``type`` key (typeSet: CIString Set ) (typeName: string Option) settings =
         match ``type`` with
