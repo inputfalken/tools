@@ -128,27 +128,19 @@ module internal CSharpFactory =
             match property.Type |> Option.defaultValue UnresolvedBaseType with
             | _ when not (Char.IsLetter property.Name.[0]) ->
                 raise (System.ArgumentException("Member names can only start with letters."))
-            | GeneratedType x when property.Name
-                                   |> CI
-                                   |> set.Contains ->
+            | GeneratedType x ->
                 // This will make sure that class names do not collide with their outer members.
-                let className = joinStringsWithSpaceSeparation [ name; property.Name ] |> settings.TypeCasing.apply
+                let className =
+                    if property.Name
+                       |> CI
+                       |> set.Contains
+                    then joinStringsWithSpaceSeparation [ name; property.Name ] |> settings.TypeCasing.apply
+                    else property.Name
+
                 let ``class`` = CSharpClass x className set settings
 
                 let property =
                     [ settings.Prefix; className; settings.Suffix ]
-                    |> joinStringsWithSpaceSeparation
-                    |> settings.TypeCasing.apply
-                    |> classProperty
-                    <| casedPropertyName
-
-                [ ``class``; property ] |> joinStringsWithSpaceSeparation
-            | GeneratedType x ->
-
-                let ``class`` = CSharpClass x property.Name set settings
-
-                let property =
-                    [ settings.Prefix; property.Name; settings.Suffix ]
                     |> joinStringsWithSpaceSeparation
                     |> settings.TypeCasing.apply
                     |> classProperty
@@ -219,12 +211,13 @@ module internal CSharpFactory =
         | GeneratedType x -> CSharpClass x key set settings
         | ArrayType x -> CSharpArray x key set Option.None settings
         | BaseType x ->
-                let casedKey =
-                    if set.IsEmpty then [ settings.Prefix; key; settings.Suffix ] |> joinStringsWithSpaceSeparation
-                    else key
-                let casedKey = casedKey |> settings.PropertyCasing.apply
-                let property = Formatters.property (x.TypeInfo.ToString()) casedKey
-                property
+            let casedKey =
+                if set.IsEmpty then [ settings.Prefix; key; settings.Suffix ] |> joinStringsWithSpaceSeparation
+                else key
+
+            let casedKey = casedKey |> settings.PropertyCasing.apply
+            let property = Formatters.property (x.TypeInfo.ToString()) casedKey
+            property
 
     let internal CSharpFactory ``type`` root settings =
         CSharpFactoryPrivate ``type`` root settings Set.empty
