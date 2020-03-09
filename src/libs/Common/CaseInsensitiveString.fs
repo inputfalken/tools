@@ -7,8 +7,10 @@ type CIString =
     override this.Equals x =
         match x with
         | :? CIString as s -> StringComparer.OrdinalIgnoreCase.Equals(this.String, s.String) 
-        | :? string as s -> StringComparer.OrdinalIgnoreCase.Equals(this.String, s) 
+        | :? string as s -> StringComparer.OrdinalIgnoreCase.Equals(this.String, s)
         | x when x = null && this.String = null -> true
+        | :? Option<String> as s when s.IsSome -> StringComparer.OrdinalIgnoreCase.Equals(this.String, s.Value)
+        | :? Option<Object> as s when s.IsSome -> StringComparer.OrdinalIgnoreCase.Equals(this.String, s.Value)
         | _ -> false
     member this.String =
         match this with
