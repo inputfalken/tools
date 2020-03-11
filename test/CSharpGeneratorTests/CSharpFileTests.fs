@@ -279,7 +279,7 @@ let ``Array with objects`` json csharp =
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
-[<InlineData("""{ "aps": { "alert":"tit}" } }""",
+[<InlineData("""{ "aps": { "alert":"foobar" } }""",
              "public class ApsModel { public string Alert { get; set; } } public ApsModel Aps { get; set; }")>]
 [<InlineData("""{"Foo": 2}""", "public decimal Foo { get; set; }")>]
 [<InlineData("""{"foo": 2, "bar": "this is a test"}""",
@@ -299,11 +299,21 @@ let Object json csharp =
     let expected = sprintf "public class RootModel { %s }" csharp
     Assert.Equal(expected, result.Either.Value)
 
+
+[<Literal>]
+let invalidTypeNameErrorMessage = "Member names can only start with letters."
 [<Theory>]
-[<InlineData("""{"1337": {}}""", "Member names can only start with letters.")>]
-[<InlineData("""{"Foo": {"1337": {"bar": 2}}}""", "Member names can only start with letters.")>]
-let ```Type names or member names can not start with numbers`` json expected =
+[<InlineData("""{"1337": {}}""", invalidTypeNameErrorMessage)>]
+[<InlineData("""{"Foo": {"1337": {"bar": 2}}}""", invalidTypeNameErrorMessage)>]
+let ``Type names or member names who starts with numbers result in error`` json expected =
     let result = CSharp.CreateFile json
+    Assert.Equal(expected, result.Either.Error.Message)
+    
+[<Theory>]
+[<InlineData("""{}""", invalidTypeNameErrorMessage)>]
+[<InlineData("""{"Foo": {}}""", invalidTypeNameErrorMessage)>]
+let ``Class prefix with number result in error`` json expected =
+    let result = CSharp.CreateFile(json, Settings(ClassPrefix = "0"))
     Assert.Equal(expected, result.Either.Error.Message)
 
 [<Theory>]
@@ -314,7 +324,7 @@ let ```Type names or member names can not start with numbers`` json expected =
 [<InlineData("""{"data":{"name":"","token":"","user":{"data":{"name":"","email":""}},"quota":{"data":{"usage":25,"limit":100,"next_reset":"2020-04-01T00:00:00+02:00"}}}}""",
              "public class RootModel { public class DataModel { public string Name { get; set; } public string Token { get; set; } public class UserModel { public class UserDataModel { public string Name { get; set; } public string Email { get; set; } } public UserDataModel Data { get; set; } } public UserModel User { get; set; } public class QuotaModel { public class QuotaDataModel { public decimal Usage { get; set; } public decimal Limit { get; set; } public System.DateTime NextReset { get; set; } } public QuotaDataModel Data { get; set; } } public QuotaModel Quota { get; set; } } public DataModel Data { get; set; } }")>]
 let ``Resolve class names when it's the same name as their enclosing type`` json expected =
-    let result = CSharp.CreateFile json
+    let result = CSharp.CreateFile (json)
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]

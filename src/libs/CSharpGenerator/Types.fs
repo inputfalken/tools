@@ -14,7 +14,7 @@ type internal TypeInfo =
       Namespace: string
       Alias: string option
       Nullable: bool }
-    override this.ToString() = this.Alias |> Option.defaultValue ([ this.Namespace; "."; this.Name ] |> joinStrings)
+    member this.Stringified = this.Alias |> Option.defaultValue ([ this.Namespace; "."; this.Name ] |> joinStrings)
     member this.AsNullable =
         if this.Nullable then
             this
