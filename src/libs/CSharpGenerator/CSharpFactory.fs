@@ -116,7 +116,6 @@ module internal CSharpFactory =
         this.TypeInfo |> fun x -> Formatters.arrayProperty (x.ToString()) key
     let internal UnresolvedBaseType = BaseType.Object |> CSType.BaseType
 
-
     let rec private CSharpClass members name (typeSet: CIString Set) settings =
         let typeSet = typeSet.Add <| CI name
         members
@@ -164,29 +163,19 @@ module internal CSharpFactory =
 
     and private CSharpArray ``type`` key typeSet typeName settings =
         match ``type`` with
-        | GeneratedType x when key
-                               |> CI
-                               |> typeSet.Contains
-                               && typeName.IsSome ->
-            let typeName = typeName.Value
+        | GeneratedType x ->
+
+            let typeName =
+                if typeSet.Contains <| CI key then typeName |> Option.defaultValue key
+                else key
 
             let ``class`` = CSharpClass x typeName typeSet settings
-
-            let property =
-                [ settings.Prefix; typeName; settings.Suffix ]
-                |> joinStringsWithSpaceSeparation
-                |> settings.TypeCasing.apply
-                |> Formatters.arrayProperty
-                <| key
-
-            [ ``class``; property ] |> joinStringsWithSpaceSeparation
-        | GeneratedType x ->
-            let ``class`` = CSharpClass x key typeSet settings
+            
             if typeSet.IsEmpty then
                 ``class``
             else
                 let property =
-                    [ settings.Prefix; key; settings.Suffix ]
+                    [ settings.Prefix; typeName; settings.Suffix ]
                     |> joinStringsWithSpaceSeparation
                     |> settings.TypeCasing.apply
                     |> Formatters.arrayProperty
