@@ -3,7 +3,7 @@ module Tests
 open Generator
 open Xunit
 
-// TODO these tests should test the CSharp assembly directly and there should be seperate tests for translating the CSharpSettings object.
+// TODO these tests should test the CSharp assembly directly and there should be separate tests for translating the CSharpSettings object.
 [<Literal>]
 let CamelCase = "Camel"
 

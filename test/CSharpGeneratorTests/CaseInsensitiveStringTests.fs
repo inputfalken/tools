@@ -3,7 +3,7 @@ module CSharp.CaseInsensitiveStringTests
 open Xunit
 open Common.CaseInsensitiveString
 
-// TODO move to seperate assembly.
+// TODO move to separate assembly.
 [<Theory>]
 [<InlineData("foo","foo")>]
 [<InlineData("Foo", "foo")>]
