@@ -7,8 +7,8 @@ open Common.CaseInsensitiveString
 open Common.StringValidator
 open CSharp.Factory.CSharpFactory
 
-type CSharp =
-    static member public CreateFile(input, (settings: Types.Settings), (root: System.String), (nameSpace: System.String)) =
+module CSharp =
+    let generateCSharpFromJson (input, (settings: Types.Settings), (root: System.String), (nameSpace: System.String)) =
 
         let tryConvertToNullableValueType current =
             match current with
@@ -126,7 +126,7 @@ type CSharp =
                 |> CSType.ArrayType
                 |> Option.Some
             | Null -> Option.None
-            
+
         try
             let cSharp =
                 Json.parse input

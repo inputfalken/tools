@@ -1,9 +1,10 @@
 ﻿namespace Generator
 
-open CSharp
+open CSharp.CSharp
+open CSharp.Types
 open Common
-open StringValidator
 open Common.Casing
+open StringValidator
 
 type public Factory =
     static member public CSharp input = Factory.CSharp(input, CSharpSettings())
@@ -29,6 +30,6 @@ type public Factory =
               TypeCasing =
                   settings.TypeCasing
                   |> Casing.fromString
-                  |> Option.defaultValue Casing.Pascal } : Types.Settings
+                  |> Option.defaultValue Casing.Pascal } 
             
-        CSharp.CreateFile(input, csharpSettings, root, settings.NameSpace)
+        generateCSharpFromJson(input, csharpSettings, root, settings.NameSpace)
