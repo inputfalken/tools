@@ -7,7 +7,7 @@ module public StringValidator =
         |> Option.filter (fun x -> not (System.String.IsNullOrWhiteSpace(x)))
         |> Option.map (fun x -> x.Trim())
 
-module public StringUtils =
+module public StringJoin =
     let joinStrings strings: string =
         strings |> String.concat System.String.Empty
         

@@ -1,4 +1,4 @@
-module Tests
+module Tests.CIString
 
 open Xunit
 open Common.CaseInsensitiveString
