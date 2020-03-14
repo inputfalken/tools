@@ -85,9 +85,9 @@
         CSharp = null;
         StatusClass = string.Empty;
         StatusMessage = string.Empty;
-        CSharpGenerator.CSharp.CreateFile(
+       Factory.CSharp(
             _settings.Json,
-            new Settings {
+            new CSharpSettings {
                 PropertyCasing = _settings.PropertyCasing,
                 ClassPrefix = _settings.ClassPrefix,
                 ClassSuffix = _settings.ClassSuffix,
