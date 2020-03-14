@@ -1,10 +1,9 @@
 module Tests
 
-open CSharpGenerator
-open CSharpGenerator.Arguments
+open Generator
 open Xunit
 
-
+// TODO these tests should test the CSharp assembly directly and there should be separate tests for translating the CSharpSettings object.
 [<Literal>]
 let CamelCase = "Camel"
 
@@ -17,14 +16,14 @@ let NoneCase = "None"
 [<Theory>]
 [<InlineData("""{}""")>]
 let ``Empty object is valid`` json =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     let expected = "public object RootModel { get; set; }"
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
 [<InlineData("""[]""")>]
 let ``Empty Array is valid`` json =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     let expected = "public object[] RootModel { get; set; }"
     Assert.Equal(expected, result.Either.Value)
 
@@ -33,7 +32,7 @@ let ``Empty Array is valid`` json =
 [<InlineData("""abc""")>]
 [<InlineData(""" "abc" """)>]
 let ``Passing invalid JSON sets a value in Value`` json =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     Assert.Null(result.Either.Value)
     Assert.NotNull(result.Either.Error)
 
@@ -41,7 +40,7 @@ let ``Passing invalid JSON sets a value in Value`` json =
 [<InlineData("Foo", "")>]
 [<InlineData("", "Foo")>]
 let ``Allow prefix to be empty if suffix is set`` prefix suffix =
-    let result = CSharp.CreateFile("""{ "FooBar" : [] }""", Settings(ClassPrefix = prefix, ClassSuffix = suffix))
+    let result = Factory.CSharp("""{ "FooBar" : [] }""", CSharpSettings(ClassPrefix = prefix, ClassSuffix = suffix))
     let expected = sprintf "public class %sRoot%s { public object[] FooBar { get; set; } }" prefix suffix
     Assert.Equal(expected, result.Either.Value)
 
@@ -49,7 +48,7 @@ let ``Allow prefix to be empty if suffix is set`` prefix suffix =
 [<InlineData(NoneCase, "public class rootmodel { public object[] @object { get; set; } }")>]
 [<InlineData(PascalCase, "public class RootModel { public object[] Object { get; set; } }")>]
 let ``Handle reserved words`` casing expected =
-    let result = CSharp.CreateFile("""{ "object" : [] }""", Settings(PropertyCasing = casing, TypeCasing = casing))
+    let result = Factory.CSharp("""{ "object" : [] }""", CSharpSettings(PropertyCasing = casing, TypeCasing = casing))
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -59,11 +58,11 @@ let ``Handle reserved words`` casing expected =
 [<InlineData("", null)>]
 let ``Uses default suffix if prefix and sufifx is set to empty string or null`` prefix suffix =
     let result =
-        CSharp.CreateFile("""
+        Factory.CSharp("""
     {
         "FooBar" : []
     }
-    """, Settings(ClassPrefix = prefix, ClassSuffix = suffix))
+    """, CSharpSettings(ClassPrefix = prefix, ClassSuffix = suffix))
 
     let expected = "public class RootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -76,7 +75,7 @@ let ``Uses default suffix if prefix and sufifx is set to empty string or null`` 
 [<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, null,
              "public class rootModel { public class innerClassModel { public decimal FooBar { get; set; } } public innerClassModel InnerClass { get; set; } }")>]
 let ``Casing Camel `` json typeCasing propertyCasing expected =
-    let result = CSharp.CreateFile(json, Settings(PropertyCasing = propertyCasing, TypeCasing = typeCasing))
+    let result = Factory.CSharp(json, CSharpSettings(PropertyCasing = propertyCasing, TypeCasing = typeCasing))
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -94,9 +93,9 @@ let ``Casing Camel `` json typeCasing propertyCasing expected =
 [<InlineData("""[]""", null, CamelCase, "public object[] xRootModel { get; set; }")>]
 let ``Casing Camel  works with arguments suffix, root and prefix`` json typeCasing propertyCasing expected =
     let result =
-        CSharp.CreateFile
+        Factory.CSharp
             (json,
-             Settings
+             CSharpSettings
                  (TypeCasing = typeCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
                   RootObjectName = "root"))
     Assert.Equal(expected, result.Either.Value)
@@ -116,9 +115,9 @@ let ``Casing Camel  works with arguments suffix, root and prefix`` json typeCasi
 [<InlineData("""[]""", null, NoneCase, "public object[] xrootmodel { get; set; }")>]
 let ``Casing None works with arguments suffix, root and prefix`` json typeCasing propertyCasing expected =
     let result =
-        CSharp.CreateFile
+        Factory.CSharp
             (json,
-             Settings
+             CSharpSettings
                  (TypeCasing = typeCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
                   RootObjectName = "root"))
     Assert.Equal(expected, result.Either.Value)
@@ -131,7 +130,7 @@ let ``Casing None works with arguments suffix, root and prefix`` json typeCasing
 let ``Casing Pascal`` json typeCasing propertyCasing =
     let expected =
         "public class RootModel { public class InnerClassModel { public decimal FooBar { get; set; } } public InnerClassModel InnerClass { get; set; } }"
-    let result = CSharp.CreateFile(json, Settings(PropertyCasing = propertyCasing, TypeCasing = typeCasing))
+    let result = Factory.CSharp(json, CSharpSettings(PropertyCasing = propertyCasing, TypeCasing = typeCasing))
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -151,9 +150,9 @@ let ``Casing Pascal`` json typeCasing propertyCasing =
 [<InlineData("""[]""", null, PascalCase, "public object[] XRootModel { get; set; }")>]
 let ``Casing Pascal  works with arguments suffix, root and prefix`` json typeCasing propertyCasing expected =
     let result =
-        CSharp.CreateFile
+        Factory.CSharp
             (json,
-             Settings
+             CSharpSettings
                  (TypeCasing = typeCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
                   RootObjectName = "root"))
     Assert.Equal(expected, result.Either.Value)
@@ -166,14 +165,14 @@ let ``Casing Pascal  works with arguments suffix, root and prefix`` json typeCas
 [<InlineData("""{"INNER_CLASS": {"FOO_BAR": 2}}""", NoneCase, null,
              "public class rootmodel { public class INNER_CLASSmodel { public decimal FooBar { get; set; } } public INNER_CLASSmodel InnerClass { get; set; } }")>]
 let ``Casing none`` json typeCasing propertyCasing expected =
-    let result = CSharp.CreateFile(json, Settings(PropertyCasing = propertyCasing, TypeCasing = typeCasing))
+    let result = Factory.CSharp(json, CSharpSettings(PropertyCasing = propertyCasing, TypeCasing = typeCasing))
     Assert.Equal(expected, result.Either.Value)
 
 
 [<Theory>]
 [<InlineData("""[ { "tags": [ "non" ], "friends": [ { "id": 0, "name": "Henrietta Tillman" } ] }, { "tags": [ "aliqua" ], "friends": [ { "id": 0, "name": "Kristy Calhoun" } ] } ]""")>]
 let ``Two array Objects next to each other`` json =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     let expected =
         "public class RootModel { public string[] Tags { get; set; } public class FriendsModel { public decimal Id { get; set; } public string Name { get; set; } } public FriendsModel[] Friends { get; set; } }"
 
@@ -185,7 +184,7 @@ let ``Two array Objects next to each other`` json =
 [<InlineData("""[ { "tags": [ "non" ], "friends": [ { "id": 0, "name": "Henrietta Tillman" } ], "john" : "" }, { "tags": [ "aliqua" ], "friends": [ { "id": 0 } ], "doe" : "" } ]""")>]
 [<InlineData("""[ { "Tags": [ "non" ], "friends": [ { "id": 0, "name": "Henrietta Tillman" } ], "john" : "" }, { "tags": [ "aliqua" ], "friends": [ { "id": 0 } ], "doe" : "" } ]""")>]
 let ``Two array Objects next to each other with different properties should expand properties`` json =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     let expected =
         "public class RootModel { public string[] Tags { get; set; } public class FriendsModel { public decimal Id { get; set; } public string Name { get; set; } } public FriendsModel[] Friends { get; set; } public string John { get; set; } public string Doe { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -193,7 +192,7 @@ let ``Two array Objects next to each other with different properties should expa
 [<Theory>]
 [<InlineData("""{ "Foo" : [] }""")>]
 let ``Object with Empty Array`` json =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     let expected = "public class RootModel { public object[] Foo { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
 
@@ -201,7 +200,7 @@ let ``Object with Empty Array`` json =
 [<InlineData("""{ "Foo" : {} }""")>]
 [<InlineData("""{ "Foo" : null }""")>]
 let ``Object with Empty or null object`` json =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     let expected = "public class RootModel { public object Foo { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
 
@@ -221,7 +220,7 @@ let ``Object with Empty or null object`` json =
 [<InlineData("""[{}, {}]""", "object")>]
 [<InlineData("""[{}]""", "object")>]
 let ``Array with basetypes`` json ``type`` =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     let expected = sprintf "public %s[] RootModel { get; set; }" ``type``
     Assert.Equal(expected, result.Either.Value)
 
@@ -250,7 +249,7 @@ let ``Array with basetypes`` json ``type`` =
 [<InlineData("""[{}, null]""", "object")>]
 [<InlineData("""[{}, {}, null]""", "object")>]
 let ``Array with basetypes mixed with null`` json ``type`` =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     let expected = sprintf "public %s[] RootModel { get; set; }" ``type``
     Assert.Equal(expected, result.Either.Value)
 
@@ -274,7 +273,7 @@ let ``Array with basetypes mixed with null`` json ``type`` =
 [<InlineData("""[ { "Foo" : null, "Bar" : 2 }, { "Foo" : "foobar", "Bar" : 2, "test" : 2 } ]""",
              "public string Foo { get; set; } public decimal Bar { get; set; } public decimal? Test { get; set; }")>]
 let ``Array with objects`` json csharp =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     let expected = sprintf "public class RootModel { %s }" csharp
     Assert.Equal(expected, result.Either.Value)
 
@@ -295,7 +294,7 @@ let ``Array with objects`` json csharp =
 [<InlineData(""" [ { "Foo" : "foobar", "Bar" : 2 }, { "Foo" : null, "Bar" : 2 } ] """,
              "public string Foo { get; set; } public decimal Bar { get; set; }")>]
 let Object json csharp =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     let expected = sprintf "public class RootModel { %s }" csharp
     Assert.Equal(expected, result.Either.Value)
 
@@ -306,14 +305,14 @@ let invalidTypeNameErrorMessage = "Member names can only start with letters."
 [<InlineData("""{"1337": {}}""", invalidTypeNameErrorMessage)>]
 [<InlineData("""{"Foo": {"1337": {"bar": 2}}}""", invalidTypeNameErrorMessage)>]
 let ``Type names or member names who starts with numbers result in error`` json expected =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     Assert.Equal(expected, result.Either.Error.Message)
     
 [<Theory>]
 [<InlineData("""{}""", invalidTypeNameErrorMessage)>]
 [<InlineData("""{"Foo": {}}""", invalidTypeNameErrorMessage)>]
 let ``Class prefix with number result in error`` json expected =
-    let result = CSharp.CreateFile(json, Settings(ClassPrefix = "0"))
+    let result = Factory.CSharp(json, CSharpSettings(ClassPrefix = "0"))
     Assert.Equal(expected, result.Either.Error.Message)
 
 [<Theory>]
@@ -324,7 +323,7 @@ let ``Class prefix with number result in error`` json expected =
 [<InlineData("""{"data":{"name":"","token":"","user":{"data":{"name":"","email":""}},"quota":{"data":{"usage":25,"limit":100,"next_reset":"2020-04-01T00:00:00+02:00"}}}}""",
              "public class RootModel { public class DataModel { public string Name { get; set; } public string Token { get; set; } public class UserModel { public class UserDataModel { public string Name { get; set; } public string Email { get; set; } } public UserDataModel Data { get; set; } } public UserModel User { get; set; } public class QuotaModel { public class QuotaDataModel { public decimal Usage { get; set; } public decimal Limit { get; set; } public System.DateTime NextReset { get; set; } } public QuotaDataModel Data { get; set; } } public QuotaModel Quota { get; set; } } public DataModel Data { get; set; } }")>]
 let ``Resolve class names when it's the same name as their enclosing type`` json expected =
-    let result = CSharp.CreateFile (json)
+    let result = Factory.CSharp (json)
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -343,7 +342,7 @@ let ``Resolve class names when it's the same name as their enclosing type`` json
 [<InlineData("""[null, {"foo":"bar"}, null, null, null]""")>]
 [<InlineData("""[null, null, null, {"foo":"bar"}, null]""")>]
 let ``Array with empty object or null should not resolve in object array`` json =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     let expected = "public class RootModel { public string Foo { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
 
@@ -351,12 +350,12 @@ let ``Array with empty object or null should not resolve in object array`` json 
 [<InlineData(""" { "orgnr": "", "name": "", "children": { "orgnr": "", "name": "", "children": { "orgnr": "", "name": "", "children": { "orgnr": "", "name": "" } } } } """,
              "public class RootModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } } public ChildrenChildrenChildrenModel Children { get; set; } } public ChildrenChildrenModel Children { get; set; } } public ChildrenModel Children { get; set; } }")>]
 let ``Nested identical children with Object`` json expected =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
 [<InlineData(""" { "orgnr": "", "name": "", "children": [ { "orgnr": "", "name": "", "children": [ { "orgnr": "", "name": "", "children": [ { "orgnr": "", "name": "" } ] } ] } ] } """,
              "public class RootModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } } public ChildrenChildrenChildrenModel[] Children { get; set; } } public ChildrenChildrenModel[] Children { get; set; } } public ChildrenModel[] Children { get; set; } }")>]
 let ``Nested identical children with Array`` json expected =
-    let result = CSharp.CreateFile json
+    let result = Factory.CSharp json
     Assert.Equal(expected, result.Either.Value)

@@ -1,4 +1,4 @@
-namespace CSharpGenerator.Types
+namespace CSharp.Types
 open Common.Casing
 open Common.StringUtils
 open System

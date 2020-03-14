@@ -7,17 +7,17 @@
 
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
-        <PackageReference Include="xunit" Version="2.4.1" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
-        <PackageReference Update="FSharp.Core" Version="4.7.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0"/>
+        <PackageReference Include="xunit" Version="2.4.1"/>
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1"/>
+        <PackageReference Update="FSharp.Core" Version="4.7.0"/>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="CSharpFileTests.fs" />
-        <Compile Include="CaseInsensitiveStringTests.fs" />
+        <Compile Include="CSharpFileTests.fs"/>
+        <Compile Include="CaseInsensitiveStringTests.fs"/>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\src\libs\CSharpGenerator\CSharpGenerator.fsproj" />
+        <ProjectReference Include="..\..\src\libs\Generator\Generator.fsproj"/>
     </ItemGroup>
 
 </Project>
