@@ -1,17 +1,14 @@
-﻿namespace CSharpGenerator
+﻿namespace CSharp
 
 open JsonParser
-open CSharpGenerator.Types
-open CSharpGenerator.Arguments
+open CSharp.Types
 open Common
 open Common.CaseInsensitiveString
-open Common.Casing
 open Common.StringValidator
-open CSharpFactory
+open CSharp.Factory.CSharpFactory
 
 type CSharp =
-    static member public CreateFile input = CSharp.CreateFile(input, Settings())
-    static member public CreateFile(input, settings) =
+    static member public CreateFile(input, (settings: Types.Settings), (root: System.String), (nameSpace: System.String)) =
 
         let tryConvertToNullableValueType current =
             match current with
@@ -132,38 +129,17 @@ type CSharp =
             | Null -> Option.None
 
 
-        let (classPrefix, classSuffix) =
-            match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
-            | Some prefix, Some suffix -> (prefix, suffix)
-            | Some prefix, Option.None -> (prefix, System.String.Empty)
-            | Option.None, Option.Some suffix -> (System.String.Empty, suffix)
-            | Option.None, Option.None -> (System.String.Empty, "model")
-
-        let csharpSettings =
-            { Prefix = classPrefix
-              Suffix = classSuffix
-              PropertyCasing =
-                  settings.PropertyCasing
-                  |> Casing.fromString
-                  |> Option.defaultValue Casing.Pascal
-              TypeCasing =
-                  settings.TypeCasing
-                  |> Casing.fromString
-                  |> Option.defaultValue Casing.Pascal }
 
         try
-            let root = settings.RootObjectName
-                    |> valueExists
-                    |> Option.defaultValue "root"
             let cSharp =
                 Json.parse input
                 |> baseType
                 |> Option.defaultValue UnresolvedBaseType
                 |> CSharpFactory
                 <| root
-                <| csharpSettings
+                <| settings
 
-            settings.NameSpace
+            nameSpace
             |> valueExists
             |> Option.map (fun x -> StringUtils.joinStringsWithSpaceSeparation [ "namespace"; x; "{"; cSharp; "}" ])
             |> Option.defaultValue cSharp

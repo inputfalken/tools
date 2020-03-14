@@ -3,8 +3,7 @@
 open System
 open System.Collections.Generic
 open System.Management.Automation
-open CSharpGenerator.Arguments
-open CSharpGenerator
+open Generator
 
 /// <summary>
 /// The ConvertFrom-Json command.
@@ -46,4 +45,4 @@ type CSharpFactory() =
                 (PropertyCasing = x.Casing, NameSpace = x.NameSpace, ClassPrefix = x.Prefix, ClassSuffix = x.Suffix,
                  RootObjectName = x.ObjectName)
         // TODO add proper support like https://github.com/PowerShell/PowerShell/blob/master/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/ConvertFromJsonCommand.cs
-        CSharp.CreateFile(String.Join(Environment.NewLine, x.Buffer), settings) |> x.WriteObject
+        Factory.CSharp(String.Join(Environment.NewLine, x.Buffer), settings) |> x.WriteObject

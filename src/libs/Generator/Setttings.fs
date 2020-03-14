@@ -1,4 +1,4 @@
-namespace CSharpGenerator.Arguments
+namespace Generator
 
     type public Settings() =
             member val PropertyCasing = "" with get, set
