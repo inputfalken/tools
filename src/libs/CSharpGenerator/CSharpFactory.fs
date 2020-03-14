@@ -110,100 +110,68 @@ module private Formatters =
         property ([ ``type``; "[]" ] |> joinStrings) name
 
 module internal CSharpFactory =
-
-    let private classProperty ``type`` name = Formatters.property ``type`` name
-    let private baseTypeArray (this: BaseType) key =
-        this.TypeInfo |> fun x -> Formatters.arrayProperty (x.ToString()) key
     let internal UnresolvedBaseType = BaseType.Object |> CSType.BaseType
 
-    let rec private CSharpClass members name (typeSet: CIString Set) settings =
-        let typeSet = typeSet.Add <| CI name
-        members
-        |> Seq.map (fun property ->
-            let casedPropertyName = settings.PropertyCasing.apply property.Name
-            match property.Type |> Option.defaultValue UnresolvedBaseType with
-            | _ when not (Char.IsLetter property.Name.[0]) ->
-                raise (System.ArgumentException("Member names can only start with letters."))
-            | GeneratedType x ->
-                // This will make sure that class names do not collide with their outer members.
+    let private getFormatter =
+        function
+        | ArrayType _ -> Formatters.arrayProperty
+        | _ -> Formatters.property
+        
+    let validateName (name: String) = if not (Char.IsLetter name.[0]) then raise (System.ArgumentException("Member names can only start with letters."))
+
+    let rec private GeneratedType members key (typeSet: CIString Set) settings propertyFormatter className =
+        let className = className |> Option.defaultValue key
+        let typeSet = typeSet.Add <| CI className
+        
+        let classContent =
+            members
+            |> Array.map (fun property ->
                 let className =
                     if property.Name
                        |> CI
                        |> typeSet.Contains
-                    then joinStringsWithSpaceSeparation [ name; property.Name ] |> settings.TypeCasing.apply
+                    then joinStringsWithSpaceSeparation [ className; property.Name ] |> settings.TypeCasing.apply
                     else property.Name
-
-                let ``class`` = CSharpClass x className typeSet settings
-
-                let property =
-                    [ settings.Prefix; className; settings.Suffix ]
-                    |> joinStringsWithSpaceSeparation
-                    |> settings.TypeCasing.apply
-                    |> classProperty
-                    <| casedPropertyName
-
-                [ ``class``; property ] |> joinStringsWithSpaceSeparation
-            | ArrayType x ->
-                let className =
-                    joinStringsWithSpaceSeparation [ name; property.Name ]
-                    |> settings.TypeCasing.apply
                     |> Option.Some
+                match property.Type |> Option.defaultValue UnresolvedBaseType with
+                | GeneratedType x ->
+                    GeneratedType x property.Name typeSet settings propertyFormatter className
+                | ArrayType x ->
+                    let formatter = Formatters.arrayProperty
+                    match x with
+                    | GeneratedType x -> GeneratedType x property.Name typeSet settings formatter className
+                    | x -> CSharpFactoryPrivate x property.Name typeSet settings formatter
+                | x -> CSharpFactoryPrivate x property.Name typeSet settings (getFormatter x))
+            |> joinStringsWithSpaceSeparation
 
-                CSharpArray x casedPropertyName typeSet className settings
-            | x -> CSharpFactoryPrivate x casedPropertyName typeSet settings)
-        |> joinStringsWithSpaceSeparation
-        |> (fun x ->
-
-        let name =
-            [ settings.Prefix; name; settings.Suffix ]
+        let formattedClassName =
+            [ settings.Prefix; className; settings.Suffix ]
             |> joinStringsWithSpaceSeparation
             |> settings.TypeCasing.apply
-
-        Formatters.``class`` name x)
-
-    and private CSharpArray ``type`` key typeSet typeName settings =
-        match ``type`` with
-        | GeneratedType x ->
-
-            let typeName =
-                if typeSet.Contains <| CI key then typeName |> Option.defaultValue key
-                else key
-
-            let ``class`` = CSharpClass x typeName typeSet settings
             
-            if typeSet.IsEmpty then
-                ``class``
-            else
-                let property =
-                    [ settings.Prefix; typeName; settings.Suffix ]
-                    |> joinStringsWithSpaceSeparation
-                    |> settings.TypeCasing.apply
-                    |> Formatters.arrayProperty
-                    <| key
+        // Ugly side effect, maybe use Result in order in order to be explicit that things could go wrong.
+        validateName formattedClassName
 
-                [ ``class``; property ] |> joinStringsWithSpaceSeparation
-        | ArrayType x -> CSharpFactoryPrivate x key typeSet settings
-        | BaseType x ->
-            if not typeSet.IsEmpty then
-                baseTypeArray x key
-            else
-                [ settings.Prefix; key; settings.Suffix ]
-                |> joinStringsWithSpaceSeparation
-                |> settings.PropertyCasing.apply
-                |> baseTypeArray x
+        let ``class`` = Formatters.``class`` formattedClassName classContent
+        if typeSet.Count = 1 then
+            ``class``
+        else
+            let formattedPropertyName = key |> settings.PropertyCasing.apply
+            let property = propertyFormatter formattedClassName formattedPropertyName
+            let res = [ ``class``; property ] |> joinStringsWithSpaceSeparation
+            res
 
-    and private CSharpFactoryPrivate ``type`` key typeSet settings =
+    and private CSharpFactoryPrivate ``type`` key typeSet settings propertyFormatter =
         match ``type`` with
-        | GeneratedType x -> CSharpClass x key typeSet settings
-        | ArrayType x -> CSharpArray x key typeSet Option.None settings
+        | GeneratedType members -> GeneratedType members key typeSet settings propertyFormatter Option.None
+        | ArrayType ``type`` -> CSharpFactoryPrivate ``type`` key typeSet settings Formatters.arrayProperty
         | BaseType x ->
-            let casedKey =
+            let formattedPropertyName =
                 if typeSet.IsEmpty then [ settings.Prefix; key; settings.Suffix ] |> joinStringsWithSpaceSeparation
                 else key
-
-            let casedKey = casedKey |> settings.PropertyCasing.apply
-            let property = Formatters.property (x.TypeInfo.ToString()) casedKey
-            property
+                |> settings.PropertyCasing.apply
+            validateName formattedPropertyName
+            propertyFormatter x.TypeInfo.Stringified formattedPropertyName
 
     let internal CSharpFactory ``type`` root settings =
-        CSharpFactoryPrivate ``type`` root Set.empty settings
+        CSharpFactoryPrivate ``type`` root Set.empty settings (getFormatter ``type``)
