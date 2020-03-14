@@ -21,7 +21,6 @@ type CSharp =
                 | _ -> current
             | _ -> current
 
-
         let tryConvertToNullableValueTypeProperty current =
             { Name = current.Name
               Type = Option.map tryConvertToNullableValueType current.Type }
@@ -127,9 +126,7 @@ type CSharp =
                 |> CSType.ArrayType
                 |> Option.Some
             | Null -> Option.None
-
-
-
+            
         try
             let cSharp =
                 Json.parse input

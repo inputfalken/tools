@@ -1,6 +1,6 @@
 namespace Generator
 
-    type public Settings() =
+    type public CSharpSettings() =
             member val PropertyCasing = "" with get, set
             member val TypeCasing = "" with get, set
             member val NameSpace = "" with get, set

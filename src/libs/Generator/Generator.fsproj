@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Setttings.fs" />
+        <Compile Include="CSharpSettings.fs" />
         <Compile Include="Index.fs" />
     </ItemGroup>
 

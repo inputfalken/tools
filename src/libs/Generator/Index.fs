@@ -6,8 +6,8 @@ open StringValidator
 open Common.Casing
 
 type public Factory =
-    static member public CSharp input = Factory.CSharp(input, Settings())
-    static member public CSharp(input, (settings : Settings)) =
+    static member public CSharp input = Factory.CSharp(input, CSharpSettings())
+    static member public CSharp(input, (settings : CSharpSettings)) =
         let (classPrefix, classSuffix) =
             match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
             | Some prefix, Some suffix -> (prefix, suffix)
