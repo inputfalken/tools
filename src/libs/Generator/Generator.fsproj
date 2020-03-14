@@ -5,17 +5,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="CSharpSettings.fs" />
-        <Compile Include="Index.fs" />
+        <Compile Include="CSharpSettings.fs"/>
+        <Compile Include="Index.fs"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference PrivateAssets="Compile" Include="..\generators\CSharp\CSharp.fsproj" />
-        <ProjectReference Include="..\Common\Common.fsproj" />
-        <ProjectReference Include="..\JsonParser\JsonParser.fsproj" />
+        <ProjectReference PrivateAssets="Compile" Include="..\generators\CSharp\CSharp.fsproj"/>
+        <ProjectReference Include="..\Common\Common.fsproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Lemonad.ErrorHandling" Version="0.9.5" />
+        <PackageReference Include="Lemonad.ErrorHandling" Version="0.9.5"/>
     </ItemGroup>
 </Project>
