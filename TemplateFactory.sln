@@ -18,9 +18,9 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CSharpGeneratorTests", "tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubPage", "src\apps\GitHubPage\GitHubPage.csproj", "{459F3A04-4FE0-444E-9118-A97D71D7B585}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CSharp", "src\libs\Generators\CSharp\CSharp.fsproj", "{342B38C4-87FD-4037-BE9F-E7DADD6788BE}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CSharp", "src\libs\generators\CSharp\CSharp.fsproj", "{342B38C4-87FD-4037-BE9F-E7DADD6788BE}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", "{2B9F5274-7325-4E14-9F96-43F0C7FC6FA7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "generators", "generators", "{2B9F5274-7325-4E14-9F96-43F0C7FC6FA7}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Generator", "src\libs\Generator\Generator.fsproj", "{CA77EA61-F4CA-4042-B5EC-CF1DB9A388EF}"
 EndProject

@@ -10,7 +10,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference PrivateAssets="Compile" Include="..\Generators\CSharp\CSharp.fsproj" />
+        <ProjectReference PrivateAssets="Compile" Include="..\generators\CSharp\CSharp.fsproj" />
         <ProjectReference Include="..\Common\Common.fsproj" />
         <ProjectReference Include="..\JsonParser\JsonParser.fsproj" />
     </ItemGroup>
