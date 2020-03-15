@@ -1,6 +1,7 @@
 namespace JsonParser
 
 open FSharp.Data
+open FSharp.Data.Runtime
 
 module public Json =
     let private stringParser =
@@ -9,6 +10,8 @@ module public Json =
         | TryParse.Guid x -> Guid x
         | x -> Value.String x
 
+    // TODO use the JsonConversions type in order to translate into custom types.
+    // link: https://github.com/fsharp/FSharp.Data/blob/master/src/Json/JsonConversions.fs
     let rec private map value =
         match value with
         | JsonValue.Number x ->
