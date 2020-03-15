@@ -29,13 +29,25 @@ let ``Empty Array is valid`` json =
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
-[<InlineData("""1""")>]
 [<InlineData("""abc""")>]
-[<InlineData(""" "abc" """)>]
-let ``Passing invalid JSON sets a value in Value`` json =
+let ``Passing invalid json results in an exception`` json =
     let result = Factory.CSharp json
     Assert.Null(result.Either.Value)
     Assert.NotNull(result.Either.Error)
+
+[<Theory>]
+[<InlineData("""1""", "int")>]
+[<InlineData("""1.3""", "decimal")>]
+[<InlineData(""" "abc" """, "string")>]
+[<InlineData(""" "C34B804A-AB36-4060-88DC-E0138863E152" """, "System.Guid")>]
+[<InlineData(""" "2020-12-01" """, "System.DateTime")>]
+[<InlineData(""" true """, "bool")>]
+[<InlineData(""" false """, "bool")>]
+[<InlineData(""" null """, "object")>]
+let ``Entry with value`` json expected =
+    let result = Factory.CSharp json
+    let expected = sprintf "public %s RootModel { get; set; }" expected
+    Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
 [<InlineData("Foo", "")>]
@@ -222,7 +234,7 @@ let ``Object with Empty or null object`` json =
 [<InlineData("""[null]""", "object")>]
 [<InlineData("""[{}, {}]""", "object")>]
 [<InlineData("""[{}]""", "object")>]
-let ``Array with basetypes`` json ``type`` =
+let ``Entry as with array`` json ``type`` =
     let result = Factory.CSharp json
     let expected = sprintf "public %s[] RootModel { get; set; }" ``type``
     Assert.Equal(expected, result.Either.Value)
@@ -300,7 +312,7 @@ let ``Array with objects`` json csharp =
 [<InlineData("""{ "Foo" : null, "Bar" : 1 }""", "public object Foo { get; set; } public int Bar { get; set; }")>]
 [<InlineData(""" [ { "Foo" : "foobar", "Bar" : 2 }, { "Foo" : null, "Bar" : 2 } ] """,
              "public string Foo { get; set; } public int Bar { get; set; }")>]
-let Object json csharp =
+let ``Entry with object`` json csharp =
     let result = Factory.CSharp json
     let expected = sprintf "public class RootModel { %s }" csharp
     Assert.Equal(expected, result.Either.Value)
