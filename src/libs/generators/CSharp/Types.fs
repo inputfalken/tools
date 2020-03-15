@@ -1,6 +1,6 @@
 namespace CSharp.Types
 open Common.Casing
-open Common.StringUtils
+open Common.StringJoin
 open System
 
 type Settings =

@@ -2,7 +2,7 @@ namespace CSharp.Factory
 
 open System
 open Common.CaseInsensitiveString
-open Common.StringUtils
+open Common.StringJoin
 open CSharp.Types
 open CSharp.Formatters.Formatters
 

@@ -138,7 +138,7 @@ module CSharp =
 
             nameSpace
             |> valueExists
-            |> Option.map (fun x -> StringUtils.joinStringsWithSpaceSeparation [ "namespace"; x; "{"; cSharp; "}" ])
+            |> Option.map (fun x -> StringJoin.joinStringsWithSpaceSeparation [ "namespace"; x; "{"; cSharp; "}" ])
             |> Option.defaultValue cSharp
             |> Lemonad.ErrorHandling.Result.Value
 

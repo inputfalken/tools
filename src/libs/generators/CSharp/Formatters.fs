@@ -1,5 +1,5 @@
 namespace CSharp.Formatters
-    open Common.StringUtils
+    open Common.StringJoin
     module internal Formatters =
         let keywords =
             [| "abstract"

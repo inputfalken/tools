@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <IsPackable>false</IsPackable>
+        <GenerateProgramFile>true</GenerateProgramFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="CaseInsensitiveStringTests.fs" />
+        <Compile Include="StringJoinTests.fs" />
+        <Compile Include="StringValidatorTests.fs" />
+        <Compile Include="Casing\ToString.fs" />
+        <Compile Include="Casing\FromString.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
+        <PackageReference Include="xunit" Version="2.4.1" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
+        <PackageReference Update="FSharp.Core" Version="4.7.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\libs\Common\Common.fsproj" />
+    </ItemGroup>
+
+</Project>
