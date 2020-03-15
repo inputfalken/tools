@@ -12,6 +12,8 @@
         <Compile Include="StringValidatorTests.fs" />
         <Compile Include="Casing\ToString.fs" />
         <Compile Include="Casing\FromString.fs" />
+        <Compile Include="Casing\ApplyMultiple.fs" />
+        <Compile Include="Casing\Apply.fs" />
     </ItemGroup>
 
     <ItemGroup>

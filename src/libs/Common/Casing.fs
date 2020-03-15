@@ -1,5 +1,6 @@
 ﻿namespace Common.Casing
 
+open Common
 open System
 open Microsoft.FSharp.Reflection
 open FSharp.Data.Runtime
@@ -30,8 +31,19 @@ type public Casing =
     static member public CamelCase = Casing.Cases.[1]
     static member public NoneCase = Casing.Cases.[2]
     static member fromString s = UnionFunctions.fromStringWithUnionCases s Casing.CasesTypes
+
     member this.apply x: string =
         match this with
         | Pascal -> NameUtils.nicePascalName x
         | Camel -> NameUtils.niceCamelName x
-        | None -> x.Replace(" ", "")
+        | None -> x.Replace(" ", String.Empty)
+
+    member this.applyMultiple (items: string seq): string =
+        let items = items |> Seq.filter (fun x -> String.IsNullOrWhiteSpace(x) = false)
+        match this with
+        | None -> items |> StringJoin.joinStrings
+        | x ->
+            items
+            |> Seq.filter (fun x -> String.IsNullOrWhiteSpace(x) = false)
+            |> StringJoin.joinStringsWithSpaceSeparation
+            |> x.apply

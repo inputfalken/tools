@@ -5,13 +5,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Casing.fs"/>
-        <Compile Include="StringValidator.fs"/>
-        <Compile Include="CaseInsensitiveString.fs"/>
+        <Compile Include="StringValidator.fs" />
+        <Compile Include="Casing.fs" />
+        <Compile Include="CaseInsensitiveString.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference PrivateAssets="Compile" Include="FSharp.Data" Version="3.1.1"/>
-        <PackageReference Update="FSharp.Core" Version="4.7.0"/>
+        <PackageReference PrivateAssets="Compile" Include="FSharp.Data" Version="3.1.1" />
+        <PackageReference Update="FSharp.Core" Version="4.7.0" />
     </ItemGroup>
 </Project>

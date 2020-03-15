@@ -13,13 +13,15 @@ module internal CSharpFactory =
         function
         | ArrayType _ -> arrayProperty
         | _ -> property
-        
-    let validateName (name: String) = if not (Char.IsLetter name.[0]) then raise (System.ArgumentException("Member names can only start with letters."))
+
+    let validateName (name: String) =
+        if not (Char.IsLetter name.[0]) then
+            raise (System.ArgumentException("Member names can only start with letters."))
 
     let rec private GeneratedType members key (typeSet: CIString Set) settings propertyFormatter className =
         let className = className |> Option.defaultValue key
         let typeSet = typeSet.Add <| CI className
-        
+
         let classContent =
             members
             |> Array.map (fun property ->
@@ -27,7 +29,7 @@ module internal CSharpFactory =
                     if property.Name
                        |> CI
                        |> typeSet.Contains
-                    then joinStringsWithSpaceSeparation [ className; property.Name ] |> settings.TypeCasing.apply
+                    then settings.TypeCasing.applyMultiple [ className; property.Name ]
                     else property.Name
                     |> Option.Some
                 match property.Type |> Option.defaultValue UnresolvedBaseType with
@@ -41,11 +43,8 @@ module internal CSharpFactory =
                 | x -> CSharpFactoryPrivate x property.Name typeSet settings (getFormatter x))
             |> joinStringsWithSpaceSeparation
 
-        let formattedClassName =
-            [ settings.Prefix; className; settings.Suffix ]
-            |> joinStringsWithSpaceSeparation
-            |> settings.TypeCasing.apply
-            
+        let formattedClassName = settings.TypeCasing.applyMultiple [ settings.Prefix; className; settings.Suffix ]
+
         // Ugly side effect, maybe use Result in order in order to be explicit that things could go wrong.
         validateName formattedClassName
 
@@ -64,9 +63,10 @@ module internal CSharpFactory =
         | ArrayType ``type`` -> CSharpFactoryPrivate ``type`` key typeSet settings arrayProperty
         | BaseType x ->
             let formattedPropertyName =
-                if typeSet.IsEmpty then [ settings.Prefix; key; settings.Suffix ] |> joinStringsWithSpaceSeparation
-                else key
-                |> settings.PropertyCasing.apply
+                if typeSet.IsEmpty then
+                    [ settings.Prefix; key; settings.Suffix ] |> settings.PropertyCasing.applyMultiple
+                else key |> settings.PropertyCasing.apply
+
             validateName formattedPropertyName
             propertyFormatter x.TypeInfo.Stringified formattedPropertyName
 
