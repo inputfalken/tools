@@ -10,6 +10,8 @@
         <Compile Include="CaseInsensitiveStringTests.fs" />
         <Compile Include="StringJoinTests.fs" />
         <Compile Include="StringValidatorTests.fs" />
+        <Compile Include="Casing\ToString.fs" />
+        <Compile Include="Casing\FromString.fs" />
     </ItemGroup>
 
     <ItemGroup>
