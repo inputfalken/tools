@@ -95,6 +95,16 @@ and internal BaseType =
           Value = x }
         |> ValueType.Double
         |> BaseType.ValueType
+        
+    static member Integer x =
+        { Type =
+              { Namespace = "System"
+                Name = "Int32"
+                Alias = option.Some "int"
+                Nullable = false }
+          Value = x }
+        |> ValueType.Integer
+        |> BaseType.ValueType
 
     static member Boolean x =
         { Type =

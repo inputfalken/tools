@@ -5,6 +5,7 @@ open System
 type public Key = string
 
 type public Value =
+    | Int of int
     | Double of double
     | Decimal of decimal
     | String of string
