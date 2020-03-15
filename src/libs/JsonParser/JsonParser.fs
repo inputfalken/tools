@@ -1,6 +1,5 @@
 namespace JsonParser
 
-open Common.Casing
 open FSharp.Data
 
 module public Json =
@@ -10,12 +9,11 @@ module public Json =
         | TryParse.Guid x -> Guid x
         | x -> Value.String x
 
-    let isInteger decimal = decimal % 1m = 0m
-
     let rec private map value =
         match value with
         | JsonValue.Number x ->
-            if isInteger x then Int <| int x
+            // We only get decimals here, so we need to check if the number is a integer before mapping to int.
+            if x % 1m = 0m then Int <| int x
             else Decimal(x)
         | JsonValue.Float x -> Decimal(decimal x)
         | JsonValue.String x -> stringParser x
@@ -27,14 +25,12 @@ module public Json =
             |> Array
         | JsonValue.Record x ->
             x
-            |> Array.map (fun (x, y) -> propertyMap x y)
+            |> Array.map (fun (x, y) ->
+                { Key = x
+                  Value = map y })
             |> Object
 
-    and private propertyMap key value =
-        { Key = key
-          Value = map value }
-
-    let parse input =
+    let public parse input =
         input
         |> JsonValue.Parse
         |> (fun x -> map x)
