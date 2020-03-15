@@ -8,8 +8,7 @@ open Common.StringValidator
 open CSharp.Factory.CSharpFactory
 
 module CSharp =
-    let generateCSharpFromJson (input, (settings: Types.Settings), (root: System.String), (nameSpace: System.String)) =
-
+    let generateCSharpFromJson input settings root nameSpace =
         let tryConvertToNullableValueType current =
             match current with
             | BaseType x ->

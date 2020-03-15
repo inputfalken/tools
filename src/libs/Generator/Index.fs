@@ -8,7 +8,8 @@ open StringValidator
 
 type public Factory =
     static member public CSharp input = Factory.CSharp(input, CSharpSettings())
-    static member public CSharp(input, (settings : CSharpSettings)) =
+    static member public CSharp (input, settings) =
+        
         let (classPrefix, classSuffix) =
             match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
             | Some prefix, Some suffix -> (prefix, suffix)
@@ -32,4 +33,4 @@ type public Factory =
                   |> Casing.fromString
                   |> Option.defaultValue Casing.Pascal } 
             
-        generateCSharpFromJson(input, csharpSettings, root, settings.NameSpace)
+        generateCSharpFromJson input csharpSettings root settings.NameSpace
