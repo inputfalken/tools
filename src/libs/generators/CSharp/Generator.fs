@@ -39,6 +39,18 @@ module CSharp =
                         previous
                         |> BaseType.ValueType
                         |> CSType.BaseType
+                    | ValueType.Decimal previous, ValueType.Integer current ->
+                        if current.Type.Nullable then previous.AsNullable
+                        else previous
+                        |> ValueType.Decimal
+                        |> ValueType
+                        |> CSType.BaseType
+                    | ValueType.Integer previous, ValueType.Decimal current ->
+                        if previous.Type.Nullable then current.AsNullable
+                        else current
+                        |> ValueType.Decimal
+                        |> ValueType
+                        |> CSType.BaseType
                     | _ -> UnresolvedBaseType
                 | _ -> UnresolvedBaseType
             | ArrayType previous, ArrayType current ->
@@ -78,6 +90,10 @@ module CSharp =
                 |> Option.Some
             | JsonParser.Decimal x ->
                 BaseType.Decimal x
+                |> CSType.BaseType
+                |> Option.Some
+            | JsonParser.Int x ->
+                BaseType.Integer x
                 |> CSType.BaseType
                 |> Option.Some
             | JsonParser.String x ->

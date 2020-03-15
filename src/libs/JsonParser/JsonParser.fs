@@ -10,9 +10,13 @@ module public Json =
         | TryParse.Guid x -> Guid x
         | x -> Value.String x
 
+    let isInteger decimal = decimal % 1m = 0m
+
     let rec private map value =
         match value with
-        | JsonValue.Number x -> Decimal(x)
+        | JsonValue.Number x ->
+            if isInteger x then Int <| int x
+            else Decimal(x)
         | JsonValue.Float x -> Decimal(decimal x)
         | JsonValue.String x -> stringParser x
         | JsonValue.Boolean x -> Boolean(x)
@@ -23,14 +27,14 @@ module public Json =
             |> Array
         | JsonValue.Record x ->
             x
-            |> Array.map (fun (x, y) -> propertyMap x y )
+            |> Array.map (fun (x, y) -> propertyMap x y)
             |> Object
 
-    and private propertyMap key value  =
-        { Key =  key
+    and private propertyMap key value =
+        { Key = key
           Value = map value }
 
     let parse input =
         input
         |> JsonValue.Parse
-        |> (fun x -> map x )
+        |> (fun x -> map x)
