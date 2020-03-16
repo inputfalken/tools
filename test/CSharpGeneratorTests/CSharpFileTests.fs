@@ -52,9 +52,9 @@ let ``Entry with value`` json expected =
 [<Theory>]
 [<InlineData("Foo", "")>]
 [<InlineData("", "Foo")>]
-let ``Allow prefix to be empty if suffix is set`` prefix suffix =
-    let result = Factory.CSharp("""{ "FooBar" : [] }""", CSharpSettings(ClassPrefix = prefix, ClassSuffix = suffix))
-    let expected = sprintf "public class %sRoot%s { public object[] FooBar { get; set; } }" prefix suffix
+let ``Allow classPrefix to be empty if classSuffix is set`` classPrefix classSuffix =
+    let result = Factory.CSharp("""{ "FooBar" : [] }""", CSharpSettings(ClassPrefix = classPrefix, ClassSuffix = classSuffix))
+    let expected = sprintf "public class %sRoot%s { public object[] FooBar { get; set; } }" classPrefix classSuffix
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -69,13 +69,13 @@ let ``Handle reserved words`` casing expected =
 [<InlineData(null, null)>]
 [<InlineData(null, "")>]
 [<InlineData("", null)>]
-let ``Uses default suffix if prefix and sufifx is set to empty string or null`` prefix suffix =
+let ``Uses default classSuffix if classPrefix and sufifx is set to empty string or null`` classPrefix classSuffix =
     let result =
         Factory.CSharp("""
     {
         "FooBar" : []
     }
-    """, CSharpSettings(ClassPrefix = prefix, ClassSuffix = suffix))
+    """, CSharpSettings(ClassPrefix = classPrefix, ClassSuffix = classSuffix))
 
     let expected = "public class RootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -104,7 +104,7 @@ let ``Casing Camel `` json classCasing propertyCasing expected =
 [<InlineData("""[]""", CamelCase, CamelCase, "public object[] xRootModel { get; set; }")>]
 [<InlineData("""[]""", CamelCase, null, "public object[] XRootModel { get; set; }")>]
 [<InlineData("""[]""", null, CamelCase, "public object[] xRootModel { get; set; }")>]
-let ``Casing Camel  works with arguments suffix, root and prefix`` json classCasing propertyCasing expected =
+let ``Casing Camel  works with arguments classSuffix, root and classPrefix`` json classCasing propertyCasing expected =
     let result =
         Factory.CSharp
             (json,
@@ -126,7 +126,7 @@ let ``Casing Camel  works with arguments suffix, root and prefix`` json classCas
 [<InlineData("""[]""", NoneCase, NoneCase, "public object[] xrootmodel { get; set; }")>]
 [<InlineData("""[]""", NoneCase, null, "public object[] XRootModel { get; set; }")>]
 [<InlineData("""[]""", null, NoneCase, "public object[] xrootmodel { get; set; }")>]
-let ``Casing None works with arguments suffix, root and prefix`` json classCasing propertyCasing expected =
+let ``Casing None works with arguments classSuffix, root and classPrefix`` json classCasing propertyCasing expected =
     let result =
         Factory.CSharp
             (json,
@@ -161,7 +161,7 @@ let ``Casing Pascal`` json classCasing propertyCasing =
 [<InlineData("""[]""", PascalCase, PascalCase, "public object[] XRootModel { get; set; }")>]
 [<InlineData("""[]""", PascalCase, null, "public object[] XRootModel { get; set; }")>]
 [<InlineData("""[]""", null, PascalCase, "public object[] XRootModel { get; set; }")>]
-let ``Casing Pascal  works with arguments suffix, root and prefix`` json classCasing propertyCasing expected =
+let ``Casing Pascal  works with arguments classSuffix, root and classPrefix`` json classCasing propertyCasing expected =
     let result =
         Factory.CSharp
             (json,
@@ -330,7 +330,7 @@ let ``Type names or member names who starts with numbers result in error`` json 
 [<Theory>]
 [<InlineData("""{}""", invalidTypeNameErrorMessage)>]
 [<InlineData("""{"Foo": {}}""", invalidTypeNameErrorMessage)>]
-let ``Class prefix with number result in error`` json expected =
+let ``Class classPrefix with number result in error`` json expected =
     let result = Factory.CSharp(json, CSharpSettings(ClassPrefix = "0"))
     Assert.Equal(expected, result.Either.Error.Message)
 

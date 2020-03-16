@@ -6,8 +6,8 @@ open System
 type Settings =
     { ClassCasing: Casing
       PropertyCasing: Casing
-      Prefix: string
-      Suffix: string }
+      ClassPrefix: string
+      ClassSuffix: string }
 
 type internal TypeInfo =
     { Name: string

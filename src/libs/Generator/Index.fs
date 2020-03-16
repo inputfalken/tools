@@ -22,8 +22,8 @@ type public Factory =
                 |> Option.defaultValue "root"
                 
         let csharpSettings =
-            { Prefix = classPrefix
-              Suffix = classSuffix
+            { ClassPrefix = classPrefix
+              ClassSuffix = classSuffix
               PropertyCasing =
                   settings.PropertyCasing
                   |> Casing.fromString

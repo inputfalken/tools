@@ -15,7 +15,7 @@
         <InputTextArea class="form-control form-control-lg" id="json" @bind-Value="@_settings.Json"/>
     </div>
     <div class="form-group">
-        <label for="propertyCasingSelector">Property Casing Rule: </label>
+        <label for="propertyCasingSelector">Casing for properties: </label>
         <InputSelect class="form-control form-control-lg" id="propertyCasingSelector" @bind-Value="@_settings.PropertyCasing">
             @foreach (var casingOption in CasingOptions) {
                 <option>@casingOption</option>
@@ -23,7 +23,7 @@
         </InputSelect>
     </div>
     <div class="form-group">
-        <label for="classCasingSelector">Class Casing Rule: </label>
+        <label for="classCasingSelector">Casing for classes: </label>
         <InputSelect class="form-control form-control-lg" id="classCasingSelector" @bind-Value="@_settings.ClassCasing">
             @foreach (var casingOption in CasingOptions) {
                 <option>@casingOption</option>
@@ -31,11 +31,11 @@
         </InputSelect>
     </div>
     <div class="form-group">
-        <label for="classPrefix">Prefix: </label>
+        <label for="classPrefix">Class Prefix: </label>
         <InputText type="text" class="form-control form-control-lg " id="classPrefix" @bind-Value="@_settings.ClassPrefix"></InputText>
     </div>
     <div class="form-group">
-        <label for="classSuffix">Suffix: </label>
+        <label for="classSuffix">Class Suffix: </label>
         <InputText type="text" class="form-control form-control-lg " id="classSuffix" @bind-Value="@_settings.ClassSuffix"></InputText>
     </div>
     <div class="form-group">
@@ -43,7 +43,7 @@
         <InputText type="text" class="form-control form-control-lg " id="namespace" @bind-Value="@_settings.NameSpace"></InputText>
     </div>
     <div class="form-group">
-        <label for="rootName">Root name: </label>
+        <label for="rootName">Root object name: </label>
         <InputText type="text" class="form-control form-control-lg " id="rootName" @bind-Value="@_settings.RootName"></InputText>
     </div>
     <button class="btn btn-primary" type="submit">Generate C#</button>
