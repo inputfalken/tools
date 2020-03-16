@@ -4,10 +4,10 @@ open Common.StringJoin
 open System
 
 type Settings =
-    { TypeCasing: Casing
+    { ClassCasing: Casing
       PropertyCasing: Casing
-      Prefix: string
-      Suffix: string }
+      ClassPrefix: string
+      ClassSuffix: string }
 
 type internal TypeInfo =
     { Name: string

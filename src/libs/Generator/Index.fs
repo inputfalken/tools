@@ -22,14 +22,14 @@ type public Factory =
                 |> Option.defaultValue "root"
                 
         let csharpSettings =
-            { Prefix = classPrefix
-              Suffix = classSuffix
+            { ClassPrefix = classPrefix
+              ClassSuffix = classSuffix
               PropertyCasing =
                   settings.PropertyCasing
                   |> Casing.fromString
                   |> Option.defaultValue Casing.Pascal
-              TypeCasing =
-                  settings.TypeCasing
+              ClassCasing =
+                  settings.ClassCasing
                   |> Casing.fromString
                   |> Option.defaultValue Casing.Pascal } 
             

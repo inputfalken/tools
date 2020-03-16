@@ -18,9 +18,9 @@ module internal CSharpFactory =
         if not (Char.IsLetter name.[0]) then
             raise (System.ArgumentException("Member names can only start with letters."))
 
-    let rec private GeneratedType members key (typeSet: CIString Set) settings propertyFormatter className =
+    let rec private GeneratedType members key (classSet: CIString Set) settings propertyFormatter className =
         let className = className |> Option.defaultValue key
-        let typeSet = typeSet.Add <| CI className
+        let classSet = classSet.Add <| CI className
 
         let classContent =
             members
@@ -28,28 +28,28 @@ module internal CSharpFactory =
                 let className =
                     if property.Name
                        |> CI
-                       |> typeSet.Contains
-                    then settings.TypeCasing.applyMultiple [ className; property.Name ]
+                       |> classSet.Contains
+                    then settings.ClassCasing.applyMultiple [ className; property.Name ]
                     else property.Name
                     |> Option.Some
                 match property.Type |> Option.defaultValue UnresolvedBaseType with
                 | GeneratedType x ->
-                    GeneratedType x property.Name typeSet settings propertyFormatter className
+                    GeneratedType x property.Name classSet settings propertyFormatter className
                 | ArrayType x ->
                     let formatter = arrayProperty
                     match x with
-                    | GeneratedType x -> GeneratedType x property.Name typeSet settings formatter className
-                    | x -> CSharpFactoryPrivate x property.Name typeSet settings formatter
-                | x -> CSharpFactoryPrivate x property.Name typeSet settings (getFormatter x))
+                    | GeneratedType x -> GeneratedType x property.Name classSet settings formatter className
+                    | x -> CSharpFactoryPrivate x property.Name classSet settings formatter
+                | x -> CSharpFactoryPrivate x property.Name classSet settings (getFormatter x))
             |> joinStringsWithSpaceSeparation
 
-        let formattedClassName = settings.TypeCasing.applyMultiple [ settings.Prefix; className; settings.Suffix ]
+        let formattedClassName = settings.ClassCasing.applyMultiple [ settings.ClassPrefix; className; settings.ClassSuffix ]
 
         // Ugly side effect, maybe use Result in order in order to be explicit that things could go wrong.
         validateName formattedClassName
 
         let ``class`` = ``class`` formattedClassName classContent
-        if typeSet.Count = 1 then
+        if classSet.Count = 1 then
             ``class``
         else
             let formattedPropertyName = key |> settings.PropertyCasing.apply
@@ -57,14 +57,14 @@ module internal CSharpFactory =
             let res = [ ``class``; property ] |> joinStringsWithSpaceSeparation
             res
 
-    and private CSharpFactoryPrivate ``type`` key typeSet settings propertyFormatter =
+    and private CSharpFactoryPrivate ``type`` key classSet settings propertyFormatter =
         match ``type`` with
-        | GeneratedType members -> GeneratedType members key typeSet settings propertyFormatter Option.None
-        | ArrayType ``type`` -> CSharpFactoryPrivate ``type`` key typeSet settings arrayProperty
+        | GeneratedType members -> GeneratedType members key classSet settings propertyFormatter Option.None
+        | ArrayType ``type`` -> CSharpFactoryPrivate ``type`` key classSet settings arrayProperty
         | BaseType x ->
             let formattedPropertyName =
-                if typeSet.IsEmpty then
-                    [ settings.Prefix; key; settings.Suffix ] |> settings.PropertyCasing.applyMultiple
+                if classSet.IsEmpty then
+                    [ settings.ClassPrefix; key; settings.ClassSuffix ] |> settings.PropertyCasing.applyMultiple
                 else key |> settings.PropertyCasing.apply
 
             validateName formattedPropertyName
