@@ -33,25 +33,25 @@ type CSharpFactory() =
 
 
     [<ValidateSet(CasingConstants.Camel, CasingConstants.Pascal, CasingConstants.None)>]
-    [<Parameter(Mandatory = false, Position = 1, HelpMessage = "Sets the casing rules for property names.")>]
+    [<Parameter(Mandatory = false, Position = 2, HelpMessage = "Sets the casing rules for property names.")>]
     member val PropertyCasing: string = CasingConstants.Pascal with get, set
 
 
     [<ValidateNotNullOrEmpty>]
-    [<Parameter(Mandatory = false, Position = 2, HelpMessage = "Sets the name of the namespace.")>]
+    [<Parameter(Mandatory = false, Position = 3, HelpMessage = "Sets the name of the namespace.")>]
     member val NameSpace: string = "" with get, set
 
 
     [<ValidateNotNullOrEmpty>]
-    [<Parameter(Mandatory = false, Position = 3, HelpMessage = "Sets the name of the root object.")>]
+    [<Parameter(Mandatory = false, Position = 4, HelpMessage = "Sets the name of the root object.")>]
     member val ObjectName: string = "Root" with get, set
 
 
-    [<Parameter(Mandatory = false, Position = 4, HelpMessage = "Sets a prefix for the class names.")>]
+    [<Parameter(Mandatory = false, Position = 5, HelpMessage = "Sets a prefix for the class names.")>]
     member val Prefix: string = "" with get, set
 
 
-    [<Parameter(Mandatory = false, Position = 5, HelpMessage = "Suffix a prefix for the class names.")>]
+    [<Parameter(Mandatory = false, Position = 6, HelpMessage = "Suffix a prefix for the class names.")>]
     member val Suffix: string = "" with get, set
 
     member val private Buffer: List<string> = List<string>()
