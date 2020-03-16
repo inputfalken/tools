@@ -4,7 +4,7 @@ open Common.StringJoin
 open System
 
 type Settings =
-    { TypeCasing: Casing
+    { ClassCasing: Casing
       PropertyCasing: Casing
       Prefix: string
       Suffix: string }

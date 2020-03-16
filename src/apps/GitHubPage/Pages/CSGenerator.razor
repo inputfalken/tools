@@ -93,7 +93,7 @@
                 ClassSuffix = _settings.ClassSuffix,
                 NameSpace = _settings.NameSpace,
                 RootObjectName = _settings.RootName,
-                TypeCasing = _settings.ClassCasing
+                ClassCasing = _settings.ClassCasing
             }
             )
             .Map(x => CSharpSyntaxTree.ParseText(x))

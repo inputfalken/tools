@@ -29,7 +29,7 @@ module internal CSharpFactory =
                     if property.Name
                        |> CI
                        |> typeSet.Contains
-                    then settings.TypeCasing.applyMultiple [ className; property.Name ]
+                    then settings.ClassCasing.applyMultiple [ className; property.Name ]
                     else property.Name
                     |> Option.Some
                 match property.Type |> Option.defaultValue UnresolvedBaseType with
@@ -43,7 +43,7 @@ module internal CSharpFactory =
                 | x -> CSharpFactoryPrivate x property.Name typeSet settings (getFormatter x))
             |> joinStringsWithSpaceSeparation
 
-        let formattedClassName = settings.TypeCasing.applyMultiple [ settings.Prefix; className; settings.Suffix ]
+        let formattedClassName = settings.ClassCasing.applyMultiple [ settings.Prefix; className; settings.Suffix ]
 
         // Ugly side effect, maybe use Result in order in order to be explicit that things could go wrong.
         validateName formattedClassName

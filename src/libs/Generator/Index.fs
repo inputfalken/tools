@@ -28,8 +28,8 @@ type public Factory =
                   settings.PropertyCasing
                   |> Casing.fromString
                   |> Option.defaultValue Casing.Pascal
-              TypeCasing =
-                  settings.TypeCasing
+              ClassCasing =
+                  settings.ClassCasing
                   |> Casing.fromString
                   |> Option.defaultValue Casing.Pascal } 
             
