@@ -60,5 +60,5 @@ type CSharpFactory() =
                 
         // TODO add proper support like https://github.com/PowerShell/PowerShell/blob/master/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/ConvertFromJsonCommand.cs
         Factory.CSharp(String.Join(Environment.NewLine, x.Buffer), settings)
-               .Match((fun (x: String) -> x), (fun (x: exn) -> raise x))
+               .Match((fun x -> x), raise)
         |> x.WriteObject
