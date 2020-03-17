@@ -5,6 +5,7 @@ open Common.CaseInsensitiveString
 open Common.StringJoin
 open CSharp.Types
 open CSharp.Formatters.Formatters
+open Common.Casing
 
 module internal CSharpFactory =
     let internal UnresolvedBaseType = BaseType.Object |> CSType.BaseType
@@ -13,6 +14,17 @@ module internal CSharpFactory =
         function
         | ArrayType _ -> arrayProperty
         | _ -> property
+
+    let private applyPrefixSuffix key (settings: Settings) (casing: Casing) =
+        [ settings.ClassPrefix; key; settings.ClassSuffix ] |> casing.applyMultiple
+
+    let private createClassName (classSet: CIString Set) property className settings =
+        if property
+           |> CI
+           |> classSet.Contains
+        then settings.ClassCasing.applyMultiple [ className; property ]
+        else property
+        |> Option.Some
 
     let validateName (name: String) =
         if not (Char.IsLetter name.[0]) then
@@ -25,25 +37,20 @@ module internal CSharpFactory =
         let classContent =
             members
             |> Array.map (fun property ->
-                let className =
-                    if property.Name
-                       |> CI
-                       |> classSet.Contains
-                    then settings.ClassCasing.applyMultiple [ className; property.Name ]
-                    else property.Name
-                    |> Option.Some
                 match property.Type |> Option.defaultValue UnresolvedBaseType with
                 | GeneratedType x ->
-                    GeneratedType x property.Name classSet settings propertyFormatter className
+                    let uniqueClassName = createClassName classSet property.Name className settings
+                    GeneratedType x property.Name classSet settings propertyFormatter uniqueClassName
                 | ArrayType x ->
-                    let formatter = arrayProperty
                     match x with
-                    | GeneratedType x -> GeneratedType x property.Name classSet settings formatter className
-                    | x -> CSharpFactoryPrivate x property.Name classSet settings formatter
+                    | GeneratedType x ->
+                        let uniqueClassName = createClassName classSet property.Name className settings
+                        GeneratedType x property.Name classSet settings arrayProperty uniqueClassName
+                    | x -> CSharpFactoryPrivate x property.Name classSet settings arrayProperty
                 | x -> CSharpFactoryPrivate x property.Name classSet settings (getFormatter x))
             |> joinStringsWithSpaceSeparation
 
-        let formattedClassName = settings.ClassCasing.applyMultiple [ settings.ClassPrefix; className; settings.ClassSuffix ]
+        let formattedClassName = applyPrefixSuffix className settings settings.ClassCasing
 
         // Ugly side effect, maybe use Result in order in order to be explicit that things could go wrong.
         validateName formattedClassName
@@ -54,20 +61,21 @@ module internal CSharpFactory =
         else
             let formattedPropertyName = key |> settings.PropertyCasing.apply
             let property = propertyFormatter formattedClassName formattedPropertyName
-            let res = [ ``class``; property ] |> joinStringsWithSpaceSeparation
-            res
+            [ ``class``; property ] |> joinStringsWithSpaceSeparation
 
     and private CSharpFactoryPrivate ``type`` key classSet settings propertyFormatter =
         match ``type`` with
         | GeneratedType members -> GeneratedType members key classSet settings propertyFormatter Option.None
         | ArrayType ``type`` -> CSharpFactoryPrivate ``type`` key classSet settings arrayProperty
         | BaseType x ->
+
             let formattedPropertyName =
-                if classSet.IsEmpty then
-                    [ settings.ClassPrefix; key; settings.ClassSuffix ] |> settings.PropertyCasing.applyMultiple
+                if classSet.IsEmpty then applyPrefixSuffix key settings settings.PropertyCasing
                 else key |> settings.PropertyCasing.apply
 
+            // Ugly side effect, maybe use Result in order in order to be explicit that things could go wrong.
             validateName formattedPropertyName
+
             propertyFormatter x.TypeInfo.Stringified formattedPropertyName
 
     let internal CSharpFactory ``type`` root settings =
