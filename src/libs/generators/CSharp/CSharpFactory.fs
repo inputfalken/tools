@@ -78,5 +78,5 @@ module internal CSharpFactory =
 
             propertyFormatter x.TypeInfo.Stringified formattedPropertyName
 
-    let internal CSharpFactory ``type`` root settings =
-        CSharpFactoryPrivate ``type`` root Set.empty settings (getFormatter ``type``)
+    let internal CSharpFactory ``type`` settings =
+        CSharpFactoryPrivate ``type`` settings.RootName Set.empty settings (getFormatter ``type``)

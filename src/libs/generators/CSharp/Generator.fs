@@ -4,11 +4,10 @@ open JsonParser
 open CSharp.Types
 open Common
 open Common.CaseInsensitiveString
-open Common.StringValidator
 open CSharp.Factory.CSharpFactory
 
 module CSharp =
-    let generateCSharpFromJson input settings root nameSpace =
+    let generateCSharpFromJson input settings =
         let tryConvertToNullableValueType current =
             match current with
             | BaseType x ->
@@ -148,11 +147,9 @@ module CSharp =
                 |> baseType
                 |> Option.defaultValue UnresolvedBaseType
                 |> CSharpFactory
-                <| root
                 <| settings
 
-            nameSpace
-            |> valueExists
+            settings.NameSpace
             |> Option.map (fun x -> StringJoin.joinStringsWithSpaceSeparation [ "namespace"; x; "{"; cSharp; "}" ])
             |> Option.defaultValue cSharp
             |> Lemonad.ErrorHandling.Result.Value

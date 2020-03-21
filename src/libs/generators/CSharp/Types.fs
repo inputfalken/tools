@@ -3,8 +3,10 @@ open Common.Casing
 open Common.StringJoin
 open System
 
-type Settings =
-    { ClassCasing: Casing
+type public Settings =
+    { RootName: String
+      NameSpace: String option
+      ClassCasing: Casing
       PropertyCasing: Casing
       ClassPrefix: string
       ClassSuffix: string }
