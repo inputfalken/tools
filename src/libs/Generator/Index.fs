@@ -4,12 +4,11 @@ open CSharp.CSharp
 open CSharp.Types
 open Common
 open Common.Casing
+open Lemonad.ErrorHandling
 open StringValidator
 
-type public Factory =
-    static member public CSharp input = Factory.ConfiguredCSharp input (CSharpSettings())
-    static member public ConfiguredCSharp input settings =
-
+module Config =
+    let transformCSharpSettings (settings: CSharpSettings) =
         let (classPrefix, classSuffix) =
             match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
             | Some prefix, Some suffix -> (prefix, suffix)
@@ -34,4 +33,10 @@ type public Factory =
                   |> Casing.fromString
                   |> Option.defaultValue Casing.Pascal }
 
-        generateCSharpFromJson input csharpSettings
+        csharpSettings
+
+type public Factory =
+
+    static member public CSharp input = Factory.ConfiguredCSharp <| input <| CSharpSettings()
+    static member public ConfiguredCSharp (input: System.String) (settings: CSharpSettings): IResult<System.String, exn> =
+        generateCSharpFromJson <| input <| Config.transformCSharpSettings settings
