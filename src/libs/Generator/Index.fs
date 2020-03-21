@@ -7,8 +7,8 @@ open Common.Casing
 open StringValidator
 
 type public Factory =
-    static member public CSharp input = Factory.CSharp(input, CSharpSettings())
-    static member public CSharp(input, settings) =
+    static member public CSharp input = Factory.ConfiguredCSharp input (CSharpSettings())
+    static member public ConfiguredCSharp input settings =
 
         let (classPrefix, classSuffix) =
             match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with

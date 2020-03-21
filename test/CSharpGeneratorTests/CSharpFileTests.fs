@@ -53,7 +53,9 @@ let ``Entry with value`` json expected =
 [<InlineData("Foo", "")>]
 [<InlineData("", "Foo")>]
 let ``Allow classPrefix to be empty if classSuffix is set`` classPrefix classSuffix =
-    let result = Factory.CSharp("""{ "FooBar" : [] }""", CSharpSettings(ClassPrefix = classPrefix, ClassSuffix = classSuffix))
+    let result =
+        Factory.ConfiguredCSharp """{ "FooBar" : [] }"""
+            (CSharpSettings(ClassPrefix = classPrefix, ClassSuffix = classSuffix))
     let expected = sprintf "public class %sRoot%s { public object[] FooBar { get; set; } }" classPrefix classSuffix
     Assert.Equal(expected, result.Either.Value)
 
@@ -61,7 +63,9 @@ let ``Allow classPrefix to be empty if classSuffix is set`` classPrefix classSuf
 [<InlineData(NoneCase, "public class rootmodel { public object[] @object { get; set; } }")>]
 [<InlineData(PascalCase, "public class RootModel { public object[] Object { get; set; } }")>]
 let ``Handle reserved words`` casing expected =
-    let result = Factory.CSharp("""{ "object" : [] }""", CSharpSettings(PropertyCasing = casing, ClassCasing = casing))
+    let result =
+        Factory.ConfiguredCSharp """{ "object" : [] }"""
+            (CSharpSettings(PropertyCasing = casing, ClassCasing = casing))
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -71,11 +75,8 @@ let ``Handle reserved words`` casing expected =
 [<InlineData("", null)>]
 let ``Uses default classSuffix if classPrefix and sufifx is set to empty string or null`` classPrefix classSuffix =
     let result =
-        Factory.CSharp("""
-    {
-        "FooBar" : []
-    }
-    """, CSharpSettings(ClassPrefix = classPrefix, ClassSuffix = classSuffix))
+        Factory.ConfiguredCSharp """ { "FooBar" : [] } """
+            (CSharpSettings(ClassPrefix = classPrefix, ClassSuffix = classSuffix))
 
     let expected = "public class RootModel { public object[] FooBar { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -88,7 +89,8 @@ let ``Uses default classSuffix if classPrefix and sufifx is set to empty string 
 [<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, null,
              "public class rootModel { public class innerClassModel { public int FooBar { get; set; } } public innerClassModel InnerClass { get; set; } }")>]
 let ``Casing Camel `` json classCasing propertyCasing expected =
-    let result = Factory.CSharp(json, CSharpSettings(PropertyCasing = propertyCasing, ClassCasing = classCasing))
+    let result =
+        Factory.ConfiguredCSharp json (CSharpSettings(PropertyCasing = propertyCasing, ClassCasing = classCasing))
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -106,11 +108,10 @@ let ``Casing Camel `` json classCasing propertyCasing expected =
 [<InlineData("""[]""", null, CamelCase, "public object[] xRootModel { get; set; }")>]
 let ``Casing Camel  works with arguments classSuffix, root and classPrefix`` json classCasing propertyCasing expected =
     let result =
-        Factory.CSharp
-            (json,
-             CSharpSettings
-                 (ClassCasing = classCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
-                  RootObjectName = "root"))
+        Factory.ConfiguredCSharp json
+            (CSharpSettings
+                (ClassCasing = classCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
+                 RootObjectName = "root"))
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -128,11 +129,10 @@ let ``Casing Camel  works with arguments classSuffix, root and classPrefix`` jso
 [<InlineData("""[]""", null, NoneCase, "public object[] xrootmodel { get; set; }")>]
 let ``Casing None works with arguments classSuffix, root and classPrefix`` json classCasing propertyCasing expected =
     let result =
-        Factory.CSharp
-            (json,
-             CSharpSettings
-                 (ClassCasing = classCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
-                  RootObjectName = "root"))
+        Factory.ConfiguredCSharp json
+            (CSharpSettings
+                (ClassCasing = classCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
+                 RootObjectName = "root"))
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -143,7 +143,8 @@ let ``Casing None works with arguments classSuffix, root and classPrefix`` json 
 let ``Casing Pascal`` json classCasing propertyCasing =
     let expected =
         "public class RootModel { public class InnerClassModel { public int FooBar { get; set; } } public InnerClassModel InnerClass { get; set; } }"
-    let result = Factory.CSharp(json, CSharpSettings(PropertyCasing = propertyCasing, ClassCasing = classCasing))
+    let result =
+        Factory.ConfiguredCSharp json (CSharpSettings(PropertyCasing = propertyCasing, ClassCasing = classCasing))
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -163,11 +164,9 @@ let ``Casing Pascal`` json classCasing propertyCasing =
 [<InlineData("""[]""", null, PascalCase, "public object[] XRootModel { get; set; }")>]
 let ``Casing Pascal  works with arguments classSuffix, root and classPrefix`` json classCasing propertyCasing expected =
     let result =
-        Factory.CSharp
-            (json,
-             CSharpSettings
-                 (ClassCasing = classCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
-                  RootObjectName = "root"))
+        Factory.ConfiguredCSharp
+            json
+             (CSharpSettings (ClassCasing = classCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model", RootObjectName = "root"))
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -178,7 +177,8 @@ let ``Casing Pascal  works with arguments classSuffix, root and classPrefix`` js
 [<InlineData("""{"INNER_CLASS": {"FOO_BAR": 2}}""", NoneCase, null,
              "public class rootmodel { public class INNER_CLASSmodel { public int FooBar { get; set; } } public INNER_CLASSmodel InnerClass { get; set; } }")>]
 let ``Casing none`` json classCasing propertyCasing expected =
-    let result = Factory.CSharp(json, CSharpSettings(PropertyCasing = propertyCasing, ClassCasing = classCasing))
+    let result =
+        Factory.ConfiguredCSharp json (CSharpSettings(PropertyCasing = propertyCasing, ClassCasing = classCasing))
     Assert.Equal(expected, result.Either.Value)
 
 
@@ -300,10 +300,8 @@ let ``Array with objects`` json csharp =
 [<InlineData("""{ "aps": { "alert":"foobar" } }""",
              "public class ApsModel { public string Alert { get; set; } } public ApsModel Aps { get; set; }")>]
 [<InlineData("""{"Foo": 2}""", "public int Foo { get; set; }")>]
-[<InlineData("""{"foo": 2, "bar": "this is a test"}""",
-             "public int Foo { get; set; } public string Bar { get; set; }")>]
-[<InlineData("""{"foo": 2, "items": [1,2,3,4,5]}""",
-             "public int Foo { get; set; } public int[] Items { get; set; }")>]
+[<InlineData("""{"foo": 2, "bar": "this is a test"}""", "public int Foo { get; set; } public string Bar { get; set; }")>]
+[<InlineData("""{"foo": 2, "items": [1,2,3,4,5]}""", "public int Foo { get; set; } public int[] Items { get; set; }")>]
 [<InlineData("""{"foo": 2, "items": ["foo","bar", "doe"]}""",
              "public int Foo { get; set; } public string[] Items { get; set; }")>]
 [<InlineData("""{ "Models": [ { "foo": 1 }, { "foo": 2 } ]} """,
@@ -320,18 +318,19 @@ let ``Entry with object`` json csharp =
 
 [<Literal>]
 let invalidTypeNameErrorMessage = "Member names can only start with letters."
+
 [<Theory>]
 [<InlineData("""{"1337": {}}""", invalidTypeNameErrorMessage)>]
 [<InlineData("""{"Foo": {"1337": {"bar": 2}}}""", invalidTypeNameErrorMessage)>]
 let ``Type names or member names who starts with numbers result in error`` json expected =
     let result = Factory.CSharp json
     Assert.Equal(expected, result.Either.Error.Message)
-    
+
 [<Theory>]
 [<InlineData("""{}""", invalidTypeNameErrorMessage)>]
 [<InlineData("""{"Foo": {}}""", invalidTypeNameErrorMessage)>]
 let ``Class classPrefix with number result in error`` json expected =
-    let result = Factory.CSharp(json, CSharpSettings(ClassPrefix = "0"))
+    let result = Factory.ConfiguredCSharp json (CSharpSettings(ClassPrefix = "0"))
     Assert.Equal(expected, result.Either.Error.Message)
 
 [<Theory>]
@@ -342,7 +341,7 @@ let ``Class classPrefix with number result in error`` json expected =
 [<InlineData("""{"data":{"name":"","token":"","user":{"data":{"name":"","email":""}},"quota":{"data":{"usage":25,"limit":100,"next_reset":"2020-04-01T00:00:00+02:00"}}}}""",
              "public class RootModel { public class DataModel { public string Name { get; set; } public string Token { get; set; } public class UserModel { public class UserDataModel { public string Name { get; set; } public string Email { get; set; } } public UserDataModel Data { get; set; } } public UserModel User { get; set; } public class QuotaModel { public class QuotaDataModel { public int Usage { get; set; } public int Limit { get; set; } public System.DateTime NextReset { get; set; } } public QuotaDataModel Data { get; set; } } public QuotaModel Quota { get; set; } } public DataModel Data { get; set; } }")>]
 let ``Resolve class names when it's the same name as their enclosing type`` json expected =
-    let result = Factory.CSharp (json)
+    let result = Factory.CSharp(json)
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -385,7 +384,7 @@ let ``Nested identical children with Array`` json expected =
 [<InlineData("[1,null,1.50,3,4]", "decimal?")>]
 [<InlineData("[null,3,1.50,3,4]", "decimal?")>]
 [<InlineData("[1,3,1.50,3,null]", "decimal?")>]
-let ``Integers transforms into decimal if a number with decimals occur`` json ``type``  =
+let ``Integers transforms into decimal if a number with decimals occur`` json ``type`` =
     let result = Factory.CSharp json
     let expected = sprintf "public %s[] RootModel { get; set; }" ``type``
     Assert.Equal(expected, result.Either.Value)

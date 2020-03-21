@@ -57,8 +57,7 @@ type CSharpFactory() =
             CSharpSettings
                 (PropertyCasing = x.PropertyCasing, ClassCasing = x.ClassCasing, NameSpace = x.NameSpace,
                  ClassPrefix = x.Prefix, ClassSuffix = x.Suffix, RootObjectName = x.ObjectName)
-                
+
         // TODO add proper support like https://github.com/PowerShell/PowerShell/blob/master/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/ConvertFromJsonCommand.cs
-        Factory.CSharp(String.Join(Environment.NewLine, x.Buffer), settings)
-               .Match((fun x -> x), raise)
-        |> x.WriteObject
+        (Factory.ConfiguredCSharp (String.Join(Environment.NewLine, x.Buffer)) settings)
+            .Match((fun x -> x), raise) |> x.WriteObject
