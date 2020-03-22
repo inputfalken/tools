@@ -1,15 +1,20 @@
 namespace CSharp.Types
+
 open Common.Casing
 open Common.StringJoin
 open System
+
+type public LetterRule =
+    | Prefix of String
+    | Suffix of String
+    | ``Prefix and Suffix`` of string * String
 
 type public Settings =
     { RootName: String
       NameSpace: String option
       ClassCasing: Casing
       PropertyCasing: Casing
-      ClassPrefix: string
-      ClassSuffix: string }
+      LetterRule: LetterRule }
 
 type internal TypeInfo =
     { Name: string
@@ -78,6 +83,7 @@ and internal BaseType =
         match this with
         | ReferenceType x -> x.TypeInfo
         | ValueType x -> x.TypeInfo
+
     static member Guid x =
         { Type =
               { Namespace = "System"
@@ -97,7 +103,7 @@ and internal BaseType =
           Value = x }
         |> ValueType.Double
         |> BaseType.ValueType
-        
+
     static member Integer x =
         { Type =
               { Namespace = "System"
@@ -155,12 +161,12 @@ and internal BaseType =
           Value = x }
         |> ReferenceType.String
         |> BaseType.ReferenceType
-        
+
 and internal Property =
     { Name: string
       Type: CSType Option }
 
 and internal CSType =
     | BaseType of BaseType
-    | GeneratedType of Property[]
+    | GeneratedType of Property []
     | ArrayType of CSType
