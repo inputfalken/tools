@@ -32,12 +32,12 @@ let ``Setting namespace`` nameSpace =
     Assert.Equal(Option.Some(nameSpace), result.NameSpace)
 
 [<Fact>]
-let ``Allow classPrefix to be empty if classSuffix is set``() =
+let ``Allow ClassPrefix to be empty if ClassSuffix is set``() =
     let result = transformCSharpSettings (CSharpSettings(ClassPrefix = System.String.Empty, ClassSuffix = "Foo"))
     Assert.Equal(System.String.Empty, result.ClassPrefix)
 
 [<Fact>]
-let ``Allow classSuffix to be empty if classPrefix is set``() =
+let ``Allow ClassSuffix to be empty if ClassPrefix is set``() =
     let result = transformCSharpSettings (CSharpSettings(ClassPrefix = "Foo", ClassSuffix = System.String.Empty))
     Assert.Equal(System.String.Empty, result.ClassSuffix)
 
@@ -48,7 +48,7 @@ let ``Allow classSuffix to be empty if classPrefix is set``() =
 [<InlineData(null, null)>]
 [<InlineData(null, "")>]
 [<InlineData("", null)>]
-let ``Uses default settings if classSuffix or classPrefix is set to empty string or null`` classPrefix classSuffix =
+let ``Uses default settings if ClassSuffix or ClassPrefix is set to empty string or null`` classPrefix classSuffix =
     let result = transformCSharpSettings (CSharpSettings(ClassPrefix = classPrefix, ClassSuffix = classSuffix))
     Assert.Equal(defaultSettings, result)
 
@@ -59,6 +59,6 @@ let ``Uses default settings if classSuffix or classPrefix is set to empty string
 [<InlineData(null, null)>]
 [<InlineData(null, "")>]
 [<InlineData("", null)>]
-let ``Uses default settings if propertyCasing or classCasing is set to empty string or null`` classCasing propertyCasing =
+let ``Uses default settings if PropertyCasing or ClassCasing is set to empty string or null`` classCasing propertyCasing =
     let result = transformCSharpSettings (CSharpSettings(ClassCasing = classCasing, PropertyCasing = propertyCasing))
     Assert.Equal(defaultSettings, result)

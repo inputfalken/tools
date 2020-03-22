@@ -3,10 +3,8 @@ module Tests
 open CSharp
 open CSharp.Types
 open Common.Casing
-open Generator
 open Xunit
 
-// TODO these tests should test the CSharp assembly directly and there should be separate tests for translating the CSharpSettings object.
 [<Literal>]
 let CamelCase = "Camel"
 
@@ -32,7 +30,7 @@ let setCasing classCasing propertyCasing =
       ClassSuffix = "model"
       PropertyCasing = Casing.fromString propertyCasing |> Option.defaultValue settings.ClassCasing
       ClassCasing = Casing.fromString classCasing |> Option.defaultValue settings.ClassCasing }
-    
+
 
 let settingsSetPrefisSuffix classPrefix classSuffix =
     { RootName = settings.RootName
@@ -77,7 +75,7 @@ let ``Entry with value`` json expected =
     let result = CSharp.generateCSharpFromJson json settings
     let expected = sprintf "public %s RootModel { get; set; }" expected
     Assert.Equal(expected, result.Either.Value)
-    
+
 
 [<Theory>]
 [<InlineData(NoneCase, "public class rootmodel { public object[] @object { get; set; } }")>]
@@ -86,105 +84,77 @@ let ``Handle reserved words`` casing expected =
     let settings = setCasing casing casing
     let result = CSharp.generateCSharpFromJson """{ "object" : [] }""" settings
     Assert.Equal(expected, result.Either.Value)
-    
+
 
 
 [<Theory>]
-[<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, CamelCase,
+[<InlineData("""{"InnerClass": {"FooBar": 2}}""", 
              "public class rootModel { public class innerClassModel { public int fooBar { get; set; } } public innerClassModel innerClass { get; set; } }")>]
-[<InlineData("""{"InnerClass": {"FooBar": 2}}""", null, CamelCase,
-             "public class RootModel { public class InnerClassModel { public int fooBar { get; set; } } public InnerClassModel innerClass { get; set; } }")>]
-[<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, null,
-             "public class rootModel { public class innerClassModel { public int FooBar { get; set; } } public innerClassModel InnerClass { get; set; } }")>]
 let ``Casing Camel `` json classCasing propertyCasing expected =
     let settings = setCasing classCasing propertyCasing
     let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
-[<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, CamelCase,
+[<InlineData("""{"InnerClass": {"FooBar": 2}}""", 
              "public class xRootModel { public class xInnerClassModel { public int fooBar { get; set; } } public xInnerClassModel innerClass { get; set; } }")>]
-[<InlineData("""{"InnerClass": {"FooBar": 2}}""", null, CamelCase,
-             "public class XRootModel { public class XInnerClassModel { public int fooBar { get; set; } } public XInnerClassModel innerClass { get; set; } }")>]
-[<InlineData("""{"InnerClass": {"FooBar": 2}}""", CamelCase, null,
-             "public class xRootModel { public class xInnerClassModel { public int FooBar { get; set; } } public xInnerClassModel InnerClass { get; set; } }")>]
-[<InlineData("""{}""", CamelCase, CamelCase, "public object xRootModel { get; set; }")>]
-[<InlineData("""{}""", CamelCase, null, "public object XRootModel { get; set; }")>]
-[<InlineData("""{}""", null, CamelCase, "public object xRootModel { get; set; }")>]
-[<InlineData("""[]""", CamelCase, CamelCase, "public object[] xRootModel { get; set; }")>]
-[<InlineData("""[]""", CamelCase, null, "public object[] XRootModel { get; set; }")>]
-[<InlineData("""[]""", null, CamelCase, "public object[] xRootModel { get; set; }")>]
-let ``Casing Camel  works with arguments classSuffix and classPrefix`` json classCasing propertyCasing expected =
-    let result =
-        Factory.ConfiguredCSharp json
-            (CSharpSettings
-                (ClassCasing = classCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
-                 RootObjectName = "root"))
+[<InlineData("""{}""",  "public object xRootModel { get; set; }")>]
+[<InlineData("""[]""",  "public object[] xRootModel { get; set; }")>]
+let ``Casing Camel  works with arguments classSuffix and classPrefix`` json expected =
+    let settings: Settings =
+        { RootName = "root"
+          NameSpace = Option.None
+          ClassPrefix = "x"
+          ClassSuffix = "model"
+          PropertyCasing = Casing.Camel 
+          ClassCasing = Casing.Camel }
+    let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
-[<InlineData("""{"INNERCLASS": {"FOOBAR": 2}}""", NoneCase, NoneCase,
+[<InlineData("""{"INNERCLASS": {"FOOBAR": 2}}""", 
              "public class xrootmodel { public class xINNERCLASSmodel { public int FOOBAR { get; set; } } public xINNERCLASSmodel INNERCLASS { get; set; } }")>]
-[<InlineData("""{"innerClass": {"fooBar": 2}}""", null, NoneCase,
-             "public class XRootModel { public class XInnerClassModel { public int fooBar { get; set; } } public XInnerClassModel innerClass { get; set; } }")>]
-[<InlineData("""{"innerClass": {"fooBar": 2}}""", NoneCase, null,
-             "public class xrootmodel { public class xinnerClassmodel { public int FooBar { get; set; } } public xinnerClassmodel InnerClass { get; set; } }")>]
-[<InlineData("""{}""", NoneCase, NoneCase, "public object xrootmodel { get; set; }")>]
-[<InlineData("""{}""", NoneCase, null, "public object XRootModel { get; set; }")>]
-[<InlineData("""{}""", null, NoneCase, "public object xrootmodel { get; set; }")>]
-[<InlineData("""[]""", NoneCase, NoneCase, "public object[] xrootmodel { get; set; }")>]
-[<InlineData("""[]""", NoneCase, null, "public object[] XRootModel { get; set; }")>]
-[<InlineData("""[]""", null, NoneCase, "public object[] xrootmodel { get; set; }")>]
-let ``Casing None works with arguments classSuffix, root and classPrefix`` json classCasing propertyCasing expected =
-    let result =
-        Factory.ConfiguredCSharp json
-            (CSharpSettings
-                (ClassCasing = classCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
-                 RootObjectName = "root"))
+[<InlineData("""{}""",  "public object xrootmodel { get; set; }")>]
+[<InlineData("""[]""",  "public object[] xrootmodel { get; set; }")>]
+let ``Casing None works with arguments classSuffix, root and classPrefix`` json expected =
+    let settings: Settings =
+        { RootName = "root"
+          NameSpace = Option.None
+          ClassPrefix = "x"
+          ClassSuffix = "model"
+          PropertyCasing = Casing.None 
+          ClassCasing = Casing.None }
+    let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
-[<InlineData("""{"innerClass": {"FooBar": 2}}""", PascalCase, PascalCase)>]
-[<InlineData("""{"innerClass": {"FooBar": 2}}""", null, PascalCase)>]
-[<InlineData("""{"innerClass": {"FooBar": 2}}""", PascalCase, null)>]
-[<InlineData("""{"innerClass": {"FooBar": 2}}""", null, null)>]
-let ``Casing Pascal`` json classCasing propertyCasing =
+[<InlineData("""{"innerClass": {"FooBar": 2}}""" )>]
+let ``Casing Pascal`` json =
     let expected =
         "public class RootModel { public class InnerClassModel { public int FooBar { get; set; } } public InnerClassModel InnerClass { get; set; } }"
-    let result =
-        Factory.ConfiguredCSharp json (CSharpSettings(PropertyCasing = propertyCasing, ClassCasing = classCasing))
+    let settings = setCasing PascalCase PascalCase
+    let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
 [<InlineData("""{"innerClass": {"fooBar": 2}}""", PascalCase, PascalCase,
              "public class XRootModel { public class XInnerClassModel { public int FooBar { get; set; } } public XInnerClassModel InnerClass { get; set; } }")>]
-[<InlineData("""{"innerClass": {"fooBar": 2}}""", null, null,
-             "public class XRootModel { public class XInnerClassModel { public int FooBar { get; set; } } public XInnerClassModel InnerClass { get; set; } }")>]
-[<InlineData("""{"innerClass": {"fooBar": 2}}""", null, PascalCase,
-             "public class XRootModel { public class XInnerClassModel { public int FooBar { get; set; } } public XInnerClassModel InnerClass { get; set; } }")>]
-[<InlineData("""{"innerClass": {"fooBar": 2}}""", PascalCase, null,
-             "public class XRootModel { public class XInnerClassModel { public int FooBar { get; set; } } public XInnerClassModel InnerClass { get; set; } }")>]
 [<InlineData("""{}""", PascalCase, PascalCase, "public object XRootModel { get; set; }")>]
-[<InlineData("""{}""", PascalCase, null, "public object XRootModel { get; set; }")>]
-[<InlineData("""{}""", null, PascalCase, "public object XRootModel { get; set; }")>]
 [<InlineData("""[]""", PascalCase, PascalCase, "public object[] XRootModel { get; set; }")>]
-[<InlineData("""[]""", PascalCase, null, "public object[] XRootModel { get; set; }")>]
-[<InlineData("""[]""", null, PascalCase, "public object[] XRootModel { get; set; }")>]
 let ``Casing Pascal  works with arguments classSuffix, root and classPrefix`` json classCasing propertyCasing expected =
-    let result =
-        Factory.ConfiguredCSharp json
-            (CSharpSettings
-                (ClassCasing = classCasing, PropertyCasing = propertyCasing, ClassPrefix = "x", ClassSuffix = "model",
-                 RootObjectName = "root"))
+    let settings: Settings =
+        { RootName = "root"
+          NameSpace = Option.None
+          ClassPrefix = "x"
+          ClassSuffix = "model"
+          PropertyCasing = Casing.Pascal 
+          ClassCasing = Casing.Pascal }
+    let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
 [<InlineData("""{"INNER_CLASS": {"FOO_BAR": 2}}""", NoneCase, NoneCase,
              "public class rootmodel { public class INNER_CLASSmodel { public int FOO_BAR { get; set; } } public INNER_CLASSmodel INNER_CLASS { get; set; } }")>]
-[<InlineData("""{"INNER_CLASS": {"FOO_BAR": 2}}""", null, NoneCase,
-             "public class RootModel { public class InnerClassModel { public int FOO_BAR { get; set; } } public InnerClassModel INNER_CLASS { get; set; } }")>]
-[<InlineData("""{"INNER_CLASS": {"FOO_BAR": 2}}""", NoneCase, null,
-             "public class rootmodel { public class INNER_CLASSmodel { public int FooBar { get; set; } } public INNER_CLASSmodel InnerClass { get; set; } }")>]
 let ``Casing none`` json classCasing propertyCasing expected =
     let settings = setCasing classCasing propertyCasing
     let result = CSharp.generateCSharpFromJson json settings
@@ -214,7 +184,7 @@ let ``Two array Objects next to each other with different properties should expa
 [<Theory>]
 [<InlineData("""{ "Foo" : [] }""")>]
 let ``Object with Empty Array`` json =
-    let result = Factory.CSharp json
+    let result = CSharp.generateCSharpFromJson json settings
     let expected = "public class RootModel { public object[] Foo { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
 
@@ -339,7 +309,7 @@ let ``Type names or member names who starts with numbers result in error`` json 
 [<InlineData("""{}""", invalidTypeNameErrorMessage)>]
 [<InlineData("""{"Foo": {}}""", invalidTypeNameErrorMessage)>]
 let ``Class classPrefix with number result in error`` json expected =
-    let settings = settingsSetPrefisSuffix (Option.Some "0") (Option.None) 
+    let settings = settingsSetPrefisSuffix (Option.Some "0") (Option.None)
     let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Error.Message)
 
@@ -378,7 +348,7 @@ let ``Array with empty object or null should not resolve in object array`` json 
 [<InlineData(""" { "orgnr": "", "name": "", "children": { "orgnr": "", "name": "", "children": { "orgnr": "", "name": "", "children": { "orgnr": "", "name": "" } } } } """,
              "public class RootModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } } public ChildrenChildrenChildrenModel Children { get; set; } } public ChildrenChildrenModel Children { get; set; } } public ChildrenModel Children { get; set; } }")>]
 let ``Nested identical children with Object`` json expected =
-    let result = Factory.CSharp json
+    let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
