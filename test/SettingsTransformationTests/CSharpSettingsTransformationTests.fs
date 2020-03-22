@@ -7,7 +7,7 @@ open Xunit
 open Generator.Config
 
 
-let defaultSettings =
+let defaultSettings() =
     { RootName = "root"
       NameSpace = Option.None
       ClassSuffix = "model"
@@ -19,7 +19,7 @@ let defaultSettings =
 [<Fact>]
 let ``Empty object``() =
     let result = transformCSharpSettings (CSharpSettings())
-    Assert.Equal(defaultSettings, result)
+    Assert.Equal(defaultSettings(), result)
 
 [<Theory>]
 [<InlineData("Foobar")>]
@@ -50,7 +50,7 @@ let ``Allow ClassSuffix to be empty if ClassPrefix is set``() =
 [<InlineData("", null)>]
 let ``Uses default settings if ClassSuffix or ClassPrefix is set to empty string or null`` classPrefix classSuffix =
     let result = transformCSharpSettings (CSharpSettings(ClassPrefix = classPrefix, ClassSuffix = classSuffix))
-    Assert.Equal(defaultSettings, result)
+    Assert.Equal(defaultSettings(), result)
 
 [<Theory>]
 [<InlineData(" ", " ")>]
@@ -61,4 +61,4 @@ let ``Uses default settings if ClassSuffix or ClassPrefix is set to empty string
 [<InlineData("", null)>]
 let ``Uses default settings if PropertyCasing or ClassCasing is set to empty string or null`` classCasing propertyCasing =
     let result = transformCSharpSettings (CSharpSettings(ClassCasing = classCasing, PropertyCasing = propertyCasing))
-    Assert.Equal(defaultSettings, result)
+    Assert.Equal(defaultSettings(), result)

@@ -90,8 +90,8 @@ let ``Handle reserved words`` casing expected =
 [<Theory>]
 [<InlineData("""{"InnerClass": {"FooBar": 2}}""", 
              "public class rootModel { public class innerClassModel { public int fooBar { get; set; } } public innerClassModel innerClass { get; set; } }")>]
-let ``Casing Camel `` json classCasing propertyCasing expected =
-    let settings = setCasing classCasing propertyCasing
+let ``Casing Camel `` json expected =
+    let settings = setCasing CamelCase CamelCase
     let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Value)
 
