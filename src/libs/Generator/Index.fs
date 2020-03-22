@@ -9,12 +9,12 @@ open StringValidator
 
 module Config =
     let transformCSharpSettings (settings: CSharpSettings) =
-        let (classPrefix, classSuffix) =
+        let letterRule =
             match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
-            | Some prefix, Some suffix -> (prefix, suffix)
-            | Some prefix, Option.None -> (prefix, System.String.Empty)
-            | Option.None, Option.Some suffix -> (System.String.Empty, suffix)
-            | Option.None, Option.None -> (System.String.Empty, "model")
+            | Some prefix, Some suffix -> (prefix, suffix) |> LetterRule.``Prefix and Suffix``
+            | Some prefix, Option.None -> prefix |> LetterRule.Prefix
+            | Option.None, Option.Some suffix -> suffix |> LetterRule.Suffix
+            | Option.None, Option.None -> "model" |> LetterRule.Suffix  : LetterRule
 
         let csharpSettings =
             { RootName =
@@ -22,8 +22,7 @@ module Config =
                   |> valueExists
                   |> Option.defaultValue "root"
               NameSpace = settings.NameSpace |> valueExists
-              ClassPrefix = classPrefix
-              ClassSuffix = classSuffix
+              LetterRule = letterRule
               PropertyCasing =
                   settings.PropertyCasing
                   |> Casing.fromString

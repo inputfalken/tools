@@ -10,8 +10,7 @@ open Generator.Config
 let defaultSettings() =
     { RootName = "root"
       NameSpace = Option.None
-      ClassSuffix = "model"
-      ClassPrefix = System.String.Empty
+      LetterRule = "model" |> LetterRule.Suffix
       ClassCasing = Casing.Pascal
       PropertyCasing = Casing.Pascal }
 
@@ -32,14 +31,19 @@ let ``Setting namespace`` nameSpace =
     Assert.Equal(Option.Some(nameSpace), result.NameSpace)
 
 [<Fact>]
-let ``Allow ClassPrefix to be empty if ClassSuffix is set``() =
+let ``Expect Suffix when ClassSuffix is set``() =
     let result = transformCSharpSettings (CSharpSettings(ClassPrefix = System.String.Empty, ClassSuffix = "Foo"))
-    Assert.Equal(System.String.Empty, result.ClassPrefix)
+    Assert.Equal(LetterRule.Suffix "Foo", result.LetterRule)
 
 [<Fact>]
-let ``Allow ClassSuffix to be empty if ClassPrefix is set``() =
+let ``Expect prefix when ClassPrefix is set``() =
     let result = transformCSharpSettings (CSharpSettings(ClassPrefix = "Foo", ClassSuffix = System.String.Empty))
-    Assert.Equal(System.String.Empty, result.ClassSuffix)
+    Assert.Equal(LetterRule.Prefix "Foo", result.LetterRule)
+    
+[<Fact>]
+let ``Expect prefix and suffix when ClassPrefix and ClassSuffix is set``() =
+    let result = transformCSharpSettings (CSharpSettings(ClassPrefix = "Foo", ClassSuffix = "Foo"))
+    Assert.Equal(LetterRule.``Prefix and Suffix`` ("Foo", "Foo"), result.LetterRule)
 
 [<Theory>]
 [<InlineData(" ", " ")>]

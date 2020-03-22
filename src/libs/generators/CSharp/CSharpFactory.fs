@@ -16,7 +16,11 @@ module internal CSharpFactory =
         | _ -> property
 
     let private applyPrefixSuffix key (settings: Settings) (casing: Casing) =
-        [ settings.ClassPrefix; key; settings.ClassSuffix ] |> casing.applyMultiple
+        match settings.LetterRule with
+        | Prefix x -> [ x; key ]
+        | Suffix x -> [ key; x]
+        | ``Prefix and Suffix`` (x, y) -> [ x; key; y]
+        |> casing.applyMultiple
 
     let private createClassName (classSet: CIString Set) property className settings =
         if property
