@@ -9,8 +9,8 @@ let settings =
     { RootName = "root"
       NameSpace = Option.None
       LetterRule = "model" |> LetterRule.Suffix
-      ClassCasing = Casing.Pascal
-      PropertyCasing = Casing.Pascal }
+      ClassCasing = Pascal
+      PropertyCasing = Pascal }
 
 let setCasing classCasing propertyCasing =
     { RootName = settings.RootName
@@ -57,10 +57,16 @@ let ``Entry with value`` json expected =
 
 
 [<Theory>]
-[<InlineData("public class rootmodel { public object[] @object { get; set; } }")>]
 [<InlineData("public class RootModel { public object[] Object { get; set; } }")>]
-let ``Handle reserved words`` expected =
+let ``Handle reserved words with Pascal casing`` expected =
     let settings = setCasing Pascal Pascal
+    let result = CSharp.generateCSharpFromJson """{ "object" : [] }""" settings
+    Assert.Equal(expected, result.Either.Value)
+
+[<Theory>]
+[<InlineData("public class rootmodel { public object[] @object { get; set; } }")>]
+let ``Handle reserved words with NoneCasing`` expected =
+    let settings = setCasing None None
     let result = CSharp.generateCSharpFromJson """{ "object" : [] }""" settings
     Assert.Equal(expected, result.Either.Value)
 
@@ -70,7 +76,7 @@ let ``Handle reserved words`` expected =
 [<InlineData("""{"InnerClass": {"FooBar": 2}}""",
              "public class rootModel { public class innerClassModel { public int fooBar { get; set; } } public innerClassModel innerClass { get; set; } }")>]
 let ``Casing Camel `` json expected =
-    let settings = setCasing Casing.Camel Casing.Camel
+    let settings = setCasing Camel Camel
     let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Value)
 
@@ -84,8 +90,8 @@ let ``Casing Camel  works with arguments classSuffix and classPrefix`` json expe
         { RootName = "root"
           NameSpace = Option.None
           LetterRule = LetterRule.``Prefix and Suffix`` ("x", "model")
-          PropertyCasing = Casing.Camel
-          ClassCasing = Casing.Camel }
+          PropertyCasing = Camel
+          ClassCasing = Camel }
 
     let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Value)
@@ -100,8 +106,8 @@ let ``Casing None works with arguments classSuffix, root and classPrefix`` json 
         { RootName = "root"
           NameSpace = Option.None
           LetterRule = LetterRule.``Prefix and Suffix`` ("x", "model")
-          PropertyCasing = Casing.None
-          ClassCasing = Casing.None }
+          PropertyCasing = None
+          ClassCasing = None }
 
     let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Value)
@@ -111,7 +117,7 @@ let ``Casing None works with arguments classSuffix, root and classPrefix`` json 
 let ``Casing Pascal`` json =
     let expected =
         "public class RootModel { public class InnerClassModel { public int FooBar { get; set; } } public InnerClassModel InnerClass { get; set; } }"
-    let settings = setCasing Casing.Pascal Casing.Pascal
+    let settings = setCasing Pascal Pascal
     let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Value)
 
@@ -125,8 +131,8 @@ let ``Casing Pascal  works with arguments classSuffix, root and classPrefix`` js
         { RootName = "root"
           NameSpace = Option.None
           LetterRule = LetterRule.``Prefix and Suffix`` ("x", "model")
-          PropertyCasing = Casing.Pascal
-          ClassCasing = Casing.Pascal }
+          PropertyCasing = Pascal
+          ClassCasing = Pascal }
 
     let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Value)
@@ -135,7 +141,7 @@ let ``Casing Pascal  works with arguments classSuffix, root and classPrefix`` js
 [<InlineData("""{"INNER_CLASS": {"FOO_BAR": 2}}""",
              "public class rootmodel { public class INNER_CLASSmodel { public int FOO_BAR { get; set; } } public INNER_CLASSmodel INNER_CLASS { get; set; } }")>]
 let ``Casing none`` json expected =
-    let settings = setCasing Casing.None Casing.None
+    let settings = setCasing None None
     let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Value)
 
@@ -292,8 +298,8 @@ let ``Class classPrefix with number result in error`` json expected =
         { RootName = "root"
           NameSpace = Option.None
           LetterRule = "0" |> LetterRule.Prefix
-          ClassCasing = Casing.Pascal
-          PropertyCasing = Casing.Pascal }
+          ClassCasing = Pascal
+          PropertyCasing = Pascal }
 
     let result = CSharp.generateCSharpFromJson json settings
     Assert.Equal(expected, result.Either.Error.Message)
