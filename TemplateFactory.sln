@@ -28,6 +28,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CommonTests", "test\CommonT
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SettingsTransformationTests", "test\SettingsTransformationTests\SettingsTransformationTests.fsproj", "{A35C897B-2F1F-4B21-B1F4-B3EF23BAF63D}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TestDependencies", "test\TestDependencies\TestDependencies.fsproj", "{B8151023-3C48-4580-9251-937C39D35766}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,10 @@ Global
 		{A35C897B-2F1F-4B21-B1F4-B3EF23BAF63D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A35C897B-2F1F-4B21-B1F4-B3EF23BAF63D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A35C897B-2F1F-4B21-B1F4-B3EF23BAF63D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8151023-3C48-4580-9251-937C39D35766}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8151023-3C48-4580-9251-937C39D35766}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8151023-3C48-4580-9251-937C39D35766}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8151023-3C48-4580-9251-937C39D35766}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{314AEAC4-C0BD-4E5D-A206-C5CB4BC150B9} = {F7B45BE6-9006-44C1-B6B2-F7532C3023DE}
@@ -84,5 +90,6 @@ Global
 		{CA77EA61-F4CA-4042-B5EC-CF1DB9A388EF} = {314AEAC4-C0BD-4E5D-A206-C5CB4BC150B9}
 		{1929C7C7-EBA7-49B6-B47C-CFD5B79919C9} = {B3F3279A-DC18-4002-946F-73C3A56EC1F9}
 		{A35C897B-2F1F-4B21-B1F4-B3EF23BAF63D} = {B3F3279A-DC18-4002-946F-73C3A56EC1F9}
+		{B8151023-3C48-4580-9251-937C39D35766} = {B3F3279A-DC18-4002-946F-73C3A56EC1F9}
 	EndGlobalSection
 EndGlobal
