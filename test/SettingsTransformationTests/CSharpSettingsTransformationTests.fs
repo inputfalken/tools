@@ -66,3 +66,5 @@ let ``Uses default settings if ClassSuffix or ClassPrefix is set to empty string
 let ``Uses default settings if PropertyCasing or ClassCasing is set to empty string or null`` classCasing propertyCasing =
     let result = transformCSharpSettings (CSharpSettings(ClassCasing = classCasing, PropertyCasing = propertyCasing))
     Assert.Equal(defaultSettings(), result)
+
+// TODO unit test if casing can be translated.
