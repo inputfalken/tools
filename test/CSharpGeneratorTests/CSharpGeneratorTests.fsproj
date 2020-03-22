@@ -15,12 +15,10 @@
 
     <ItemGroup>
         <Compile Include="CSharpFileTests.fs" />
-        <Compile Include="SettingsTransformationTests.fs" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\libs\generators\CSharp\CSharp.fsproj" />
-        <ProjectReference Include="..\..\src\libs\Generator\Generator.fsproj" />
     </ItemGroup>
 
 </Project>
