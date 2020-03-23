@@ -39,7 +39,7 @@ let ``Expect Suffix when ClassSuffix is set``() =
 let ``Expect prefix when ClassPrefix is set``() =
     let result = transformCSharpSettings (CSharpSettings(ClassPrefix = "Foo", ClassSuffix = System.String.Empty))
     Assert.Equal(LetterRule.Prefix "Foo", result.LetterRule)
-    
+
 [<Fact>]
 let ``Expect prefix and suffix when ClassPrefix and ClassSuffix is set``() =
     let result = transformCSharpSettings (CSharpSettings(ClassPrefix = "Foo", ClassSuffix = "Foo"))
@@ -67,4 +67,50 @@ let ``Uses default settings if PropertyCasing or ClassCasing is set to empty str
     let result = transformCSharpSettings (CSharpSettings(ClassCasing = classCasing, PropertyCasing = propertyCasing))
     Assert.Equal(defaultSettings(), result)
 
-// TODO unit test if casing can be translated.
+[<Theory>]
+[<InlineData("Pascal")>]
+[<InlineData("pascal")>]
+[<InlineData("paSCal")>]
+let ``Casing ClassCaing pascal can be translated`` casing =
+    let result = transformCSharpSettings (CSharpSettings(ClassCasing = casing))
+    Assert.Equal(Casing.Pascal, result.ClassCasing)
+
+[<Theory>]
+[<InlineData("Pascal")>]
+[<InlineData("pascal")>]
+[<InlineData("paSCal")>]
+let ``Casing PropertyCasing pascal can be translated`` casing =
+    let result = transformCSharpSettings (CSharpSettings(PropertyCasing = casing))
+    Assert.Equal(Casing.Pascal, result.PropertyCasing)
+
+[<Theory>]
+[<InlineData("Camel")>]
+[<InlineData("camel")>]
+[<InlineData("caMel")>]
+let ``Casing ClassCaing camel can be translated`` casing =
+    let result = transformCSharpSettings (CSharpSettings(ClassCasing = casing))
+    Assert.Equal(Casing.Camel, result.ClassCasing)
+
+[<Theory>]
+[<InlineData("Camel")>]
+[<InlineData("camel")>]
+[<InlineData("caMel")>]
+let ``Casing PropertyCasing camel can be translated`` casing =
+    let result = transformCSharpSettings (CSharpSettings(PropertyCasing = casing))
+    Assert.Equal(Casing.Camel, result.PropertyCasing)
+
+[<Theory>]
+[<InlineData("None")>]
+[<InlineData("none")>]
+[<InlineData("noNe")>]
+let ``Casing ClassCaing none can be translated`` casing =
+    let result = transformCSharpSettings (CSharpSettings(ClassCasing = casing))
+    Assert.Equal(Casing.None, result.ClassCasing)
+
+[<Theory>]
+[<InlineData("None")>]
+[<InlineData("none")>]
+[<InlineData("noNe")>]
+let ``Casing PropertyCasing none can be translated`` casing =
+    let result = transformCSharpSettings (CSharpSettings(PropertyCasing = casing))
+    Assert.Equal(Casing.None, result.PropertyCasing)
