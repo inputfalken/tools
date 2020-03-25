@@ -1,6 +1,7 @@
 ﻿namespace Common.Casing
 
 open Common
+open Common.CaseInsensitiveString
 open System
 open Microsoft.FSharp.Reflection
 open FSharp.Data.Runtime
@@ -16,7 +17,8 @@ module private UnionFunctions =
         | _ -> None
 
     let fromStringWithUnionCases<'a> s (arr: UnionCaseInfo []) =
-        match arr |> Array.filter (fun case -> case.Name = s) with
+        let ciString = s |> CI
+        match arr |> Array.filter (fun case ->  ciString.Equals(case.Name)) with
         | [| case |] -> Some(FSharpValue.MakeUnion(case, [||]) :?> 'a)
         | _ -> None
 
