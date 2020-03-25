@@ -14,6 +14,7 @@ module CasingConstants =
 
     [<Literal>]
     let None = "None"
+    
 /// <summary>
 /// The ConvertFrom-Json command.
 /// This command converts a Json string representation to a CSharp string.
@@ -55,13 +56,10 @@ type CSharpFactory() =
     override x.EndProcessing() =
         let settings =
             CSharpSettings
-                (PropertyCasing = x.PropertyCasing,
-                 ClassCasing = x.ClassCasing,
-                 NameSpace = x.NameSpace,
-                 ClassPrefix = x.Prefix,
-                 ClassSuffix = x.Suffix, RootObjectName = x.ObjectName)
+                (PropertyCasing = x.PropertyCasing, ClassCasing = x.ClassCasing, NameSpace = x.NameSpace,
+                 ClassPrefix = x.Prefix, ClassSuffix = x.Suffix, RootObjectName = x.ObjectName)
 
         // TODO add proper support like https://github.com/PowerShell/PowerShell/blob/master/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/ConvertFromJsonCommand.cs
-        
-        (Factory.ConfiguredCSharp (String.Join(Environment.NewLine, x.Buffer)) settings)
-            .Match((fun x -> x), raise) |> x.WriteObject
+
+        let json = String.Join(Environment.NewLine, x.Buffer)
+        (Factory.ConfiguredCSharp json settings).Match((fun x -> x), raise) |> x.WriteObject

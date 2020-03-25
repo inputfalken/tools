@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\libs\Generator\Generator.fsproj"/>
+        <ProjectReference PrivateAssets="Compile" Include="..\..\libs\Generator\Generator.fsproj"/>
     </ItemGroup>
 
 </Project>
