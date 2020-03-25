@@ -1,6 +1,6 @@
 ﻿namespace Generator
 
-open CSharp.CSharp
+open CSharp
 open CSharp.Types
 open Common
 open Common.Casing
@@ -38,4 +38,4 @@ type public Factory =
 
     static member public CSharp input = Factory.ConfiguredCSharp <| input <| CSharpSettings()
     static member public ConfiguredCSharp (input: System.String) (settings: CSharpSettings): IResult<System.String, exn> =
-        generateCSharpFromJson <| input <| Config.transformCSharpSettings settings
+        CSharp.generateFromJson <| input <| Config.transformCSharpSettings settings

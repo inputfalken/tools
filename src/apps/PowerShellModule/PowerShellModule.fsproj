@@ -5,15 +5,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="CSharpFactory.fs"/>
+        <Compile Include="CSharpFactory.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="PowerShellStandard.Library" Version="5.1.1"/>
+        <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\libs\Generator\Generator.fsproj"/>
+        <!-- For some reason this dependency must exist while the GitHub page does not need it...c -->
+        <ProjectReference PrivateAssets="Compile" Include="..\..\libs\generators\CSharp\CSharp.fsproj" />
+        <ProjectReference PrivateAssets="Compile" Include="..\..\libs\Generator\Generator.fsproj" />
     </ItemGroup>
 
 </Project>

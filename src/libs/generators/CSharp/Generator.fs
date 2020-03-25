@@ -7,7 +7,7 @@ open Common.CaseInsensitiveString
 open CSharp.Factory.CSharpFactory
 
 module CSharp =
-    let generateCSharpFromJson input settings =
+    let generateFromJson input settings =
         let tryConvertToNullableValueType current =
             match current with
             | BaseType x ->
