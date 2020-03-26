@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using CurrieTechnologies.Razor.Clipboard;
 using Microsoft.AspNetCore.Blazor.Hosting;
 
 namespace GitHubPage
@@ -9,7 +10,7 @@ namespace GitHubPage
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("app");
-
+            builder.Services.AddClipboard();
             await builder.Build().RunAsync();
         }
     }
