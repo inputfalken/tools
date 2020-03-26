@@ -2,6 +2,8 @@
 @using System.ComponentModel.DataAnnotations
 @using Common.Casing
 @using Microsoft.CodeAnalysis
+@using CurrieTechnologies.Razor.Clipboard
+@inject ClipboardService clipboard
 
 <h1>Generate C# from JSON</h1>
 
@@ -49,6 +51,9 @@
     <button class="btn btn-primary" type="submit">Generate C#</button>
 </EditForm>
 
+@if (!string.IsNullOrWhiteSpace(CSharp)) {
+    <button style="margin-top: 30px" type="button" class="btn btn-primary" @onclick="(async e => await clipboard.WriteTextAsync(CSharp))">Copy To Clipboard</button>
+}
 
 @if (!string.IsNullOrWhiteSpace(CSharp)) {
     <pre style="margin-top: 20px" class="text-success bg-dark">
@@ -68,6 +73,7 @@
 
         [Required]
         public string PropertyCasing { get; set; } = CasingOptions[0];
+
         [Required]
         public string ClassCasing { get; set; } = CasingOptions[0];
 
@@ -85,7 +91,7 @@
         CSharp = null;
         StatusClass = string.Empty;
         StatusMessage = string.Empty;
-       Factory.ConfiguredCSharp(
+        Factory.ConfiguredCSharp(
             _settings.Json,
             new CSharpSettings {
                 PropertyCasing = _settings.PropertyCasing,
