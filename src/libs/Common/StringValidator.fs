@@ -13,3 +13,6 @@ module public StringJoin =
         
     let joinStringsWithSpaceSeparation strings: string =
         strings |> String.concat " "
+        
+    let joinStringsWithCommaSpaceSeparation strings: string =
+        strings |> String.concat ", "
