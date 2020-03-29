@@ -1,7 +1,6 @@
 ﻿namespace Generator
 
-open CSharp
-open CSharp.Types
+open CSHarp.JSON
 open Common
 open Common.Casing
 open Lemonad.ErrorHandling

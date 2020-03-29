@@ -1,4 +1,4 @@
-namespace CSharp.Formatters
+namespace CSHarp.JSON
     open Common.StringJoin
     module internal Formatters =
         let keywords =

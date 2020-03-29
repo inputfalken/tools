@@ -1,13 +1,13 @@
-namespace CSharp.Factory
+namespace CSHarp.JSON
 
 open System
 open Common.CaseInsensitiveString
 open Common.StringJoin
-open CSharp.Types
-open CSharp.Formatters.Formatters
+open CSHarp.JSON
+open CSHarp.JSON.Formatters
 open Common.Casing
 
-module internal CSharpFactory =
+module internal Factory =
     let internal UnresolvedBaseType = BaseType.Object |> CSType.BaseType
 
     let private getFormatter =

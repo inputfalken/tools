@@ -1,7 +1,6 @@
 module Tests
 
-open CSharp
-open CSharp.Types
+open CSHarp.JSON
 open Common.Casing
 open Xunit
 
