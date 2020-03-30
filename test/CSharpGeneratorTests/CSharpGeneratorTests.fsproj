@@ -8,7 +8,7 @@
 
     <ItemGroup>
         <Compile Include="GenerateFromJsonTests.fs" />
-        <Compile Include="SqlToolTests.fs" />
+        <Compile Include="DataTypeTests.fs" />
     </ItemGroup>
 
     <ItemGroup>
