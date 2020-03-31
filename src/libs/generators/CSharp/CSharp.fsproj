@@ -10,7 +10,7 @@
         <Compile Include="JSON\Formatters.fs" />
         <Compile Include="JSON\Factory.fs" />
         <Compile Include="JSON\Generator.fs" />
-        <Compile Include="SQL\Index.fs" />
+        <Compile Include="SQL\SQL.fs" />
     </ItemGroup>
 
     <ItemGroup>
