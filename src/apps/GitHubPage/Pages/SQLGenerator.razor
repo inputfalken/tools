@@ -11,10 +11,10 @@
     <ValidationSummary/>
 
     <div class="form-group">
-        <label for="json">SQL: </label>
-        <InputTextArea class="form-control form-control-lg" id="json" @bind-Value="@_settings.CSharp"/>
+        <label for="CSharp">C#: </label>
+        <InputTextArea rows="10" class="form-control form-control-lg" id="CSharp" @bind-Value="@_settings.CSharp"/>
     </div>
-    <button class="btn btn-primary" type="submit">Generate C#</button>
+    <button class="btn btn-primary" type="submit">Generate SQL</button>
 </EditForm>
 
 @if (!string.IsNullOrWhiteSpace(Sql)) {
@@ -34,7 +34,7 @@
 
     class SettingsModel {
         [Required]
-        public string CSharp { get; set; } = "public class { public int Id { get; set; } }";
+        public string CSharp { get; set; } = "public class Foo { public int Bar { get; set; } }";
     }
 
     private readonly SettingsModel _settings = new SettingsModel();
@@ -48,7 +48,8 @@
         Factory
             .StoredProcedureFromCsharp(_settings.CSharp)
             .Match(
-                x => Sql = x, x => {
+                x => Sql = x,
+                x => {
                     StatusMessage = x.Message;
                     HandleInvalidSubmit();
                 }
