@@ -20,7 +20,7 @@ let mapBaseTypes (dataType: string): String =
     | "string" -> "nvarchar(max)"
     | "GUID" -> "uniqueidentifier"
     | "DateTime" -> "datetime"
-    | _ -> raise (NotImplementedException("TODO"))
+    | x -> raise (NotImplementedException(sprintf "Type %s has not been implemented yet" x))
 
 
 let formatProcedure name (parameters: ProcedureParameter seq) =
