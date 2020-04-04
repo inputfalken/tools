@@ -5,7 +5,7 @@
 @using CurrieTechnologies.Razor.Clipboard
 @inject ClipboardService clipboard
 
-<h1>Generate C# from JSON</h1>
+<h1>Generate C#</h1>
 
 <EditForm Model="@_settings" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
     <div class="alert @StatusClass">@StatusMessage</div>
