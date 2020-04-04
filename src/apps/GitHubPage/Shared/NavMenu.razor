@@ -1,6 +1,8 @@
 ﻿<div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">
-        Home
+        <span class="oi" aria-hidden="true">
+            <img src="Icons/home.svg" alt="Home icon"/>
+        </span>
     </a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
@@ -9,17 +11,22 @@
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <ul class="nav flex-column">
-        <li class="nav-item px-3">
+        <li class="nav-item ">
             <NavLink class="nav-link" href="CSGenerator">
-                <span class="oi oi-code" aria-hidden="true"></span> C# Generator
+                <span class="oi" aria-hidden="true">
+                    <img src="Icons/csharp.svg" alt="CSharp file ending icon"/>
+                </span> 
             </NavLink>
         </li>
-        <li class="nav-item px-3">
+        <li class="nav-item ">
             <NavLink class="nav-link" href="SQlGenerator">
-                <span class="oi oi-code" aria-hidden="true"></span> SQL Generator
+                <span class="oi" aria-hidden="true">
+                    <img src="Icons/sql.svg" alt="SQL file ending icon"/>
+                </span> 
             </NavLink>
         </li>
     </ul>
+    
 </div>
 
 @code {

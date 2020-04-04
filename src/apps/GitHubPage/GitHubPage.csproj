@@ -20,4 +20,8 @@
         <ProjectReference PrivateAssets="Compile" Include="..\..\libs\Generator\Generator.fsproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="wwwroot\sample-data\weather.json" />
+    </ItemGroup>
+
 </Project>
