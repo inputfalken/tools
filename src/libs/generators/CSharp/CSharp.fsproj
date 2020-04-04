@@ -6,19 +6,21 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Types.fs"/>
-        <Compile Include="Formatters.fs"/>
-        <Compile Include="CSharpFactory.fs"/>
-        <Compile Include="Generator.fs"/>
+        <Compile Include="JSON\Types.fs" />
+        <Compile Include="JSON\Formatters.fs" />
+        <Compile Include="JSON\Factory.fs" />
+        <Compile Include="JSON\Generator.fs" />
+        <Compile Include="SQL\SQL.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Common\Common.fsproj"/>
-        <ProjectReference Include="..\..\JsonParser\JsonParser.fsproj"/>
+        <ProjectReference Include="..\..\Common\Common.fsproj" />
+        <ProjectReference Include="..\..\JsonParser\JsonParser.fsproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Lemonad.ErrorHandling" Version="0.9.5"/>
+        <PackageReference Include="Lemonad.ErrorHandling" Version="0.9.5" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.4.0" />
     </ItemGroup>
 
 </Project>

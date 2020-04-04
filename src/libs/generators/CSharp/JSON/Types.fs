@@ -1,4 +1,4 @@
-namespace CSharp.Types
+namespace CSHarp.JSON
 
 open Common.Casing
 open Common.StringJoin

@@ -5,7 +5,7 @@
 @using CurrieTechnologies.Razor.Clipboard
 @inject ClipboardService clipboard
 
-<h1>Generate C# from JSON</h1>
+<h1>Generate C#</h1>
 
 <EditForm Model="@_settings" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
     <div class="alert @StatusClass">@StatusMessage</div>
@@ -14,7 +14,7 @@
 
     <div class="form-group">
         <label for="json">JSON: </label>
-        <InputTextArea class="form-control form-control-lg" id="json" @bind-Value="@_settings.Json"/>
+        <InputTextArea rows="10" class="form-control form-control-lg" id="json" @bind-Value="@_settings.Json"/>
     </div>
     <div class="form-group">
         <label for="propertyCasingSelector">Casing for properties: </label>
@@ -23,6 +23,7 @@
                 <option>@casingOption</option>
             }
         </InputSelect>
+        
     </div>
     <div class="form-group">
         <label for="classCasingSelector">Casing for classes: </label>
@@ -91,7 +92,7 @@
         CSharp = null;
         StatusClass = string.Empty;
         StatusMessage = string.Empty;
-        Factory.ConfiguredCSharp(
+        Factory.ConfiguredCSharpFromJson(
             _settings.Json,
             new CSharpSettings {
                 PropertyCasing = _settings.PropertyCasing,

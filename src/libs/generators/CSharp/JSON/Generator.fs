@@ -1,10 +1,10 @@
-﻿namespace CSharp
+﻿namespace CSHarp.JSON
 
 open JsonParser
-open CSharp.Types
+open CSHarp.JSON
 open Common
 open Common.CaseInsensitiveString
-open CSharp.Factory.CSharpFactory
+open CSHarp.JSON.Factory
 
 module CSharp =
     let generateFromJson input settings =

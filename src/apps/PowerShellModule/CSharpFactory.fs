@@ -62,4 +62,4 @@ type CSharpFactory() =
         // TODO add proper support like https://github.com/PowerShell/PowerShell/blob/master/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/ConvertFromJsonCommand.cs
 
         let json = String.Join(Environment.NewLine, x.Buffer)
-        (Factory.ConfiguredCSharp json settings).Match((fun x -> x), raise) |> x.WriteObject
+        (Factory.ConfiguredCSharpFromJson json settings).Match((fun x -> x), raise) |> x.WriteObject

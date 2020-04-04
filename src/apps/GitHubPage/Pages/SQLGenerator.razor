@@ -1,0 +1,64 @@
+﻿@page "/SQLGenerator"
+@using System.ComponentModel.DataAnnotations
+@using CurrieTechnologies.Razor.Clipboard
+@inject ClipboardService clipboard
+
+<h1>Generate SQL from CSharp</h1>
+
+<EditForm Model="@_settings" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+    <div class="alert @StatusClass">@StatusMessage</div>
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+    <div class="form-group">
+        <label for="CSharp">C#: </label>
+        <InputTextArea rows="10" class="form-control form-control-lg" id="CSharp" @bind-Value="@_settings.CSharp"/>
+    </div>
+    <button class="btn btn-primary" type="submit">Generate SQL</button>
+</EditForm>
+
+@if (!string.IsNullOrWhiteSpace(Sql)) {
+    <button style="margin-top: 30px" type="button" class="btn btn-primary" @onclick="(async e => await clipboard.WriteTextAsync(Sql))">Copy To Clipboard</button>
+}
+
+@if (!string.IsNullOrWhiteSpace(Sql)) {
+    <pre style="margin-top: 20px" class="text-success bg-dark">
+@* This can not be indented *@
+@Sql
+    </pre>
+}
+
+@code {
+    private string StatusClass { get; set; } = string.Empty;
+    private string StatusMessage { get; set; } = string.Empty;
+
+    class SettingsModel {
+        [Required]
+        public string CSharp { get; set; } = "public class Foo { public int Bar { get; set; } }";
+    }
+
+    private readonly SettingsModel _settings = new SettingsModel();
+
+    private string Sql { get; set; }
+
+    private void HandleValidSubmit() {
+        Sql = null;
+        StatusClass = string.Empty;
+        StatusMessage = string.Empty;
+        Factory
+            .StoredProcedureFromCsharp(_settings.CSharp)
+            .Match(
+                x => Sql = x,
+                x => {
+                    StatusMessage = x.Message;
+                    HandleInvalidSubmit();
+                }
+            );
+    }
+
+    private void HandleInvalidSubmit() {
+        Sql = null;
+        StatusClass = "alert-danger";
+    }
+
+}

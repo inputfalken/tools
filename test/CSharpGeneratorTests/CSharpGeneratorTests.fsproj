@@ -7,7 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="CSharpFileTests.fs" />
+        <Compile Include="GenerateFromJsonTests.fs" />
+        <Compile Include="FormatProcedureTests.fs" />
+        <Compile Include="BaseTypeTests.fs" />
     </ItemGroup>
 
     <ItemGroup>

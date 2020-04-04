@@ -1,11 +1,12 @@
 ﻿namespace Generator
 
-open CSharp
-open CSharp.Types
+open CSHarp.JSON
 open Common
 open Common.Casing
 open Lemonad.ErrorHandling
+open Lemonad.ErrorHandling
 open StringValidator
+open TemplateFactory.SQL
 
 module Config =
     let transformCSharpSettings (settings: CSharpSettings) =
@@ -36,6 +37,10 @@ module Config =
 
 type public Factory =
 
-    static member public CSharp input = Factory.ConfiguredCSharp <| input <| CSharpSettings()
-    static member public ConfiguredCSharp (input: System.String) (settings: CSharpSettings): IResult<System.String, exn> =
+    static member public CSharpFromJson input = Factory.ConfiguredCSharpFromJson <| input <| CSharpSettings()
+    static member public ConfiguredCSharpFromJson (input: System.String) (settings: CSharpSettings): IResult<System.String, exn> =
         CSharp.generateFromJson <| input <| Config.transformCSharpSettings settings
+    static member public StoredProcedureFromCsharp cSharp =
+        try 
+            SQL.generateStoredProcedureFromCSharp cSharp |> Lemonad.ErrorHandling.Result.Value
+        with ex -> Lemonad.ErrorHandling.Result.Error ex
