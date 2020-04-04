@@ -1,5 +1,7 @@
 ﻿namespace CSHarp.JSON
 
+open System
+open System
 open JsonParser
 open CSHarp.JSON
 open Common
@@ -39,14 +41,16 @@ module CSharp =
                         |> BaseType.ValueType
                         |> CSType.BaseType
                     | ValueType.Decimal previous, ValueType.Integer current ->
-                        if current.Type.Nullable then previous.AsNullable
-                        else previous
+                        match previous, current with
+                        | previous, current when current.Type.Nullable -> previous.AsNullable
+                        | previous, _ -> previous
                         |> ValueType.Decimal
                         |> ValueType
                         |> CSType.BaseType
                     | ValueType.Integer previous, ValueType.Decimal current ->
-                        if previous.Type.Nullable then current.AsNullable
-                        else current
+                        match previous, current with
+                        | previous, current when previous.Type.Nullable -> current.AsNullable
+                        | _, current -> current
                         |> ValueType.Decimal
                         |> ValueType
                         |> CSType.BaseType
