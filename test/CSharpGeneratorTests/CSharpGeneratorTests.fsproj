@@ -10,6 +10,7 @@
         <Compile Include="GenerateFromJsonTests.fs" />
         <Compile Include="FormatProcedureTests.fs" />
         <Compile Include="SqlDataTypeToStringTests.fs" />
+        <Compile Include="CSharpTypeToSqlTypeTests.fs" />
     </ItemGroup>
 
     <ItemGroup>

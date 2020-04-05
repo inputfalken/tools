@@ -9,7 +9,9 @@ open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis.CSharp.Syntax
 
 let int = CIString.CI "int"
+let int32 = CIString.CI "int32"
 let bool = CIString.CI "bool"
+let boolean = CIString.CI "boolean"
 let guid = CIString.CI "guid"
 let string = CIString.CI "string"
 let datetTime = CIString.CI "datetime"
@@ -18,6 +20,7 @@ type NVarCharArgument =
     | Max
     // We get type safety but negative numbers and 0 could still be passed which is not allowed.
     | Number of int
+
 type SqlDataType =
     | DateTime
     | Int
@@ -28,8 +31,8 @@ type SqlDataType =
     static member toSqlType str: SqlDataType =
         let str = str |> CIString.CI
         match str with
-        | x when x.Equals int -> SqlDataType.Int
-        | x when x.Equals bool -> SqlDataType.Bit
+        | x when x.Equals int || x.Equals int32 -> SqlDataType.Int
+        | x when x.Equals bool || x.Equals boolean -> SqlDataType.Bit
         | x when x.Equals guid -> SqlDataType.UniqueIdentifier
         | x when x.Equals datetTime -> SqlDataType.DateTime
         | x when x.Equals string -> SqlDataType.Nvarchar Max
@@ -49,8 +52,6 @@ type SqlDataType =
 type ProcedureParameter =
     { Type: SqlDataType
       Name: string }
-
-
 
 let formatProcedure name (parameters: ProcedureParameter seq) =
     let joinedParamemters =
