@@ -10,7 +10,7 @@ open TemplateFactory.SQL.SQL
 let ```One parameter``() =
     let res =
         SQL.formatProcedure "ExecuteOnId"
-            [ { Type = "int"
+            [ { Type =  Int
                 Name = "id" } ]
     Assert.Equal("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int) AS\nBEGIN\n\nEND", res)
 
@@ -18,9 +18,9 @@ let ```One parameter``() =
 let ```Two parameters``() =
     let res =
         SQL.formatProcedure "ExecuteOnId"
-            [ { Type = "int"
+            [ { Type = Int
                 Name = "id" }
-              { Type = "bit"
+              { Type = Bit
                 Name = "isDeleted" } ]
     Assert.Equal("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int, @isDeleted bit) AS\nBEGIN\n\nEND", res)
 
@@ -28,10 +28,10 @@ let ```Two parameters``() =
 let ```Three parameters``() =
     let res =
         SQL.formatProcedure "ExecuteOnId"
-            [ { Type = "int"
+            [ { Type = Int
                 Name = "id" }
-              { Type = "bit"
+              { Type =  Bit
                 Name = "isDeleted" }
-              { Type = "datetime"
+              { Type = DateTime
                 Name = "updatedAt" } ]
     Assert.Equal("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int, @isDeleted bit, @updatedAt datetime) AS\nBEGIN\n\nEND", res)
