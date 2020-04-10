@@ -8,9 +8,10 @@
 
     <ItemGroup>
         <Compile Include="GenerateFromJsonTests.fs" />
-        <Compile Include="FormatProcedureTests.fs" />
-        <Compile Include="SqlDataTypeToStringTests.fs" />
-        <Compile Include="CSharpTypeToSqlTypeTests.fs" />
+        <Compile Include="SQL\FormatProcedureTests.fs" />
+        <Compile Include="SQL\SqlDataTypeToStringTests.fs" />
+        <Compile Include="SQL\CSharpTypeToSqlTypeTests.fs" />
+        <Compile Include="SQL\parseClassTests.fs" />
     </ItemGroup>
 
     <ItemGroup>

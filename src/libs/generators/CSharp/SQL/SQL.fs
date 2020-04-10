@@ -67,13 +67,23 @@ let formatProcedure name (parameters: ProcedureParameter seq) =
         |> joinStringsWithCommaSpaceSeparation
     sprintf "CREATE OR ALTER PROCEDURE %s (%s) AS\nBEGIN\n\nEND" <| name <| joinedParamemters
 
-let generateStoredProcedureFromCSharp (cSharp: string) =
-    let res = CSharpSyntaxTree.ParseText(cSharp) |> CSharpExtensions.GetCompilationUnitRoot
+let parseClass (input: string) =
+    let res = CSharpSyntaxTree.ParseText(input) |> CSharpExtensions.GetCompilationUnitRoot
 
-    let ``class`` =
+    try
         res.DescendantNodes()
         |> Enumerable.OfType<ClassDeclarationSyntax>
         |> Seq.exactlyOne
+    with
+    | :? ArgumentException as x when x.Message =
+                                         "The input sequence contains more than one element. (Parameter 'source')" ->
+        raise (NotSupportedException("Passing multiple classes is not supported."))
+    | :? ArgumentException as x when x.Message = "The input sequence was empty. (Parameter 'source')" ->
+         raise(ArgumentException("You must supply a CSharp class.")) 
+    | x -> raise (x)
+
+let generateStoredProcedureFromCSharp (cSharp: string) =
+    let ``class`` = parseClass cSharp
 
     let procedure =
         ``class``.Members

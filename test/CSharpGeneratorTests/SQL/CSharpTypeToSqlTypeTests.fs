@@ -1,9 +1,7 @@
-module CSharpGeneratorTests.CSharpTypeToSqlTypeTests
+module CSharpGeneratorTests.SQL.CSharpTypeToSqlTypeTests
 
 open Xunit
 open TemplateFactory.SQL.SQL
-open Xunit
-open Xunit
 
 
 [<Theory>]

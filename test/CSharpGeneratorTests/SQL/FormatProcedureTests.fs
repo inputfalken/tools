@@ -1,4 +1,4 @@
-module CSharpGeneratorTests.FormatProcedure
+module CSharpGeneratorTests.SQL.FormatProcedure
 
 open Xunit
 open TemplateFactory.SQL

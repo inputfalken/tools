@@ -1,4 +1,4 @@
-module CSharpGeneratorTests.DataTypeTests
+module CSharpGeneratorTests.SQL.DataTypeTests
 
 open Xunit
 open TemplateFactory.SQL.SQL
