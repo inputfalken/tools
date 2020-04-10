@@ -5,9 +5,15 @@ open TemplateFactory.SQL
 open Xunit
 
 
-[<Fact>]
-let ``Empty string throws argument exception``() =
-    let ``exception`` = Assert.Throws<ArgumentException>(fun () -> SQL.parseClass "" |> ignore)
+[<Theory>]
+[<InlineData("")>]
+[<InlineData("x")>]
+[<InlineData("foobar")>]
+[<InlineData("public int { get; set; }")>]
+[<InlineData("public string { get; set; }")>]
+[<InlineData("public double { get; set; }")>]
+let ``Invalid class syntax`` input =
+    let ``exception`` = Assert.Throws<ArgumentException>(fun () -> SQL.parseClass input |> ignore)
     Assert.Equal("You must supply a CSharp class.", ``exception``.Message)
 
 [<Fact>]
