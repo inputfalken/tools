@@ -1,6 +1,5 @@
 module TemplateFactory.SQL.SQL
 
-
 open Common.CaseInsensitiveString
 open Common.StringJoin
 open System
@@ -8,13 +7,20 @@ open System.Linq
 open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis.CSharp.Syntax
 
-let int = CIString.CI "int"
-let int32 = CIString.CI "int32"
-let bool = CIString.CI "bool"
-let boolean = CIString.CI "boolean"
-let guid = CIString.CI "guid"
-let string = CIString.CI "string"
-let datetTime = CIString.CI "datetime"
+type GenerationType =
+    | UserDefinedTableType
+    | None
+
+type Settings =
+    { GenerationType: GenerationType }
+
+let private int = CIString.CI "int"
+let private int32 = CIString.CI "int32"
+let private bool = CIString.CI "bool"
+let private boolean = CIString.CI "boolean"
+let private guid = CIString.CI "guid"
+let private string = CIString.CI "string"
+let private datetTime = CIString.CI "datetime"
 
 type NVarCharArgument =
     | Max
@@ -49,23 +55,40 @@ type SqlDataType =
             | Max -> "nvarchar(max)"
             | Number x -> sprintf "nvarchar(%d)" x
 
-type ProcedureParameter =
+type Parameter =
     { Type: SqlDataType
       Name: string }
+type UserDefined = {Parameters: Parameter list; Name: string}
 
-let formatProcedure name (parameters: ProcedureParameter seq) =
-    let joinedParamemters =
+type ProcedureParameter =
+    | Parameters of Parameter list
+    | UserDefinedTableType of UserDefined
+    | ProcedureParameter of ProcedureParameter
+
+let rec formatProcedure name (parameter: ProcedureParameter): string =
+    let join (parameters: Parameter list) =
         parameters
-        |> Seq.map (fun x ->
+        |> List.map (fun x ->
             let name =
                 match x.Name with
                 | x when x.[0] = '@' -> x
-                | x -> [ "@"; x ] |> joinStrings
+                | x -> joinStrings [ "@"; x ]  
             [ name
               x.Type.ToString() ]
             |> joinStringsWithSpaceSeparation)
         |> joinStringsWithCommaSpaceSeparation
-    sprintf "CREATE OR ALTER PROCEDURE %s (%s) AS\nBEGIN\n\nEND" <| name <| joinedParamemters
+
+    let procedure = sprintf "CREATE OR ALTER PROCEDURE %s (%s) AS\nBEGIN\n\nEND" name
+    let userDefinedType =
+        sprintf
+            "DROP PROCEDURE IF EXISTS %s\nGO\n\nIF type_id('%s') IS NOT NULL DROP TYPE %s\nGO\n\nCREATE TYPE %s AS TABLE (%s)\nGO\n\n" name
+    match parameter with
+    | Parameters parameters ->
+        procedure <| join parameters
+    | UserDefinedTableType x ->
+        let param = joinStringsWithSpaceSeparation [(joinStrings ["@"; x.Name]) ; x.Name ] 
+        userDefinedType x.Name x.Name x.Name (join x.Parameters) + procedure param
+    | ProcedureParameter x -> formatProcedure name x
 
 let parseClass (input: string) =
     let res = CSharpSyntaxTree.ParseText(input) |> CSharpExtensions.GetCompilationUnitRoot
@@ -79,18 +102,25 @@ let parseClass (input: string) =
                                          "The input sequence contains more than one element. (Parameter 'source')" ->
         raise (NotSupportedException("Passing multiple classes is not supported."))
     | :? ArgumentException as x when x.Message = "The input sequence was empty. (Parameter 'source')" ->
-         raise(ArgumentException("You must supply a CSharp class.")) 
+        raise (ArgumentException("You must supply a CSharp class."))
     | x -> raise (x)
 
-let generateStoredProcedureFromCSharp (cSharp: string) =
+
+let generateStoredProcedureFromCSharp (cSharp: string) (settings: Settings): string =
     let ``class`` = parseClass cSharp
 
-    let procedure =
+    let parameters =
         ``class``.Members
         |> Enumerable.OfType<PropertyDeclarationSyntax>
         |> Seq.map (fun x ->
             { Type = x.Type.ToString() |> SqlDataType.toSqlType
               Name = x.Identifier.Text })
-        |> formatProcedure ``class``.Identifier.Text
+        |> Seq.toList
 
-    procedure
+    match settings.GenerationType with
+    | GenerationType.UserDefinedTableType ->
+        ProcedureParameter.UserDefinedTableType
+            { Parameters = parameters;
+               Name = sprintf "%sUserDefinedTableType" ``class``.Identifier.Text } 
+    | GenerationType.None -> parameters |> ProcedureParameter.Parameters
+    |> formatProcedure ``class``.Identifier.Text
