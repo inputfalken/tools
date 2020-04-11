@@ -24,7 +24,11 @@ let ``Multiple classes throws not supported exception``() =
     Assert.Equal("Passing multiple classes is not supported.", ``exception``.Message)
 
 
-[<Fact>]
-let ``Single class does not throw``() =
-    let result = SQL.parseClass "public class foo {}"
+[<Theory>]
+[<InlineData("public class Person {}")>]
+[<InlineData("public class Person { public int Id { get; set; } }")>]
+[<InlineData("public class Person { public int Id { get; set; } public string FirstName { get; set; } }")>]
+let ``Single class does not throw`` input =
+    let result = SQL.parseClass input
     Assert.NotNull result
+    
