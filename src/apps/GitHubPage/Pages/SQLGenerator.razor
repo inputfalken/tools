@@ -5,17 +5,17 @@
 
 <h1>Generate SQL from CSharp</h1>
 
-<EditForm Model="@_model" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+<EditForm Model="@_view" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
     <div class="alert @StatusClass">@StatusMessage</div>
     <DataAnnotationsValidator/>
     <ValidationSummary/>
 
     <div class="form-group">
         <label for="CSharp">C#: </label>
-        <InputTextArea rows="10" class="form-control form-control-lg" id="CSharp" @bind-Value="@_model.CSharp"/>
+        <InputTextArea rows="10" class="form-control form-control-lg" id="CSharp" @bind-Value="@_view.Sql"/>
     </div>
     <div class="form-check">
-        <InputCheckbox class="form-check-input" id="generateUserDefinedTable" @bind-Value="@_model.Settings.GenerateUserDefinedTable" />
+        <InputCheckbox class="form-check-input" id="generateUserDefinedTable" @bind-Value="@_view.Settings.GenerateUserDefinedTable" />
         <label class="form-check-label" for="generateUserDefinedTable">Batchable</label>
     </div>
     <button class="btn btn-primary" type="submit">Generate SQL</button>
@@ -38,11 +38,11 @@
 
     class ViewModel {
         [Required]
-        public string CSharp { get; set; } = "public class Foo { public int Bar { get; set; } }";
+        public string Sql { get; set; } = "public class Foo { public int Bar { get; set; } }";
         public SqlSettings Settings { get; set; } = new SqlSettings();
     }
 
-    private readonly ViewModel _model = new ViewModel();
+    private readonly ViewModel _view = new ViewModel();
 
     private string Sql { get; set; }
 
@@ -51,7 +51,7 @@
         StatusClass = string.Empty;
         StatusMessage = string.Empty;
         Factory
-            .ConfiguredStoredProcedureFromCsharp(_model.CSharp, _model.Settings)
+            .ConfiguredStoredProcedureFromCsharp(_view.Sql, _view.Settings)
             .Match(
                 x => Sql = x,
                 x => {

@@ -7,27 +7,27 @@
 
 <h1>Generate C#</h1>
 
-<EditForm Model="@_settings" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+<EditForm Model="@_view" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
     <div class="alert @StatusClass">@StatusMessage</div>
     <DataAnnotationsValidator/>
     <ValidationSummary/>
 
     <div class="form-group">
         <label for="json">JSON: </label>
-        <InputTextArea rows="10" class="form-control form-control-lg" id="json" @bind-Value="@_settings.Json"/>
+        <InputTextArea rows="10" class="form-control form-control-lg" id="json" @bind-Value="@_view.Json"/>
     </div>
     <div class="form-group">
         <label for="propertyCasingSelector">Casing for properties: </label>
-        <InputSelect class="form-control form-control-lg" id="propertyCasingSelector" @bind-Value="@_settings.PropertyCasing">
+        <InputSelect class="form-control form-control-lg" id="propertyCasingSelector" @bind-Value="@_view.PropertyCasing">
             @foreach (var casingOption in CasingOptions) {
                 <option>@casingOption</option>
             }
         </InputSelect>
-        
+
     </div>
     <div class="form-group">
         <label for="classCasingSelector">Casing for classes: </label>
-        <InputSelect class="form-control form-control-lg" id="classCasingSelector" @bind-Value="@_settings.ClassCasing">
+        <InputSelect class="form-control form-control-lg" id="classCasingSelector" @bind-Value="@_view.ClassCasing">
             @foreach (var casingOption in CasingOptions) {
                 <option>@casingOption</option>
             }
@@ -35,31 +35,31 @@
     </div>
     <div class="form-group">
         <label for="classPrefix">Class Prefix: </label>
-        <InputText type="text" class="form-control form-control-lg " id="classPrefix" @bind-Value="@_settings.ClassPrefix"></InputText>
+        <InputText type="text" class="form-control form-control-lg " id="classPrefix" @bind-Value="@_view.ClassPrefix"></InputText>
     </div>
     <div class="form-group">
         <label for="classSuffix">Class Suffix: </label>
-        <InputText type="text" class="form-control form-control-lg " id="classSuffix" @bind-Value="@_settings.ClassSuffix"></InputText>
+        <InputText type="text" class="form-control form-control-lg " id="classSuffix" @bind-Value="@_view.ClassSuffix"></InputText>
     </div>
     <div class="form-group">
         <label for="namespace">Namespace: </label>
-        <InputText type="text" class="form-control form-control-lg " id="namespace" @bind-Value="@_settings.NameSpace"></InputText>
+        <InputText type="text" class="form-control form-control-lg " id="namespace" @bind-Value="@_view.NameSpace"></InputText>
     </div>
     <div class="form-group">
         <label for="rootName">Root object name: </label>
-        <InputText type="text" class="form-control form-control-lg " id="rootName" @bind-Value="@_settings.RootName"></InputText>
+        <InputText type="text" class="form-control form-control-lg " id="rootName" @bind-Value="@_view.RootName"></InputText>
     </div>
     <button class="btn btn-primary" type="submit">Generate C#</button>
 </EditForm>
 
-@if (!string.IsNullOrWhiteSpace(CSharp)) {
-    <button style="margin-top: 30px" type="button" class="btn btn-primary" @onclick="(async e => await clipboard.WriteTextAsync(CSharp))">Copy To Clipboard</button>
+@if (!string.IsNullOrWhiteSpace(_view.CSharp)) {
+    <button style="margin-top: 30px" type="button" class="btn btn-primary" @onclick="(async e => await clipboard.WriteTextAsync(_view.CSharp))">Copy To Clipboard</button>
 }
 
-@if (!string.IsNullOrWhiteSpace(CSharp)) {
+@if (!string.IsNullOrWhiteSpace(_view.CSharp)) {
     <pre style="margin-top: 20px" class="text-success bg-dark">
 @* This can not be indented *@
-@CSharp
+@_view.CSharp
     </pre>
 }
 
@@ -68,7 +68,7 @@
     private string StatusMessage { get; set; } = string.Empty;
     private static IReadOnlyList<string> CasingOptions { get; } = Casing.Cases;
 
-    class SettingsModel {
+    private class ViewModel {
         [Required]
         public string Json { get; set; } = @"{""foo"":""bar""}";
 
@@ -82,32 +82,31 @@
         public string ClassSuffix { get; set; } = "Model";
         public string NameSpace { get; set; } = string.Empty;
         public string RootName { get; set; } = "Root";
+        public string CSharp { get; set; }
     }
 
-    private readonly SettingsModel _settings = new SettingsModel();
-
-    private string CSharp { get; set; }
+    private readonly ViewModel _view = new ViewModel();
 
     private void HandleValidSubmit() {
-        CSharp = null;
+        _view.CSharp = null;
         StatusClass = string.Empty;
         StatusMessage = string.Empty;
         Factory.ConfiguredCSharpFromJson(
-            _settings.Json,
+            _view.Json,
             new CSharpSettings {
-                PropertyCasing = _settings.PropertyCasing,
-                ClassPrefix = _settings.ClassPrefix,
-                ClassSuffix = _settings.ClassSuffix,
-                NameSpace = _settings.NameSpace,
-                RootObjectName = _settings.RootName,
-                ClassCasing = _settings.ClassCasing
+                PropertyCasing = _view.PropertyCasing,
+                ClassPrefix = _view.ClassPrefix,
+                ClassSuffix = _view.ClassSuffix,
+                NameSpace = _view.NameSpace,
+                RootObjectName = _view.RootName,
+                ClassCasing = _view.ClassCasing
             }
             )
             .Map(x => CSharpSyntaxTree.ParseText(x))
             .Map(x => x.GetRoot())
             .Map(x => x.NormalizeWhitespace())
             .Map(x => x.ToFullString())
-            .Match(x => CSharp = x,
+            .Match(x => _view.CSharp = x,
                 x => {
                     StatusMessage = x.Message;
                     HandleInvalidSubmit();
@@ -116,7 +115,7 @@
     }
 
     private void HandleInvalidSubmit() {
-        CSharp = null;
+        _view.CSharp = null;
         StatusClass = "alert-danger";
     }
 
