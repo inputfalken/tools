@@ -12,6 +12,7 @@
         <Compile Include="SQL\SqlDataTypeToStringTests.fs" />
         <Compile Include="SQL\CSharpTypeToSqlTypeTests.fs" />
         <Compile Include="SQL\parseClassTests.fs" />
+        <Compile Include="SQL\GenerateProcedureTests.fs" />
     </ItemGroup>
 
     <ItemGroup>
