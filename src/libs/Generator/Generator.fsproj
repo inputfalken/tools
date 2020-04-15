@@ -5,8 +5,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="CSharpSettings.fs" />
         <Compile Include="SqlSettings.fs" />
+        <Compile Include="CSharpSettings.fs" />
         <Compile Include="Index.fs" />
     </ItemGroup>
 

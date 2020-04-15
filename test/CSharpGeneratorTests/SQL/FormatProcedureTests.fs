@@ -42,10 +42,6 @@ BEGIN
 
 END"""
 
-
-
-
-
     Assert.Equal(expected, res, false, true, true)
 
 [<Fact>]
@@ -75,10 +71,6 @@ CREATE OR ALTER PROCEDURE ExecuteOnId (@PersonType PersonType) AS
 BEGIN
 
 END"""
-
-
-
-
 
     Assert.Equal(expected, res, false, true, true)
 
