@@ -14,6 +14,8 @@ type GenerationType =
 type Settings =
     { GenerationType: GenerationType }
 
+// TODO create proper type with support for nullable value types.
+let private string = CIString.CI "string"
 let private int = CIString.CI "int"
 let private int32 = CIString.CI "int32"
 let private double = CIString.CI "double"
@@ -21,8 +23,15 @@ let private float = CIString.CI "float"
 let private bool = CIString.CI "bool"
 let private boolean = CIString.CI "boolean"
 let private guid = CIString.CI "guid"
-let private string = CIString.CI "string"
 let private datetTime = CIString.CI "datetime"
+let private intNullable = CIString.CI "int?"
+let private int32Nullable = CIString.CI "int32?"
+let private doubleNullable = CIString.CI "double?"
+let private floatNullable = CIString.CI "float?"
+let private boolNullable = CIString.CI "bool?"
+let private booleanNullable = CIString.CI "boolean?"
+let private guidNullable = CIString.CI "guid?"
+let private datetTimeNullable = CIString.CI "datetime?"
 
 type NVarCharArgument =
     | Max
@@ -40,12 +49,12 @@ type SqlDataType =
     static member toSqlType str: SqlDataType =
         let str = str |> CIString.CI
         match str with
-        | x when x.Equals int || x.Equals int32 -> SqlDataType.Int
-        | x when x.Equals bool || x.Equals boolean -> SqlDataType.Bit
-        | x when x.Equals guid -> SqlDataType.UniqueIdentifier
-        | x when x.Equals datetTime -> SqlDataType.DateTime
+        | x when x.Equals int || x.Equals int32 || x.Equals intNullable || x.Equals int32Nullable -> SqlDataType.Int
+        | x when x.Equals bool || x.Equals boolean || x.Equals boolNullable || x.Equals booleanNullable -> SqlDataType.Bit
+        | x when x.Equals guid || x.Equals guidNullable -> SqlDataType.UniqueIdentifier
+        | x when x.Equals datetTime || x.Equals datetTimeNullable -> SqlDataType.DateTime
+        | x when x.Equals float || x.Equals double ||  x.Equals floatNullable || x.Equals doubleNullable-> SqlDataType.Float
         | x when x.Equals string -> SqlDataType.Nvarchar Max
-        | x when x.Equals float || x.Equals double -> SqlDataType.Float
         | x -> raise (NotImplementedException(sprintf "Type %s has not been implemented yet" x.String))
 
     override x.ToString() =
