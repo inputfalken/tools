@@ -30,6 +30,7 @@ type NVarCharArgument =
 type SqlDataType =
     | DateTime
     | Int
+    | Float
     | Bit
     | UniqueIdentifier
     | Nvarchar of NVarCharArgument
