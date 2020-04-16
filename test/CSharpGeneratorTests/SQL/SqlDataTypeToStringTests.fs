@@ -5,6 +5,11 @@ open TemplateFactory.SQL.SQL
 
 
 [<Fact>]
+let Float() =
+    let res = SqlDataType.Float.ToString()
+    Assert.Equal("float", res)
+    
+[<Fact>]
 let Int() =
     let res = SqlDataType.Int.ToString()
     Assert.Equal("int", res)

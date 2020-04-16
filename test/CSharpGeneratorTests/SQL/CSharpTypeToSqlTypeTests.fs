@@ -5,6 +5,22 @@ open TemplateFactory.SQL.SQL
 
 
 [<Theory>]
+[<InlineData("float")>]
+[<InlineData("FLOAT")>]
+[<InlineData("FloaT")>]
+let Float str =
+    let res = str |> SqlDataType.toSqlType
+    Assert.Equal(SqlDataType.Float, res)
+    
+[<Theory>]
+[<InlineData("double")>]
+[<InlineData("DOUBLE")>]
+[<InlineData("DoublE")>]
+let Double str =
+    let res = str |> SqlDataType.toSqlType
+    Assert.Equal(SqlDataType.Float, res)
+
+[<Theory>]
 [<InlineData("guid")>]
 [<InlineData("GUID")>]
 [<InlineData("GuId")>]

@@ -16,6 +16,8 @@ type Settings =
 
 let private int = CIString.CI "int"
 let private int32 = CIString.CI "int32"
+let private double = CIString.CI "double"
+let private float = CIString.CI "float"
 let private bool = CIString.CI "bool"
 let private boolean = CIString.CI "boolean"
 let private guid = CIString.CI "guid"
@@ -30,6 +32,7 @@ type NVarCharArgument =
 type SqlDataType =
     | DateTime
     | Int
+    | Float
     | Bit
     | UniqueIdentifier
     | Nvarchar of NVarCharArgument
@@ -42,6 +45,7 @@ type SqlDataType =
         | x when x.Equals guid -> SqlDataType.UniqueIdentifier
         | x when x.Equals datetTime -> SqlDataType.DateTime
         | x when x.Equals string -> SqlDataType.Nvarchar Max
+        | x when x.Equals float || x.Equals double -> SqlDataType.Float
         | x -> raise (NotImplementedException(sprintf "Type %s has not been implemented yet" x.String))
 
     override x.ToString() =
@@ -50,6 +54,7 @@ type SqlDataType =
         | Int -> "int"
         | Bit -> "bit"
         | UniqueIdentifier -> "uniqueidentifier"
+        | Float -> "float"
         | Nvarchar x ->
             match x with
             | Max -> "nvarchar(max)"
