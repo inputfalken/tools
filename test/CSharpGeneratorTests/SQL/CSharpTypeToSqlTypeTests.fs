@@ -6,116 +6,93 @@ open TemplateFactory.SQL.SQL
 
 [<Theory>]
 [<InlineData("float?")>]
-[<InlineData("FLOAT?")>]
-[<InlineData("FloaT?")>]
 let ``Float?`` str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.Float, res)
     
 [<Theory>]
+[<InlineData("System.Double?")>]
 [<InlineData("double?")>]
-[<InlineData("DOUBLE?")>]
-[<InlineData("DoublE?")>]
 let ``Double?`` str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.Float, res)
 
 [<Theory>]
-[<InlineData("guid?")>]
-[<InlineData("GUID?")>]
-[<InlineData("GuId?")>]
+[<InlineData("Guid?")>]
+[<InlineData("System.Guid?")>]
 let ``Guid?`` str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.UniqueIdentifier, res)
 
 [<Theory>]
 [<InlineData("int?")>]
-[<InlineData("INT?")>]
-[<InlineData("InT?")>]
-[<InlineData("int32?")>]
-[<InlineData("INT32?")>]
-[<InlineData("InT32?")>]
+[<InlineData("Int32?")>]
+[<InlineData("System.Int32?")>]
 let ``Int?`` str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.Int, res)
 
 [<Theory>]
 [<InlineData("bool?")>]
-[<InlineData("BOOL?")>]
-[<InlineData("bOoL?")>]
-[<InlineData("boolean?")>]
-[<InlineData("BOOLEAN?")>]
-[<InlineData("bOoLeAn?")>]
+[<InlineData("System.Boolean?")>]
 let ``Bool?`` str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.Bit, res)
 
 [<Theory>]
-[<InlineData("datetime?")>]
-[<InlineData("DATETIME?")>]
-[<InlineData("dAteTime?")>]
+[<InlineData("DateTime?")>]
+[<InlineData("System.DateTime?")>]
 let ``DateTime?`` str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.DateTime, res)
 
 [<Theory>]
 [<InlineData("float")>]
-[<InlineData("FLOAT")>]
-[<InlineData("FloaT")>]
 let Float str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.Float, res)
     
 [<Theory>]
 [<InlineData("double")>]
-[<InlineData("DOUBLE")>]
-[<InlineData("DoublE")>]
+[<InlineData("System.Double")>]
+[<InlineData("Double")>]
 let Double str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.Float, res)
 
 [<Theory>]
-[<InlineData("guid")>]
-[<InlineData("GUID")>]
-[<InlineData("GuId")>]
+[<InlineData("Guid")>]
+[<InlineData("System.Guid")>]
 let Guid str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.UniqueIdentifier, res)
 
 [<Theory>]
 [<InlineData("int")>]
-[<InlineData("INT")>]
-[<InlineData("InT")>]
-[<InlineData("int32")>]
-[<InlineData("INT32")>]
-[<InlineData("InT32")>]
+[<InlineData("System.Int32")>]
+[<InlineData("Int32")>]
 let Int str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.Int, res)
 
 [<Theory>]
 [<InlineData("bool")>]
-[<InlineData("BOOL")>]
-[<InlineData("bOoL")>]
-[<InlineData("boolean")>]
-[<InlineData("BOOLEAN")>]
-[<InlineData("bOoLeAn")>]
+[<InlineData("Boolean")>]
+[<InlineData("System.Boolean")>]
 let Bool str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.Bit, res)
 
 [<Theory>]
-[<InlineData("datetime")>]
-[<InlineData("DATETIME")>]
-[<InlineData("dAteTime")>]
+[<InlineData("DateTime")>]
+[<InlineData("System.DateTime")>]
 let DateTime str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.DateTime, res)
 
 [<Theory>]
 [<InlineData("string")>]
-[<InlineData("STRING")>]
-[<InlineData("stRinG")>]
+[<InlineData("System.String")>]
 let String str =
     let res =
         match str |> SqlDataType.toSqlType with
