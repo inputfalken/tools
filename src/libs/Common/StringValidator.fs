@@ -10,9 +10,9 @@ module public StringValidator =
 module public StringJoin =
     let joinStrings strings: string =
         strings |> String.concat System.String.Empty
-        
+
     let joinStringsWithSpaceSeparation strings: string =
         strings |> String.concat " "
-        
+
     let joinStringsWithCommaSpaceSeparation strings: string =
         strings |> String.concat ", "

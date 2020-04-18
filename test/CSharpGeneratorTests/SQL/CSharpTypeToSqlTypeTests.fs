@@ -10,8 +10,13 @@ open TemplateFactory.SQL.SQL
 [<InlineData("hello world")>]
 [<InlineData("unhandled type")>]
 let ``Unhandled types`` str =
-    let ``exception`` = Assert.Throws<NotImplementedException>(fun ( ) -> str |> SqlDataType.toSqlType |> ignore)
-    let expected =  sprintf "Type '%s' is not supported." str
+    let ``exception`` =
+        Assert.Throws<NotImplementedException>(fun () ->
+            str
+            |> SqlDataType.toSqlType
+            |> ignore)
+
+    let expected = sprintf "Type '%s' is not supported." str
     Assert.Equal(expected, ``exception``.Message)
 
 
@@ -20,7 +25,7 @@ let ``Unhandled types`` str =
 let ``Float?`` str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.Float, res)
-    
+
 [<Theory>]
 [<InlineData("System.Double?")>]
 [<InlineData("double?")>]
@@ -62,7 +67,7 @@ let ``DateTime?`` str =
 let Float str =
     let res = str |> SqlDataType.toSqlType
     Assert.Equal(SqlDataType.Float, res)
-    
+
 [<Theory>]
 [<InlineData("double")>]
 [<InlineData("System.Double")>]

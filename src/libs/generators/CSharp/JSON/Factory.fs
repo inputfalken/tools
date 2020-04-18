@@ -18,16 +18,17 @@ module internal Factory =
     let private applyPrefixSuffix key (settings: Settings) (casing: Casing) =
         match settings.LetterRule with
         | Prefix x -> [ x; key ]
-        | Suffix x -> [ key; x]
-        | ``Prefix and Suffix`` (x, y) -> [ x; key; y]
+        | Suffix x -> [ key; x ]
+        | ``Prefix and Suffix`` (x, y) -> [ x; key; y ]
         |> casing.applyMultiple
 
     let private createClassName (classSet: CIString Set) property className settings =
         if property
            |> CI
-           |> classSet.Contains
-        then settings.ClassCasing.applyMultiple [ className; property ]
-        else property
+           |> classSet.Contains then
+            settings.ClassCasing.applyMultiple [ className; property ]
+        else
+            property
         |> Option.Some
 
     let validateName (name: String) =
@@ -74,7 +75,8 @@ module internal Factory =
         | BaseType x ->
 
             let formattedPropertyName =
-                if classSet.IsEmpty then applyPrefixSuffix key settings settings.PropertyCasing
+                if classSet.IsEmpty
+                then applyPrefixSuffix key settings settings.PropertyCasing
                 else key |> settings.PropertyCasing.apply
 
             // Ugly side effect, maybe use Result in order in order to be explicit that things could go wrong.

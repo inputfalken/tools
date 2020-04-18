@@ -49,7 +49,8 @@ type public Factory =
 
     static member public ConfiguredStoredProcedureFromCsharp cSharp settings =
         try
-            SQL.generateStoredProcedureFromCSharp cSharp (Config.transformSqlSettings (settings)) |> Lemonad.ErrorHandling.Result.Value
+            SQL.generateStoredProcedureFromCSharp cSharp (Config.transformSqlSettings (settings))
+            |> Lemonad.ErrorHandling.Result.Value
         with ex -> Lemonad.ErrorHandling.Result.Error ex
 
     static member public StoredProcedureFromCsharp cSharp =

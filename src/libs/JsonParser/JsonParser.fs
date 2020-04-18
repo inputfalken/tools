@@ -16,8 +16,7 @@ module public Json =
         match value with
         | JsonValue.Number x ->
             // We only get decimals here, so we need to check if the number is a integer before mapping to int.
-            if x % 1m = 0m then Int <| int x
-            else Decimal(x)
+            if x % 1m = 0m then Int <| int x else Decimal(x)
         | JsonValue.Float x -> Decimal(decimal x)
         | JsonValue.String x -> stringParser x
         | JsonValue.Boolean x -> Boolean(x)

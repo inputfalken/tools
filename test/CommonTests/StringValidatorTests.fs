@@ -12,7 +12,7 @@ open Common.StringValidator
 let ``Strings whose expected to not have value`` string =
     let res = string |> valueExists
     Assert.Equal(Option.None, res)
-    
+
 [<Theory>]
 [<InlineData("foo", "foo")>]
 [<InlineData("123", "123")>]

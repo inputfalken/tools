@@ -46,14 +46,16 @@ type SqlDataType =
     | UniqueIdentifier
     | Nvarchar of NVarCharArgument
 
-    static member toSqlType (str: string): SqlDataType =
+    static member toSqlType(str: string): SqlDataType =
         let ciString = str.Replace("System.", System.String.Empty, StringComparison.OrdinalIgnoreCase) |> CIString.CI
         match ciString with
         | x when x.Equals int || x.Equals int32 || x.Equals intNullable || x.Equals int32Nullable -> SqlDataType.Int
-        | x when x.Equals bool || x.Equals boolean || x.Equals boolNullable || x.Equals booleanNullable -> SqlDataType.Bit
+        | x when x.Equals bool || x.Equals boolean || x.Equals boolNullable || x.Equals booleanNullable ->
+            SqlDataType.Bit
         | x when x.Equals guid || x.Equals guidNullable -> SqlDataType.UniqueIdentifier
         | x when x.Equals datetTime || x.Equals datetTimeNullable -> SqlDataType.DateTime
-        | x when x.Equals float || x.Equals double ||  x.Equals floatNullable || x.Equals doubleNullable-> SqlDataType.Float
+        | x when x.Equals float || x.Equals double || x.Equals floatNullable || x.Equals doubleNullable ->
+            SqlDataType.Float
         | x when x.Equals string -> SqlDataType.Nvarchar Max
         | _ -> raise (NotImplementedException(sprintf "Type '%s' is not supported." str))
 
@@ -72,7 +74,10 @@ type SqlDataType =
 type Parameter =
     { Type: SqlDataType
       Name: string }
-type UserDefined = {Parameters: Parameter list; Name: string}
+
+type UserDefined =
+    { Parameters: Parameter list
+      Name: string }
 
 type ProcedureParameter =
     | Parameters of Parameter list
@@ -86,21 +91,28 @@ let rec formatProcedure name (parameter: ProcedureParameter): string =
             let name =
                 match x.Name with
                 | x when x.[0] = '@' -> x
-                | x -> joinStrings [ "@"; x ]  
+                | x -> joinStrings [ "@"; x ]
             [ name
               x.Type.ToString() ]
             |> joinStringsWithSpaceSeparation)
         |> joinStringsWithCommaSpaceSeparation
 
-    let procedure = sprintf "CREATE OR ALTER PROCEDURE %s (%s) AS\nBEGIN\n\nEND" name
+    let procedure =
+        sprintf "CREATE OR ALTER PROCEDURE %s (%s) AS\nBEGIN\n\nEND" name
+
     let userDefinedType =
         sprintf
-            "DROP PROCEDURE IF EXISTS %s\nGO\n\nIF type_id('%s') IS NOT NULL DROP TYPE %s\nGO\n\nCREATE TYPE %s AS TABLE (%s)\nGO\n\n" name
+            "DROP PROCEDURE IF EXISTS %s\nGO\n\nIF type_id('%s') IS NOT NULL DROP TYPE %s\nGO\n\nCREATE TYPE %s AS TABLE (%s)\nGO\n\n"
+            name
+
     match parameter with
     | Parameters parameters ->
         procedure <| join parameters
     | UserDefinedTableType x ->
-        let param = joinStringsWithSpaceSeparation [(joinStrings ["@"; x.Name]) ; x.Name ] 
+        let param =
+            joinStringsWithSpaceSeparation
+                [ (joinStrings [ "@"; x.Name ])
+                  x.Name ]
         userDefinedType x.Name x.Name x.Name (join x.Parameters) + procedure param
     | ProcedureParameter x -> formatProcedure name x
 
@@ -134,7 +146,7 @@ let generateStoredProcedureFromCSharp (cSharp: string) (settings: Settings): str
     match settings.GenerationType with
     | GenerationType.UserDefinedTableType ->
         ProcedureParameter.UserDefinedTableType
-            { Parameters = parameters;
-               Name = sprintf "%sUserDefinedTableType" ``class``.Identifier.Text } 
+            { Parameters = parameters
+              Name = sprintf "%sUserDefinedTableType" ``class``.Identifier.Text }
     | GenerationType.None -> parameters |> ProcedureParameter.Parameters
     |> formatProcedure ``class``.Identifier.Text

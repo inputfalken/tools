@@ -18,7 +18,7 @@ module private UnionFunctions =
 
     let fromStringWithUnionCases<'a> s (arr: UnionCaseInfo []) =
         let ciString = s |> CI
-        match arr |> Array.filter (fun case ->  ciString.Equals(case.Name)) with
+        match arr |> Array.filter (fun case -> ciString.Equals(case.Name)) with
         | [| case |] -> Some(FSharpValue.MakeUnion(case, [||]) :?> 'a)
         | _ -> None
 

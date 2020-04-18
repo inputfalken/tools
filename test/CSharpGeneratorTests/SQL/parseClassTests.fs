@@ -17,7 +17,7 @@ let ``Invalid class syntax`` input =
     Assert.Equal("You must supply a CSharp class.", ``exception``.Message)
 
 [<Fact>]
-let ``Multiple classes throws not supported exception``() =
+let ``Multiple classes throws not supported exception`` () =
     let ``exception`` =
         Assert.Throws<NotSupportedException>(fun () ->
             SQL.parseClass "public class Foo { public class Bar {} }" |> ignore)
@@ -31,4 +31,3 @@ let ``Multiple classes throws not supported exception``() =
 let ``Single class does not throw`` input =
     let result = SQL.parseClass input
     Assert.NotNull result
-    

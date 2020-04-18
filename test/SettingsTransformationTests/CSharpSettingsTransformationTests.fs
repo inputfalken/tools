@@ -7,7 +7,7 @@ open Xunit
 open Generator.Config
 
 
-let defaultSettings() =
+let defaultSettings () =
     { RootName = "root"
       NameSpace = Option.None
       LetterRule = "model" |> LetterRule.Suffix
@@ -16,9 +16,9 @@ let defaultSettings() =
 
 
 [<Fact>]
-let ``Empty object``() =
+let ``Empty object`` () =
     let result = transformCSharpSettings (CSharpSettings())
-    Assert.Equal(defaultSettings(), result)
+    Assert.Equal(defaultSettings (), result)
 
 [<Theory>]
 [<InlineData("Foobar")>]
@@ -31,17 +31,17 @@ let ``Setting namespace`` nameSpace =
     Assert.Equal(Option.Some(nameSpace), result.NameSpace)
 
 [<Fact>]
-let ``Expect Suffix when ClassSuffix is set``() =
+let ``Expect Suffix when ClassSuffix is set`` () =
     let result = transformCSharpSettings (CSharpSettings(ClassPrefix = System.String.Empty, ClassSuffix = "Foo"))
     Assert.Equal(LetterRule.Suffix "Foo", result.LetterRule)
 
 [<Fact>]
-let ``Expect prefix when ClassPrefix is set``() =
+let ``Expect prefix when ClassPrefix is set`` () =
     let result = transformCSharpSettings (CSharpSettings(ClassPrefix = "Foo", ClassSuffix = System.String.Empty))
     Assert.Equal(LetterRule.Prefix "Foo", result.LetterRule)
 
 [<Fact>]
-let ``Expect prefix and suffix when ClassPrefix and ClassSuffix is set``() =
+let ``Expect prefix and suffix when ClassPrefix and ClassSuffix is set`` () =
     let result = transformCSharpSettings (CSharpSettings(ClassPrefix = "Foo", ClassSuffix = "Foo"))
     Assert.Equal(LetterRule.``Prefix and Suffix`` ("Foo", "Foo"), result.LetterRule)
 
@@ -54,7 +54,7 @@ let ``Expect prefix and suffix when ClassPrefix and ClassSuffix is set``() =
 [<InlineData("", null)>]
 let ``Uses default settings if ClassSuffix or ClassPrefix is set to empty string or null`` classPrefix classSuffix =
     let result = transformCSharpSettings (CSharpSettings(ClassPrefix = classPrefix, ClassSuffix = classSuffix))
-    Assert.Equal(defaultSettings(), result)
+    Assert.Equal(defaultSettings (), result)
 
 [<Theory>]
 [<InlineData(" ", " ")>]
@@ -65,7 +65,7 @@ let ``Uses default settings if ClassSuffix or ClassPrefix is set to empty string
 [<InlineData("", null)>]
 let ``Uses default settings if PropertyCasing or ClassCasing is set to empty string or null`` classCasing propertyCasing =
     let result = transformCSharpSettings (CSharpSettings(ClassCasing = classCasing, PropertyCasing = propertyCasing))
-    Assert.Equal(defaultSettings(), result)
+    Assert.Equal(defaultSettings (), result)
 
 [<Theory>]
 [<InlineData("Pascal")>]

@@ -1,4 +1,4 @@
 namespace Generator
 
-    type public SqlSettings() =
-            member val GenerateUserDefinedTable = false with get, set
+type public SqlSettings() =
+    member val GenerateUserDefinedTable = false with get, set
