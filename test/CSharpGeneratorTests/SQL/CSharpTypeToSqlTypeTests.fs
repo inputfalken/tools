@@ -1,7 +1,18 @@
 module CSharpGeneratorTests.SQL.CSharpTypeToSqlTypeTests
 
+open System
 open Xunit
 open TemplateFactory.SQL.SQL
+
+[<Theory>]
+[<InlineData("foobar")>]
+[<InlineData("foobar3")>]
+[<InlineData("hello world")>]
+[<InlineData("unhandled type")>]
+let ``Unhandled types`` str =
+    let ``exception`` = Assert.Throws<NotImplementedException>(fun ( ) -> str |> SqlDataType.toSqlType |> ignore)
+    let expected =  sprintf "Type '%s' is not supported." str
+    Assert.Equal(expected, ``exception``.Message)
 
 
 [<Theory>]

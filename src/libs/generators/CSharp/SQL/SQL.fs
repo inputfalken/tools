@@ -55,7 +55,7 @@ type SqlDataType =
         | x when x.Equals datetTime || x.Equals datetTimeNullable -> SqlDataType.DateTime
         | x when x.Equals float || x.Equals double ||  x.Equals floatNullable || x.Equals doubleNullable-> SqlDataType.Float
         | x when x.Equals string -> SqlDataType.Nvarchar Max
-        | x -> raise (NotImplementedException(sprintf "Type %s has not been implemented yet" str))
+        | _ -> raise (NotImplementedException(sprintf "Type '%s' is not supported." str))
 
     override x.ToString() =
         match x with
