@@ -46,16 +46,16 @@ type SqlDataType =
     | UniqueIdentifier
     | Nvarchar of NVarCharArgument
 
-    static member toSqlType str: SqlDataType =
-        let str = str |> CIString.CI
-        match str with
+    static member toSqlType (str: string): SqlDataType =
+        let ciString = str.Replace("System.", System.String.Empty, StringComparison.OrdinalIgnoreCase) |> CIString.CI
+        match ciString with
         | x when x.Equals int || x.Equals int32 || x.Equals intNullable || x.Equals int32Nullable -> SqlDataType.Int
         | x when x.Equals bool || x.Equals boolean || x.Equals boolNullable || x.Equals booleanNullable -> SqlDataType.Bit
         | x when x.Equals guid || x.Equals guidNullable -> SqlDataType.UniqueIdentifier
         | x when x.Equals datetTime || x.Equals datetTimeNullable -> SqlDataType.DateTime
         | x when x.Equals float || x.Equals double ||  x.Equals floatNullable || x.Equals doubleNullable-> SqlDataType.Float
         | x when x.Equals string -> SqlDataType.Nvarchar Max
-        | x -> raise (NotImplementedException(sprintf "Type %s has not been implemented yet" x.String))
+        | x -> raise (NotImplementedException(sprintf "Type %s has not been implemented yet" str))
 
     override x.ToString() =
         match x with
