@@ -7,7 +7,7 @@ open TemplateFactory.SQL.SQL
 
 
 [<Fact>]
-let ```One parameter``() =
+let ```One parameter`` () =
     let argument =
         [ { Type = SqlDataType.Int
             Name = "id" } ]
@@ -17,7 +17,7 @@ let ```One parameter``() =
     Assert.Equal("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int) AS\nBEGIN\n\nEND", res)
 
 [<Fact>]
-let ```User defined one parameter``() =
+let ```User defined one parameter`` () =
 
     let argument =
         { Parameters =
@@ -34,7 +34,7 @@ GO
 IF type_id('PersonType') IS NOT NULL DROP TYPE PersonType
 GO
 
-CREATE TYPE PersonType AS TABLE (@id int)
+CREATE TYPE PersonType AS TABLE (id int)
 GO
 
 CREATE OR ALTER PROCEDURE ExecuteOnId (@PersonType PersonType) AS
@@ -45,7 +45,7 @@ END"""
     Assert.Equal(expected, res, false, true, true)
 
 [<Fact>]
-let ```User defined two parameter``() =
+let ```User defined two parameter`` () =
 
     let argument =
         { Parameters =
@@ -64,7 +64,7 @@ GO
 IF type_id('PersonType') IS NOT NULL DROP TYPE PersonType
 GO
 
-CREATE TYPE PersonType AS TABLE (@id int, @FirstName nvarchar(max))
+CREATE TYPE PersonType AS TABLE (id int, FirstName nvarchar(max))
 GO
 
 CREATE OR ALTER PROCEDURE ExecuteOnId (@PersonType PersonType) AS
@@ -75,7 +75,7 @@ END"""
     Assert.Equal(expected, res, false, true, true)
 
 [<Fact>]
-let ```User defined three parameter``() =
+let ```User defined three parameter`` () =
 
     let argument =
         { Parameters =
@@ -96,18 +96,17 @@ GO
 IF type_id('PersonType') IS NOT NULL DROP TYPE PersonType
 GO
 
-CREATE TYPE PersonType AS TABLE (@id int, @FirstName nvarchar(max), @TimeStamp datetime)
+CREATE TYPE PersonType AS TABLE (id int, FirstName nvarchar(max), TimeStamp datetime)
 GO
 
 CREATE OR ALTER PROCEDURE ExecuteOnId (@PersonType PersonType) AS
 BEGIN
 
 END"""
-
     Assert.Equal(expected, res, false, true, true)
 
 [<Fact>]
-let ```Two parameters``() =
+let ```Two parameters`` () =
     let parameter =
         [ { Type = Int
             Name = "id" }
@@ -120,7 +119,7 @@ let ```Two parameters``() =
     Assert.Equal("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int, @isDeleted bit) AS\nBEGIN\n\nEND", res)
 
 [<Fact>]
-let ```Three parameters``() =
+let ```Three parameters`` () =
     let parameter =
         [ { Type = Int
             Name = "id" }

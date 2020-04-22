@@ -84,14 +84,17 @@ type ProcedureParameter =
     | UserDefinedTableType of UserDefined
     | ProcedureParameter of ProcedureParameter
 
-let rec formatProcedure name (parameter: ProcedureParameter): string =
-    let join (parameters: Parameter list) =
+let rec formatProcedure name (parameter: ProcedureParameter) : string =
+    let join (parameters: Parameter list) (prefixWithAt: bool)=
         parameters
         |> List.map (fun x ->
             let name =
-                match x.Name with
-                | x when x.[0] = '@' -> x
-                | x -> joinStrings [ "@"; x ]
+                if prefixWithAt then
+                    match x.Name with
+                    | x when x.[0] = '@' -> x
+                    | x -> joinStrings [ "@"; x ]
+                else
+                    x.Name
             [ name
               x.Type.ToString() ]
             |> joinStringsWithSpaceSeparation)
@@ -107,14 +110,14 @@ let rec formatProcedure name (parameter: ProcedureParameter): string =
 
     match parameter with
     | Parameters parameters ->
-        procedure <| join parameters
+        procedure <| join parameters true
     | UserDefinedTableType x ->
         let param =
             joinStringsWithSpaceSeparation
                 [ (joinStrings [ "@"; x.Name ])
                   x.Name ]
-        userDefinedType x.Name x.Name x.Name (join x.Parameters) + procedure param
-    | ProcedureParameter x -> formatProcedure name x
+        userDefinedType x.Name x.Name x.Name (join x.Parameters false) + procedure param
+    | ProcedureParameter x -> formatProcedure name x 
 
 let parseClass (input: string) =
     let res = CSharpSyntaxTree.ParseText(input) |> CSharpExtensions.GetCompilationUnitRoot
