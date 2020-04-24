@@ -37,7 +37,7 @@ GO
 CREATE TYPE PersonType AS TABLE (id int)
 GO
 
-CREATE OR ALTER PROCEDURE ExecuteOnId (@PersonType PersonType) AS
+CREATE OR ALTER PROCEDURE ExecuteOnId (@PersonType PersonType READONLY) AS
 BEGIN
 
 END"""
@@ -67,7 +67,7 @@ GO
 CREATE TYPE PersonType AS TABLE (id int, FirstName nvarchar(max))
 GO
 
-CREATE OR ALTER PROCEDURE ExecuteOnId (@PersonType PersonType) AS
+CREATE OR ALTER PROCEDURE ExecuteOnId (@PersonType PersonType READONLY) AS
 BEGIN
 
 END"""
@@ -99,7 +99,7 @@ GO
 CREATE TYPE PersonType AS TABLE (id int, FirstName nvarchar(max), TimeStamp datetime)
 GO
 
-CREATE OR ALTER PROCEDURE ExecuteOnId (@PersonType PersonType) AS
+CREATE OR ALTER PROCEDURE ExecuteOnId (@PersonType PersonType READONLY) AS
 BEGIN
 
 END"""

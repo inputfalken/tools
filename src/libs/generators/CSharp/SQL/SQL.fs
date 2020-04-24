@@ -100,9 +100,6 @@ let rec formatProcedure name (parameter: ProcedureParameter) : string =
             |> joinStringsWithSpaceSeparation)
         |> joinStringsWithCommaSpaceSeparation
 
-    let procedure =
-        sprintf "CREATE OR ALTER PROCEDURE %s (%s) AS\nBEGIN\n\nEND" name
-
     let userDefinedType =
         sprintf
             "DROP PROCEDURE IF EXISTS %s\nGO\n\nIF type_id('%s') IS NOT NULL DROP TYPE %s\nGO\n\nCREATE TYPE %s AS TABLE (%s)\nGO\n\n"
@@ -110,8 +107,13 @@ let rec formatProcedure name (parameter: ProcedureParameter) : string =
 
     match parameter with
     | Parameters parameters ->
+        let procedure =
+            sprintf "CREATE OR ALTER PROCEDURE %s (%s) AS\nBEGIN\n\nEND" name
+
         procedure <| join parameters true
     | UserDefinedTableType x ->
+        let procedure =
+            sprintf "CREATE OR ALTER PROCEDURE %s (%s READONLY) AS\nBEGIN\n\nEND" name
         let param =
             joinStringsWithSpaceSeparation
                 [ (joinStrings [ "@"; x.Name ])
