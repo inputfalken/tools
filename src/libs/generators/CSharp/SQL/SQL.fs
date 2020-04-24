@@ -46,6 +46,8 @@ type SqlDataType =
     | UniqueIdentifier
     | Nvarchar of NVarCharArgument
 
+    static member NvarcharMax = NVarCharArgument.Max |> Nvarchar
+    static member NvarcharNumber number = NVarCharArgument.Number number |> Nvarchar
     static member toSqlType(str: string): SqlDataType =
         let ciString = str.Replace("System.", System.String.Empty, StringComparison.OrdinalIgnoreCase) |> CIString.CI
         match ciString with
@@ -80,46 +82,73 @@ type UserDefined =
       Name: string }
 
 type ProcedureParameter =
-    | Parameters of Parameter list
+    | DataType of Parameter
     | UserDefinedTableType of UserDefined
-    | ProcedureParameter of ProcedureParameter
 
-let rec formatProcedure name (parameter: ProcedureParameter) : string =
-    let join (parameters: Parameter list) (prefixWithAt: bool)=
-        parameters
+let rec formatProcedure name (arg: ProcedureParameter list): string =
+
+    let userDefinedTypes =
+        arg
+        |> List.filter (fun x ->
+            match x with
+            | UserDefinedTableType _ -> true
+            | DataType _ -> false)
         |> List.map (fun x ->
-            let name =
-                if prefixWithAt then
+            match x with
+            | UserDefinedTableType x -> x)
+
+    let stringifiedParams =
+        arg
+        |> List.map (fun x ->
+            match x with
+            | DataType x ->
+                let name =
                     match x.Name with
                     | x when x.[0] = '@' -> x
                     | x -> joinStrings [ "@"; x ]
-                else
-                    x.Name
-            [ name
-              x.Type.ToString() ]
-            |> joinStringsWithSpaceSeparation)
-        |> joinStringsWithCommaSpaceSeparation
+                [ name
+                  x.Type.ToString() ]
+                |> joinStringsWithSpaceSeparation
+            | UserDefinedTableType userDefined ->
 
-    let userDefinedType =
-        sprintf
-            "DROP PROCEDURE IF EXISTS %s\nGO\n\nIF type_id('%s') IS NOT NULL DROP TYPE %s\nGO\n\nCREATE TYPE %s AS TABLE (%s)\nGO\n\n"
-            name
+                let param =
+                    joinStringsWithSpaceSeparation
+                        [ (joinStrings [ "@"; userDefined.Name ])
+                          userDefined.Name
+                          "READONLY" ]
 
-    match parameter with
-    | Parameters parameters ->
-        let procedure =
-            sprintf "CREATE OR ALTER PROCEDURE %s (%s) AS\nBEGIN\n\nEND" name
+                param)
 
-        procedure <| join parameters true
-    | UserDefinedTableType x ->
-        let procedure =
-            sprintf "CREATE OR ALTER PROCEDURE %s (%s READONLY) AS\nBEGIN\n\nEND" name
-        let param =
-            joinStringsWithSpaceSeparation
-                [ (joinStrings [ "@"; x.Name ])
-                  x.Name ]
-        userDefinedType x.Name x.Name x.Name (join x.Parameters false) + procedure param
-    | ProcedureParameter x -> formatProcedure name x 
+    let userDefinedTypeProvided = not userDefinedTypes.IsEmpty
+
+    let dropProcedure =
+        if userDefinedTypeProvided
+        then sprintf "DROP PROCEDURE IF EXISTS %s\nGO\n\n" name
+        else System.String.Empty
+
+    let userDefinedCreate =
+        (userDefinedTypes
+         |> List.map (fun x ->
+             sprintf "CREATE TYPE %s AS TABLE (%s)\nGO" x.Name
+                 (x.Parameters
+                  |> List.map (fun x -> sprintf "%s %s" x.Name (x.Type.ToString()))
+                  |> joinStringsWithCommaSpaceSeparation))
+         |> String.concat "\n\n")
+        + if userDefinedTypeProvided then "\n\n" else System.String.Empty
+
+    let userDefinedDrop =
+        (userDefinedTypes
+         |> List.map (fun x ->
+             sprintf "IF type_id('%s') IS NOT NULL DROP TYPE %s\nGO" x.Name x.Name)
+         |> String.concat "\n\n")
+        + if userDefinedTypeProvided then "\n\n" else System.String.Empty
+
+    let createOrAlterProcedure =
+        sprintf "CREATE OR ALTER PROCEDURE %s (%s) AS\nBEGIN\n\nEND" name
+
+    dropProcedure + userDefinedDrop + userDefinedCreate + (stringifiedParams
+                                                           |> joinStringsWithCommaSpaceSeparation
+                                                           |> createOrAlterProcedure)
 
 let parseClass (input: string) =
     let res = CSharpSyntaxTree.ParseText(input) |> CSharpExtensions.GetCompilationUnitRoot
@@ -150,8 +179,9 @@ let generateStoredProcedureFromCSharp (cSharp: string) (settings: Settings): str
 
     match settings.GenerationType with
     | GenerationType.UserDefinedTableType ->
-        ProcedureParameter.UserDefinedTableType
+        let f =
             { Parameters = parameters
               Name = sprintf "%sUserDefinedTableType" ``class``.Identifier.Text }
-    | GenerationType.None -> parameters |> ProcedureParameter.Parameters
+        [ f ] |> List.map ProcedureParameter.UserDefinedTableType
+    | GenerationType.None -> parameters |> List.map ProcedureParameter.DataType
     |> formatProcedure ``class``.Identifier.Text
