@@ -43,6 +43,45 @@ let ```Three datatype parameters`` () =
         ("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int, @isDeleted bit, @updatedAt datetime) AS\nBEGIN\n\nEND", res)
 
 [<Fact>]
+let ```Two User defined tables with one datatype parameter`` () =
+
+    let argument =
+        { Parameters =
+              [ { Type = SqlDataType.Int
+                  Name = "id" } ]
+          Name = "PersonType" }
+        |> ProcedureParameter.UserDefinedTableType
+    let argument2 =
+        { Parameters =
+              [ { Type = SqlDataType.NvarcharMax
+                  Name = "Address" } ]
+          Name = "AddressType" }
+        |> ProcedureParameter.UserDefinedTableType
+
+    let res = SQL.formatProcedure "ExecuteOnId" [ argument; argument2 ]
+    let expected =
+        """DROP PROCEDURE IF EXISTS ExecuteOnId
+GO
+
+IF type_id('PersonType') IS NOT NULL DROP TYPE PersonType
+GO
+
+IF type_id('AddressType') IS NOT NULL DROP TYPE AddressType
+GO
+
+CREATE TYPE PersonType AS TABLE (id int)
+GO
+
+CREATE TYPE AddressType AS TABLE (Address nvarchar(max))
+GO
+
+CREATE OR ALTER PROCEDURE ExecuteOnId (@PersonType PersonType READONLY, @AddressType AddressType READONLY) AS
+BEGIN
+
+END"""
+
+    Assert.Equal(expected, res, false, true, true)
+[<Fact>]
 let ```User defined table with one datatype parameter`` () =
 
     let argument =
