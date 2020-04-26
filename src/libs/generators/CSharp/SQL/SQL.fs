@@ -85,7 +85,7 @@ type ProcedureParameter =
     | DataType of Parameter
     | UserDefinedTableType of UserDefined
 
-let rec formatProcedure name (arg: ProcedureParameter list): string =
+let formatProcedure name (arg: ProcedureParameter list): string =
 
     let userDefinedTypes =
         arg
