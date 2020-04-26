@@ -4,20 +4,85 @@ open Xunit
 open TemplateFactory.SQL
 open TemplateFactory.SQL.SQL
 
-
-
 [<Fact>]
-let ```One parameter`` () =
+let ```One datatype parameter`` () =
     let argument =
         [ { Type = SqlDataType.Int
             Name = "id" } ]
-        |> ProcedureParameter.Parameters
+        |> List.map ProcedureParameter.DataType
 
     let res = formatProcedure "ExecuteOnId" argument
     Assert.Equal("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int) AS\nBEGIN\n\nEND", res)
 
 [<Fact>]
-let ```User defined one parameter`` () =
+let ```Two datatype parameters`` () =
+    let parameter =
+        [ { Type = Int
+            Name = "id" }
+          { Type = Bit
+            Name = "isDeleted" } ]
+        |> List.map ProcedureParameter.DataType
+
+    let res = formatProcedure "ExecuteOnId" parameter
+
+    Assert.Equal("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int, @isDeleted bit) AS\nBEGIN\n\nEND", res)
+
+[<Fact>]
+let ```Three datatype parameters`` () =
+    let parameter =
+        [ { Type = Int
+            Name = "id" }
+          { Type = Bit
+            Name = "isDeleted" }
+          { Type = DateTime
+            Name = "updatedAt" } ]
+        |> List.map ProcedureParameter.DataType
+
+    let res = formatProcedure "ExecuteOnId" parameter
+    Assert.Equal
+        ("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int, @isDeleted bit, @updatedAt datetime) AS\nBEGIN\n\nEND", res)
+
+[<Fact>]
+let ```Two User defined tables with one datatype parameter`` () =
+
+    let argument =
+        { Parameters =
+              [ { Type = SqlDataType.Int
+                  Name = "id" } ]
+          Name = "PersonType" }
+        |> ProcedureParameter.UserDefinedTableType
+    let argument2 =
+        { Parameters =
+              [ { Type = SqlDataType.NvarcharMax
+                  Name = "Address" } ]
+          Name = "AddressType" }
+        |> ProcedureParameter.UserDefinedTableType
+
+    let res = SQL.formatProcedure "ExecuteOnId" [ argument; argument2 ]
+    let expected =
+        """DROP PROCEDURE IF EXISTS ExecuteOnId
+GO
+
+IF type_id('PersonType') IS NOT NULL DROP TYPE PersonType
+GO
+
+IF type_id('AddressType') IS NOT NULL DROP TYPE AddressType
+GO
+
+CREATE TYPE PersonType AS TABLE (id int)
+GO
+
+CREATE TYPE AddressType AS TABLE (Address nvarchar(max))
+GO
+
+CREATE OR ALTER PROCEDURE ExecuteOnId (@PersonType PersonType READONLY, @AddressType AddressType READONLY) AS
+BEGIN
+
+END"""
+
+    Assert.Equal(expected, res, false, true, true)
+[<Fact>]
+let ```User defined table with one datatype parameter`` () =
 
     let argument =
         { Parameters =
@@ -26,7 +91,7 @@ let ```User defined one parameter`` () =
           Name = "PersonType" }
         |> ProcedureParameter.UserDefinedTableType
 
-    let res = SQL.formatProcedure "ExecuteOnId" argument
+    let res = SQL.formatProcedure "ExecuteOnId" [ argument ]
     let expected =
         """DROP PROCEDURE IF EXISTS ExecuteOnId
 GO
@@ -45,7 +110,7 @@ END"""
     Assert.Equal(expected, res, false, true, true)
 
 [<Fact>]
-let ```User defined two parameter`` () =
+let ```User defined table with two datatype parameters`` () =
 
     let argument =
         { Parameters =
@@ -56,7 +121,7 @@ let ```User defined two parameter`` () =
           Name = "PersonType" }
         |> ProcedureParameter.UserDefinedTableType
 
-    let res = SQL.formatProcedure "ExecuteOnId" argument
+    let res = SQL.formatProcedure "ExecuteOnId" [ argument ]
     let expected =
         """DROP PROCEDURE IF EXISTS ExecuteOnId
 GO
@@ -75,7 +140,7 @@ END"""
     Assert.Equal(expected, res, false, true, true)
 
 [<Fact>]
-let ```User defined three parameter`` () =
+let ```User defined table with three datatype parameters`` () =
 
     let argument =
         { Parameters =
@@ -88,7 +153,7 @@ let ```User defined three parameter`` () =
           Name = "PersonType" }
         |> ProcedureParameter.UserDefinedTableType
 
-    let res = SQL.formatProcedure "ExecuteOnId" argument
+    let res = SQL.formatProcedure "ExecuteOnId" [ argument ]
     let expected =
         """DROP PROCEDURE IF EXISTS ExecuteOnId
 GO
@@ -106,29 +171,36 @@ END"""
     Assert.Equal(expected, res, false, true, true)
 
 [<Fact>]
-let ```Two parameters`` () =
-    let parameter =
-        [ { Type = Int
-            Name = "id" }
-          { Type = Bit
-            Name = "isDeleted" } ]
-        |> ProcedureParameter.Parameters
+let ```One datatype parameter mixed with a user defined table with one datatype parameter`` () =
+    let id =
+        { Type = SqlDataType.Int
+          Name = "Id" }
 
-    let res = formatProcedure "ExecuteOnId" parameter
+    let firstName =
+        { Type = SqlDataType.NvarcharNumber 20
+          Name = "FirstName" }
 
-    Assert.Equal("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int, @isDeleted bit) AS\nBEGIN\n\nEND", res)
+    let argument =
+        [ id ] |> List.map ProcedureParameter.DataType
 
-[<Fact>]
-let ```Three parameters`` () =
-    let parameter =
-        [ { Type = Int
-            Name = "id" }
-          { Type = Bit
-            Name = "isDeleted" }
-          { Type = DateTime
-            Name = "updatedAt" } ]
-        |> ProcedureParameter.Parameters
+    let argument =
+        argument @ [ ProcedureParameter.UserDefinedTableType
+                         { Parameters = [ id; firstName ]
+                           Name = "Users" } ]
 
-    let res = formatProcedure "ExecuteOnId" parameter
-    Assert.Equal
-        ("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int, @isDeleted bit, @updatedAt datetime) AS\nBEGIN\n\nEND", res)
+    let res = formatProcedure "ExecuteOnId" argument
+    let expected =
+        """DROP PROCEDURE IF EXISTS ExecuteOnId
+GO
+
+IF type_id('Users') IS NOT NULL DROP TYPE Users
+GO
+
+CREATE TYPE Users AS TABLE (Id int, FirstName nvarchar(20))
+GO
+
+CREATE OR ALTER PROCEDURE ExecuteOnId (@Id int, @Users Users READONLY) AS
+BEGIN
+
+END"""
+    Assert.Equal(expected, res, false, true, true)
