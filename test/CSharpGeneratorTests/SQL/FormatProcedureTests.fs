@@ -12,7 +12,7 @@ let ```One datatype parameter`` () =
         |> List.map ProcedureParameter.DataType
 
     let res = formatProcedure "ExecuteOnId" argument
-    Assert.Equal("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int) AS\nBEGIN\n\nEND", res)
+    Assert.Equal("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int) AS\nBEGIN\n\nEND", res, false, true, true)
 
 [<Fact>]
 let ```Two datatype parameters`` () =
@@ -25,7 +25,7 @@ let ```Two datatype parameters`` () =
 
     let res = formatProcedure "ExecuteOnId" parameter
 
-    Assert.Equal("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int, @isDeleted bit) AS\nBEGIN\n\nEND", res)
+    Assert.Equal("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int, @isDeleted bit) AS\nBEGIN\n\nEND", res, false, true, true)
 
 [<Fact>]
 let ```Three datatype parameters`` () =
@@ -40,7 +40,7 @@ let ```Three datatype parameters`` () =
 
     let res = formatProcedure "ExecuteOnId" parameter
     Assert.Equal
-        ("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int, @isDeleted bit, @updatedAt datetime) AS\nBEGIN\n\nEND", res)
+        ("CREATE OR ALTER PROCEDURE ExecuteOnId (@id int, @isDeleted bit, @updatedAt datetime) AS\nBEGIN\n\nEND", res, false, true, true)
 
 [<Fact>]
 let ```Two User defined tables with one datatype parameter`` () =

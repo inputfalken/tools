@@ -33,6 +33,9 @@ let private booleanNullable = CIString.CI "boolean?"
 let private guidNullable = CIString.CI "guid?"
 let private datetTimeNullable = CIString.CI "datetime?"
 
+let newline = Environment.NewLine
+let doubleNewLine = newline + newline
+
 type NVarCharArgument =
     | Max
     // We get type safety but negative numbers and 0 could still be passed which is not allowed.
@@ -48,6 +51,7 @@ type SqlDataType =
 
     static member NvarcharMax = NVarCharArgument.Max |> Nvarchar
     static member NvarcharNumber number = NVarCharArgument.Number number |> Nvarchar
+
     static member toSqlType(str: string): SqlDataType =
         let ciString = str.Replace("System.", System.String.Empty, StringComparison.OrdinalIgnoreCase) |> CIString.CI
         match ciString with
@@ -120,32 +124,43 @@ let formatProcedure name (arg: ProcedureParameter list): string =
 
     let dropProcedure =
         if userDefinedTypeProvided
-        then sprintf "DROP PROCEDURE IF EXISTS %s\nGO\n\n" name
+        then sprintf "DROP PROCEDURE IF EXISTS %s%sGO%s" name newline doubleNewLine
         else System.String.Empty
 
     let userDefinedCreate =
-        (userDefinedTypes
-         |> List.map (fun x ->
-             sprintf "CREATE TYPE %s AS TABLE (%s)\nGO" x.Name
-                 (x.Parameters
-                  |> List.map (fun x -> sprintf "%s %s" x.Name (x.Type.ToString()))
-                  |> joinStringsWithCommaSpaceSeparation))
-         |> String.concat "\n\n")
-        + if userDefinedTypeProvided then "\n\n" else System.String.Empty
+        if userDefinedTypeProvided then
+            (userDefinedTypes
+             |> List.map (fun x ->
+                 sprintf "CREATE TYPE %s AS TABLE (%s)%sGO" x.Name
+                     (x.Parameters
+                      |> List.map (fun x -> sprintf "%s %s" x.Name (x.Type.ToString()))
+                      |> joinStringsWithCommaSpaceSeparation) newline)
+             |> String.concat doubleNewLine)
+            + doubleNewLine
+        else
+            System.String.Empty
 
     let userDefinedDrop =
-        (userDefinedTypes
-         |> List.map (fun x ->
-             sprintf "IF type_id('%s') IS NOT NULL DROP TYPE %s\nGO" x.Name x.Name)
-         |> String.concat "\n\n")
-        + if userDefinedTypeProvided then "\n\n" else System.String.Empty
+        if userDefinedTypeProvided then
+            (userDefinedTypes
+             |> List.map (fun x ->
+                 sprintf "IF type_id('%s') IS NOT NULL DROP TYPE %s%sGO" x.Name x.Name newline)
+             |> String.concat doubleNewLine)
+            + doubleNewLine
+        else
+            System.String.Empty
 
-    let createOrAlterProcedure =
-        sprintf "CREATE OR ALTER PROCEDURE %s (%s) AS\nBEGIN\n\nEND" name
 
-    dropProcedure + userDefinedDrop + userDefinedCreate + (stringifiedParams
-                                                           |> joinStringsWithCommaSpaceSeparation
-                                                           |> createOrAlterProcedure)
+    let createOrAlterProcedure x =
+        sprintf "CREATE OR ALTER PROCEDURE %s (%s) AS%sBEGIN%sEND" name x newline doubleNewLine
+
+    [ dropProcedure
+      userDefinedDrop
+      userDefinedCreate
+      (stringifiedParams
+       |> joinStringsWithCommaSpaceSeparation
+       |> createOrAlterProcedure) ]
+    |> joinStrings
 
 let parseClass (input: string) =
     let res = CSharpSyntaxTree.ParseText(input) |> CSharpExtensions.GetCompilationUnitRoot

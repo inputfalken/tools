@@ -13,4 +13,4 @@ open Xunit
              "CREATE OR ALTER PROCEDURE Person (@Id int, @FirstName nvarchar(max)) AS\nBEGIN\n\nEND")>]
 let Class input expected =
     let result = SQL.generateStoredProcedureFromCSharp input { GenerationType = GenerationType.None }
-    Assert.Equal(expected, result)
+    Assert.Equal(expected, result, false, true, true)
