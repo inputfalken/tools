@@ -89,13 +89,10 @@ let rec formatProcedure name (arg: ProcedureParameter list): string =
 
     let userDefinedTypes =
         arg
-        |> List.filter (fun x ->
+        |> List.choose (fun x ->
             match x with
-            | UserDefinedTableType _ -> true
-            | DataType _ -> false)
-        |> List.map (fun x ->
-            match x with
-            | UserDefinedTableType x -> x)
+            | UserDefinedTableType x -> option.Some x
+            | DataType _ -> option.None)
 
     let stringifiedParams =
         arg
