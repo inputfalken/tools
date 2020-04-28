@@ -16,6 +16,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Common\Common.fsproj" />
         <ProjectReference Include="..\..\JsonParser\JsonParser.fsproj" />
+        <ProjectReference Include="..\Sql\Sql.fsproj" />
     </ItemGroup>
 
     <ItemGroup>

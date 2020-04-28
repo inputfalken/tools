@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <IsPackable>false</IsPackable>
+        <GenerateProgramFile>true</GenerateProgramFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\libs\generators\Sql\Sql.fsproj" />
+        <ProjectReference Include="..\TestDependencies\TestDependencies.fsproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="SqlDataTypeToStringTests.fs" />
+    </ItemGroup>
+
+</Project>
