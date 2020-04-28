@@ -1,7 +1,7 @@
 module CSharpGeneratorTests.SQL.GenerateProcedureTests
 
 open TemplateFactory.SQL
-open TemplateFactory.SQL.SQL
+open Sql.Index
 open Xunit
 
 

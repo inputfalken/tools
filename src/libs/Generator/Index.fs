@@ -7,6 +7,7 @@ open Lemonad.ErrorHandling
 open StringValidator
 open TemplateFactory.SQL
 open TemplateFactory.SQL.SQL
+open Sql.Index
 
 module Config =
     let transformCSharpSettings (settings: CSharpSettings) =
@@ -37,8 +38,8 @@ module Config =
 
     let transformSqlSettings (settings: SqlSettings) =
         match settings with
-        | x when x.GenerateUserDefinedTable = true -> { GenerationType = SQL.GenerationType.UserDefinedTableType }
-        | _ -> { GenerationType = SQL.GenerationType.None }
+        | x when x.GenerateUserDefinedTable = true -> { GenerationType = GenerationType.UserDefinedTableType }
+        | _ -> { GenerationType = GenerationType.None }
 
 
 type public Factory =
