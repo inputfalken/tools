@@ -53,8 +53,7 @@ let parseClass (input: string) =
     | :? ArgumentException as x when x.Message = "The input sequence was empty. (Parameter 'source')" ->
         raise (ArgumentException("You must supply a CSharp class."))
     | x -> raise (x)
-
-
+    
 let generateStoredProcedureFromCSharp (cSharp: string) (settings: Settings): string =
     let ``class`` = parseClass cSharp
 

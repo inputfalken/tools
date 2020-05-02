@@ -1,12 +1,14 @@
 ﻿namespace Generator
 
+open System
+open System.Collections.Generic
 open CSHarp.JSON
 open Common
 open Common.Casing
+open Generator
 open Lemonad.ErrorHandling
 open StringValidator
 open TemplateFactory.SQL
-open TemplateFactory.SQL.SQL
 open Sql.Index
 
 module Config =
@@ -47,6 +49,72 @@ type public Factory =
     static member public CSharpFromJson input = Factory.ConfiguredCSharpFromJson <| input <| CSharpSettings()
     static member public ConfiguredCSharpFromJson (input: System.String) (settings: CSharpSettings): IResult<System.String, exn> =
         CSharp.generateFromJson <| input <| Config.transformCSharpSettings settings
+
+    static member StoredProcedure(arg: SqlProcedureApiModel) =
+
+        let mapSqlDataType (x: SqlProcedureDataTypeParameterApiModel) =
+            let sqlDataType =
+                match x.DataType with
+                | SqlDataApiEnum.String -> Sql.Index.SqlDataType.NvarcharMax
+                | SqlDataApiEnum.Int -> Sql.Index.Int
+                | SqlDataApiEnum.Bit -> Sql.Index.Bit
+                | _ -> raise (NotImplementedException(x.ToString()))
+
+            match valueExists x.Name with
+            | Some x ->
+                { Name = x
+                  Type = sqlDataType }
+            | Option.None -> raise (ArgumentException("Invalid name"))
+
+        match arg with
+        | x when (valueExists x.Name).IsNone -> raise (ArgumentException("Invalid name"))
+        | x when x.DataTypes = null && x.UserDefinedTypes = null -> formatProcedure x.Name []
+        | x when x.DataTypes <> null && x.UserDefinedTypes <> null ->
+            let dataTypes =
+                x.DataTypes
+                |> Seq.map (mapSqlDataType)
+                |> Seq.map ProcedureParameter.DataType
+
+            let userDefinedTypes =
+                x.UserDefinedTypes
+                |> Seq.map (fun x ->
+                    { Name = x.Name
+                      Parameters =
+                          (x.DataTypes
+                           |> Seq.map mapSqlDataType
+                           |> Seq.toList) })
+                |> Seq.map ProcedureParameter.UserDefinedTableType
+
+            let parameters =
+                seq {
+                    dataTypes
+                    userDefinedTypes }
+                |> Seq.concat
+                |> Seq.toList
+
+            formatProcedure x.Name parameters
+        | x when x.DataTypes <> null ->
+            let dataTypes =
+                x.DataTypes
+                |> Seq.map (mapSqlDataType)
+                |> Seq.map ProcedureParameter.DataType
+                |> Seq.toList
+            formatProcedure x.Name dataTypes
+        | x when x.UserDefinedTypes <> null ->
+            let userDefinedTypes =
+                x.UserDefinedTypes
+                |> Seq.map (fun x ->
+                    { Name = x.Name
+                      Parameters =
+                          (x.DataTypes
+                           |> Seq.map mapSqlDataType
+                           |> Seq.toList) })
+                |> Seq.map ProcedureParameter.UserDefinedTableType
+                |> Seq.toList
+            formatProcedure x.Name userDefinedTypes
+        | _ -> raise (ArgumentException())
+
+
 
     static member public ConfiguredStoredProcedureFromCsharp cSharp settings =
         try
