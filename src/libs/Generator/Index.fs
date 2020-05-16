@@ -38,7 +38,7 @@ module Config =
 
         csharpSettings
 
-    let transformSqlSettings (settings: SqlSettings) =
+    let transformSqlSettings (settings: SqlSettingsApiModel) =
         match settings with
         | x when x.GenerateUserDefinedTable = true -> { GenerationType = GenerationType.UserDefinedTableType }
         | _ -> { GenerationType = GenerationType.None }
@@ -123,4 +123,4 @@ type public Factory =
         with ex -> Lemonad.ErrorHandling.Result.Error ex
 
     static member public StoredProcedureFromCsharp cSharp =
-        Factory.ConfiguredStoredProcedureFromCsharp cSharp (SqlSettings())
+        Factory.ConfiguredStoredProcedureFromCsharp cSharp (SqlSettingsApiModel())

@@ -36,7 +36,7 @@
     private string StatusClass { get; set; } = string.Empty;
     private string StatusMessage { get; set; } = string.Empty;
 
-    class ViewModel {
+    private class ViewModel {
         [Required]
         public string CSharp { get; set; } = "public class Foo { public int Bar { get; set; } }";
         public SqlSettingsApiModel Settings { get; set; } = new SqlSettingsApiModel();
