@@ -1,38 +1,37 @@
 namespace JsonParser
 
+open System
+open System.Globalization
 open FSharp.Data
 open FSharp.Data.Runtime
 
 module public Json =
-    let private stringParser =
-        function
-        | TryParse.Date x -> DateTime x
-        | TryParse.Guid x -> Guid x
-        | x -> Value.String x
-
-    // TODO use the JsonConversions type in order to translate into custom types.
-    // link: https://github.com/fsharp/FSharp.Data/blob/master/src/Json/JsonConversions.fs
-    let rec private map value =
-        match value with
-        | JsonValue.Number x ->
-            // We only get decimals here, so we need to check if the number is a integer before mapping to int.
-            if x % 1m = 0m then Int <| int x else Decimal(x)
-        | JsonValue.Float x -> Decimal(decimal x)
-        | JsonValue.String x -> stringParser x
-        | JsonValue.Boolean x -> Boolean(x)
-        | JsonValue.Null -> Null
-        | JsonValue.Array x ->
-            x
-            |> Array.map map
-            |> Array
-        | JsonValue.Record x ->
-            x
-            |> Array.map (fun (x, y) ->
-                { Key = x
-                  Value = map y })
-            |> Object
+    let private culture = CultureInfo.InvariantCulture
+    let private emptyArray = Array.empty<String>
+    let rec private map (value: JsonValue) =
+        JsonConversions.AsInteger culture value
+        |> Option.map Value.Int
+        |> Option.orElseWith (fun () -> JsonConversions.AsDecimal culture value |> Option.map Value.Decimal)
+        |> Option.orElseWith (fun () -> JsonConversions.AsFloat emptyArray true culture value |> Option.map Decimal |> Option.map Value.Decimal)
+        |> Option.orElseWith (fun () -> JsonConversions.AsGuid value |> Option.map Value.Guid)
+        |> Option.orElseWith (fun () -> JsonConversions.AsDateTime culture value |> Option.map Value.DateTime)
+        |> Option.orElseWith (fun () -> JsonConversions.AsBoolean value |> Option.map Value.Boolean)
+        |> Option.defaultWith (fun () ->
+            match value with
+            | JsonValue.String x -> Value.String x
+            | JsonValue.Null -> Value.Null
+            | JsonValue.Array x ->
+                x
+                |> Array.map map
+                |> Value.Array
+            | JsonValue.Record x ->
+                x
+                |> Array.map (fun (x, y) ->
+                    { Key = x
+                      Value = map y })
+                |> Value.Object)
 
     let public parse input =
         input
         |> JsonValue.Parse
-        |> (fun x -> map x)
+        |> map
