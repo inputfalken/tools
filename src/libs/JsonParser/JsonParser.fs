@@ -24,6 +24,12 @@ and public Record =
 module public Json =
     let private culture = CultureInfo.InvariantCulture
 
+    let private conversions x =
+        JsonConversions.AsInteger culture x
+        |> Option.map Value.Int
+        |> Option.orElseWith (fun () -> JsonConversions.AsGuid x |> Option.map Value.Guid)
+        |> Option.orElseWith (fun () -> JsonConversions.AsDateTime culture x |> Option.map Value.DateTime)
+
     let rec private map (value: JsonValue) =
         match value with
         | JsonValue.Record x ->
@@ -36,24 +42,15 @@ module public Json =
             x
             |> Array.map map
             |> Value.Array
+        | JsonValue.Boolean x -> Value.Boolean x
+        | JsonValue.Null -> Value.Null
         | x ->
-            match x with
-            | JsonValue.Boolean x -> Value.Boolean x
-            | JsonValue.Null -> Value.Null
-            | x ->
-                let option =
-                    JsonConversions.AsInteger culture x
-                    |> Option.map Value.Int
-                    |> Option.orElseWith (fun () -> JsonConversions.AsGuid x |> Option.map Value.Guid)
-                    |> Option.orElseWith
-                        (fun () -> JsonConversions.AsDateTime culture x |> Option.map Value.DateTime)
-                match option with
-                | Some x -> x
-                | _ ->
-                    match x with
-                    | JsonValue.String x -> Value.String x
-                    | JsonValue.Number x -> Value.Decimal x
-                    | _ -> failwith "Should never happen."
+            conversions x
+            |> Option.defaultWith (fun () ->
+                match x with
+                | JsonValue.String x -> Value.String x
+                | JsonValue.Number x -> Value.Decimal x
+                | _ -> failwith "Should never happen.")
 
 
     let public parse input =
