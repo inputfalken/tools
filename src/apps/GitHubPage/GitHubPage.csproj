@@ -20,14 +20,4 @@
         <ProjectReference PrivateAssets="Compile" Include="..\..\libs\Generator\Generator.fsproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="wwwroot\sample-data\weather.json" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Update="Pages\SQLProcedureBuilder.razor">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </Content>
-    </ItemGroup>
-
 </Project>
