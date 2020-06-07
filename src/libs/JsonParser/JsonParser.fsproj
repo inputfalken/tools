@@ -5,8 +5,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="TryParse.fs" />
-        <Compile Include="Types.fs" />
         <Compile Include="JsonParser.fs" />
     </ItemGroup>
 
