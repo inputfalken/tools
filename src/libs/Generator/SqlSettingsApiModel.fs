@@ -13,6 +13,8 @@ type SqlDataApiEnum =
     | Float = 5
     | UniqueIdentifier = 6
     | NVarchar = 7
+    | Varchar = 8
+    | DateTime2 = 9
 
 type public SqlSettingsApiModel() =
     member val GenerateUserDefinedTable = false with get, set

@@ -60,8 +60,10 @@ type public Factory =
                 | SqlDataApiEnum.Bit -> Sql.Index.Bit
                 | SqlDataApiEnum.UniqueIdentifier -> Sql.Index.UniqueIdentifier
                 | SqlDataApiEnum.Float -> Sql.Index.Float
-                | SqlDataApiEnum.NVarchar -> NVarCharArgument.Max |> Sql.Index.Nvarchar
+                | SqlDataApiEnum.NVarchar -> charArgument.Max |> Sql.Index.Nvarchar
                 | SqlDataApiEnum.DateTime -> Sql.Index.DateTime
+                | SqlDataApiEnum.DateTime2 -> Sql.Index.DateTime2Argument.Default |> Sql.Index.DateTime2
+                | SqlDataApiEnum.Varchar -> charArgument.Max |> Sql.Index.Varchar
                 | _ -> raise (NotImplementedException(x.ToString()))
 
             match valueExists x.Name with

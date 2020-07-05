@@ -116,4 +116,4 @@ let String str =
         | Nvarchar x -> x
         | _ -> raise (System.Exception())
 
-    Assert.Equal(NVarCharArgument.Max, res)
+    Assert.Equal(charArgument.Max, res)
