@@ -58,6 +58,10 @@ type public Factory =
                 | SqlDataApiEnum.String -> Sql.Index.SqlDataType.NvarcharMax
                 | SqlDataApiEnum.Int -> Sql.Index.Int
                 | SqlDataApiEnum.Bit -> Sql.Index.Bit
+                | SqlDataApiEnum.UniqueIdentifier -> Sql.Index.UniqueIdentifier
+                | SqlDataApiEnum.Float -> Sql.Index.Float
+                | SqlDataApiEnum.NVarchar -> NVarCharArgument.Max |> Sql.Index.Nvarchar
+                | SqlDataApiEnum.DateTime -> Sql.Index.DateTime
                 | _ -> raise (NotImplementedException(x.ToString()))
 
             match valueExists x.Name with
