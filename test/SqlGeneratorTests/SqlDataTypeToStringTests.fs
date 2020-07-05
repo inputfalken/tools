@@ -24,13 +24,13 @@ let Bool () =
 [<InlineData(20)>]
 [<InlineData(200)>]
 let String length =
-    let res = (SqlDataType.Nvarchar <| NVarCharArgument.Number length).ToString()
+    let res = (SqlDataType.Nvarchar <| charArgument.Number length).ToString()
     let expected = sprintf "nvarchar(%d)" length
     Assert.Equal(expected, res)
 
 [<Fact>]
 let StringMax () =
-    let res = (SqlDataType.Nvarchar <| NVarCharArgument.Max).ToString()
+    let res = (SqlDataType.Nvarchar <| charArgument.Max).ToString()
     let expected = sprintf "nvarchar(max)"
     Assert.Equal(expected, res)
 

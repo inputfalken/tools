@@ -1,0 +1,160 @@
+﻿@page "/SQLProcedureBuilder"
+@using CurrieTechnologies.Razor.Clipboard
+@inject ClipboardService clipboard
+
+<h1>SQL Procedure Builder</h1>
+
+<EditForm Model="@_view" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+    <div class="alert @StatusClass">@StatusMessage</div>
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+    <div class="form-group">
+        <label>Procedure Name: </label>
+        <InputText class="form-control" @bind-Value="@_view.ProcedureName"/>
+    </div>
+    <div class="form-group">
+        <button type="button" class="btn btn-primary" @onclick="@(() => _view.SqlDataTypes.Add(new ViewModel.SqlDataTypeViewModel()))">Add DataType parameter</button>
+    </div>
+    @foreach (var element in _view.SqlDataTypes.Select((x, y) => new {Item = x, Index = y}))
+    {
+        var humanIndex = element.Index + 1;
+        <h3>Parameter: @humanIndex</h3>
+
+        <div class="form-group">
+            <label>Name </label>
+            <InputText class="form-control" @bind-Value="@element.Item.Name"/>
+        </div>
+
+        <div class="form-group">
+            <label for="sqlDataType">Datatype </label>
+            <InputSelect class="form-control form-control-lg" id="sqlDataType" @bind-Value="element.Item.DataType">
+                @foreach (var datatype in SqlProcedureApiModel.DataTypes2)
+                {
+                    <option>@datatype</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="form-group">
+            <button type="button" class="btn btn-danger" @onclick="@(() => _view.SqlDataTypes.Remove(element.Item))">Remove Parameter</button>
+        </div>
+    }
+    <div class="form-group">
+        <button type="button" class="btn btn-primary" @onclick="@(() => _view.SqlUserTypes.Add(new ViewModel.SqlUserTypeViewModel()))">Add UserType parameter</button>
+    </div>
+    <div style="margin-left: 20px">
+
+        @foreach (var element in _view.SqlUserTypes.Select((x, y) => new {Item = x, Index = y}))
+        {
+            var humanIndex = element.Index + 1;
+
+            <h3>Parameter: @humanIndex</h3>
+
+            <div class="form-group">
+                <label>Name </label>
+                <InputText class="form-control" @bind-Value="@element.Item.Name"/>
+            </div>
+
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" @onclick="@(() => element.Item.SqlDataTypes.Add(new ViewModel.SqlDataTypeViewModel()))">Add DataType parameter</button>
+            </div>
+            @foreach (var subElement in element.Item.SqlDataTypes.Select((x, y) => new {Item = x, Index = y}))
+            {
+                var humanIndex2 = subElement.Index + 1;
+                <h3>Parameter: @humanIndex2</h3>
+
+                <div class="form-group">
+                    <label>Name </label>
+                    <InputText class="form-control" @bind-Value="@subElement.Item.Name"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="sqlDataType">Datatype </label>
+                    <InputSelect class="form-control form-control-lg" id="sqlDataType" @bind-Value="subElement.Item.DataType">
+                        @foreach (var datatype in SqlProcedureApiModel.DataTypes2)
+                        {
+                            <option>@datatype</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="form-group">
+                    <button type="button" class="btn btn-danger" @onclick="@(() => _view.SqlDataTypes.Remove(subElement.Item))">Remove Parameter</button>
+                </div>
+            }
+
+
+            <div class="form-group">
+                <button type="button" class="btn btn-danger" @onclick="@(() => _view.SqlUserTypes.Remove(element.Item))">Remove Parameter</button>
+            </div>
+        }
+    </div>
+
+    <button class="btn btn-success" type="submit">Generate SQL</button>
+</EditForm>
+
+@if (!string.IsNullOrWhiteSpace(Sql))
+{
+    <button style="margin-top: 30px" type="button" class="btn btn-primary" @onclick="(async e => await clipboard.WriteTextAsync(Sql))">Copy To Clipboard</button>
+}
+
+@if (!string.IsNullOrWhiteSpace(Sql))
+{
+    <pre style="margin-top: 20px" class="text-success bg-dark">
+@* This can not be indented *@
+@Sql
+    </pre>
+}
+
+@code {
+    private string StatusClass { get; set; } = string.Empty;
+    private string StatusMessage { get; set; } = string.Empty;
+
+    private class ViewModel
+    {
+        public string ProcedureName { get; set; }
+        public List<SqlDataTypeViewModel> SqlDataTypes { get; } = new List<SqlDataTypeViewModel>();
+        public List<SqlUserTypeViewModel> SqlUserTypes { get; } = new List<SqlUserTypeViewModel>();
+
+        public class SqlDataTypeViewModel
+        {
+            public string Name { get; set; }
+            public SqlDataApiEnum DataType { get; set; }
+        }
+
+        public class SqlUserTypeViewModel
+        {
+            public string Name { get; set; }
+            public List<SqlDataTypeViewModel> SqlDataTypes { get; } = new List<SqlDataTypeViewModel>();
+        }
+    }
+
+    private readonly ViewModel _view = new ViewModel();
+
+    private string Sql { get; set; }
+
+    private void HandleValidSubmit()
+    {
+        Sql = null;
+        StatusClass = string.Empty;
+        StatusMessage = string.Empty;
+        Sql = Factory.StoredProcedure(
+            new SqlProcedureApiModel(
+                _view.SqlDataTypes.Select(x => new SqlProcedureDataTypeParameterApiModel(x.DataType, x.Name)),
+                _view.SqlUserTypes.Select(x =>
+                    new SqlProcedureUserTypeParameterApiModel(
+                        x.SqlDataTypes.Select(y => new SqlProcedureDataTypeParameterApiModel(y.DataType, y.Name)), x.Name)
+                    ),
+                _view.ProcedureName
+                )
+            );
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        Sql = null;
+        StatusClass = "alert-danger";
+    }
+
+}

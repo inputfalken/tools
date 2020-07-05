@@ -12,7 +12,7 @@
 
     <div class="form-group">
         <label for="CSharp">C#: </label>
-        <InputTextArea rows="10" class="form-control form-control-lg" id="CSharp" @bind-Value="@_view.Sql"/>
+        <InputTextArea rows="10" class="form-control form-control-lg" id="CSharp" @bind-Value="@_view.CSharp"/>
     </div>
     <div class="form-check">
         <InputCheckbox class="form-check-input" id="generateUserDefinedTable" @bind-Value="@_view.Settings.GenerateUserDefinedTable" />
@@ -36,10 +36,10 @@
     private string StatusClass { get; set; } = string.Empty;
     private string StatusMessage { get; set; } = string.Empty;
 
-    class ViewModel {
+    private class ViewModel {
         [Required]
-        public string Sql { get; set; } = "public class Foo { public int Bar { get; set; } }";
-        public SqlSettings Settings { get; set; } = new SqlSettings();
+        public string CSharp { get; set; } = "public class Foo { public int Bar { get; set; } }";
+        public SqlSettingsApiModel Settings { get; set; } = new SqlSettingsApiModel();
     }
 
     private readonly ViewModel _view = new ViewModel();
@@ -51,7 +51,7 @@
         StatusClass = string.Empty;
         StatusMessage = string.Empty;
         Factory
-            .ConfiguredStoredProcedureFromCsharp(_view.Sql, _view.Settings)
+            .ConfiguredStoredProcedureFromCsharp(_view.CSharp, _view.Settings)
             .Match(
                 x => Sql = x,
                 x => {

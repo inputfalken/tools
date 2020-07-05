@@ -14,25 +14,38 @@ type Settings =
 let newline = Environment.NewLine
 let doubleNewLine = newline + newline
 
-type NVarCharArgument =
+type charArgument =
     | Max
     // We get type safety but negative numbers and 0 could still be passed which is not allowed.
     | Number of int
 
+type DateTime2Argument =
+    | Precision of int
+    static member Default = DateTime2Argument.Precision 7
+
 type SqlDataType =
     | DateTime
+    | DateTime2 of DateTime2Argument
+    | Varchar of charArgument
     | Int
     | Float
     | Bit
     | UniqueIdentifier
-    | Nvarchar of NVarCharArgument
+    | Nvarchar of charArgument
 
-    static member NvarcharMax = NVarCharArgument.Max |> Nvarchar
-    static member NvarcharNumber number = NVarCharArgument.Number number |> Nvarchar
+    static member NvarcharMax = charArgument.Max |> Nvarchar
+    static member NvarcharNumber number = charArgument.Number number |> Nvarchar
 
     override x.ToString() =
         match x with
         | DateTime -> "datetime"
+        | DateTime2 x ->
+            match x with
+            | Precision y -> sprintf "datetime2(%d)" y
+        | Varchar x ->
+            match x with
+            | Max -> "varchar(max)"
+            | Number x -> sprintf "varchar(%d)" x
         | Int -> "int"
         | Bit -> "bit"
         | UniqueIdentifier -> "uniqueidentifier"
