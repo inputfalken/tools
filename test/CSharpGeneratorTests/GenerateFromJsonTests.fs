@@ -358,3 +358,22 @@ let ``Integers transforms into decimal if a number with decimals occur`` json ``
     let result = CSharp.generateFromJson json settings
     let expected = sprintf "public %s[] RootModel { get; set; }" ``type``
     Assert.Equal(expected, result.Either.Value)
+
+[<Fact>]
+let ``Issue 49``() =
+    let test =
+        @"
+        {
+            ""data"": [
+                {
+                    ""attributes"": {
+                        ""field"": ""foo""
+                    }
+                }
+            ]
+        }
+        "
+    
+    let expected = @"public class RootModel { public class DataModel { public class AttributesModel { public string Field { get; set; } } public AttributesModel Attributes { get; set; } } public DataModel[] Data { get; set; } }"
+    let result = CSharp.generateFromJson test settings
+    Assert.Equal(expected, result.Either.Value)
