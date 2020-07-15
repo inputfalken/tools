@@ -42,16 +42,20 @@ module internal Factory =
         let classContent =
             members
             |> Array.map (fun property ->
+                let formatter =
+                    property.Type
+                    |> Option.map getFormatter
+                    |> Option.defaultValue propertyFormatter
                 match property.Type |> Option.defaultValue UnresolvedBaseType with
                 | GeneratedType x ->
                     let uniqueClassName = createClassName classSet property.Name className settings
-                    GeneratedType x property.Name classSet settings propertyFormatter uniqueClassName
+                    GeneratedType x property.Name classSet settings formatter uniqueClassName
                 | ArrayType x ->
                     match x with
                     | GeneratedType x ->
                         let uniqueClassName = createClassName classSet property.Name className settings
-                        GeneratedType x property.Name classSet settings arrayProperty uniqueClassName
-                    | x -> CSharpFactoryPrivate x property.Name classSet settings arrayProperty
+                        GeneratedType x property.Name classSet settings formatter uniqueClassName
+                    | x -> CSharpFactoryPrivate x property.Name classSet settings formatter
                 | x -> CSharpFactoryPrivate x property.Name classSet settings (getFormatter x))
             |> joinStringsWithSpaceSeparation
 
@@ -65,6 +69,7 @@ module internal Factory =
             ``class``
         else
             let formattedPropertyName = key |> settings.PropertyCasing.apply
+            // BUG propertyFormatter creates invalid proprety type
             let property = propertyFormatter formattedClassName formattedPropertyName
             [ ``class``; property ] |> joinStringsWithSpaceSeparation
 
