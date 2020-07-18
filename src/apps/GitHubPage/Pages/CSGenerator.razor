@@ -19,7 +19,8 @@
     <div class="form-group">
         <label for="propertyCasingSelector">Casing for properties: </label>
         <InputSelect class="form-control form-control-lg" id="propertyCasingSelector" @bind-Value="@_view.PropertyCasing">
-            @foreach (var casingOption in CasingOptions) {
+            @foreach (var casingOption in CasingOptions)
+            {
                 <option>@casingOption</option>
             }
         </InputSelect>
@@ -28,7 +29,8 @@
     <div class="form-group">
         <label for="classCasingSelector">Casing for classes: </label>
         <InputSelect class="form-control form-control-lg" id="classCasingSelector" @bind-Value="@_view.ClassCasing">
-            @foreach (var casingOption in CasingOptions) {
+            @foreach (var casingOption in CasingOptions)
+            {
                 <option>@casingOption</option>
             }
         </InputSelect>
@@ -52,12 +54,14 @@
     <button class="btn btn-primary" type="submit">Generate C#</button>
 </EditForm>
 
-@if (!string.IsNullOrWhiteSpace(_view.CSharp)) {
-    <button style="margin-top: 30px" type="button" class="btn btn-primary" @onclick="(async e => await clipboard.WriteTextAsync(_view.CSharp))">Copy To Clipboard</button>
+@if (!string.IsNullOrWhiteSpace(_view.CSharp))
+{
+    <button type="button" class="btn btn-primary mt-2" @onclick="(async e => await clipboard.WriteTextAsync(_view.CSharp))">Copy To Clipboard</button>
 }
 
-@if (!string.IsNullOrWhiteSpace(_view.CSharp)) {
-    <pre style="margin-top: 20px" class="text-success bg-dark">
+@if (!string.IsNullOrWhiteSpace(_view.CSharp))
+{
+    <pre class="text-success bg-dark mt-2">
 @* This can not be indented *@
 @_view.CSharp
     </pre>
@@ -68,7 +72,8 @@
     private string StatusMessage { get; set; } = string.Empty;
     private static IReadOnlyList<string> CasingOptions { get; } = Casing.Cases;
 
-    private class ViewModel {
+    private class ViewModel
+    {
         [Required]
         public string Json { get; set; } = @"{""foo"":""bar""}";
 
@@ -87,13 +92,15 @@
 
     private readonly ViewModel _view = new ViewModel();
 
-    private void HandleValidSubmit() {
+    private void HandleValidSubmit()
+    {
         _view.CSharp = null;
         StatusClass = string.Empty;
         StatusMessage = string.Empty;
         Factory.ConfiguredCSharpFromJson(
             _view.Json,
-            new CSharpSettings {
+            new CSharpSettings
+            {
                 PropertyCasing = _view.PropertyCasing,
                 ClassPrefix = _view.ClassPrefix,
                 ClassSuffix = _view.ClassSuffix,
@@ -107,14 +114,16 @@
             .Map(x => x.NormalizeWhitespace())
             .Map(x => x.ToFullString())
             .Match(x => _view.CSharp = x,
-                x => {
+                x =>
+                {
                     StatusMessage = x.Message;
                     HandleInvalidSubmit();
                 }
             );
     }
 
-    private void HandleInvalidSubmit() {
+    private void HandleInvalidSubmit()
+    {
         _view.CSharp = null;
         StatusClass = "alert-danger";
     }

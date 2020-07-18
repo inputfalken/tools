@@ -16,34 +16,37 @@
     <div class="form-group">
         <button type="button" class="btn btn-primary" @onclick="@(() => _view.SqlDataTypes.Add(new ViewModel.SqlDataTypeViewModel()))">Add DataType parameter</button>
     </div>
-    @foreach (var element in _view.SqlDataTypes.Select((x, y) => new {Item = x, Index = y}))
-    {
-        var humanIndex = element.Index + 1;
-        <h3>Parameter: @humanIndex</h3>
+    <div style="display: @(_view.SqlDataTypes.Count > 0 ? "block" : "none")" class="mt-2">
 
-        <div class="form-group">
-            <label>Name </label>
-            <InputText class="form-control" @bind-Value="@element.Item.Name"/>
-        </div>
+        @foreach (var element in _view.SqlDataTypes.Select((x, y) => new {Item = x, Index = y}))
+        {
+            var humanIndex = element.Index + 1;
+            <h3>Parameter: @humanIndex</h3>
 
-        <div class="form-group">
-            <label for="sqlDataType">Datatype </label>
-            <InputSelect class="form-control form-control-lg" id="sqlDataType" @bind-Value="element.Item.DataType">
-                @foreach (var datatype in SqlProcedureApiModel.DataTypes2)
-                {
-                    <option>@datatype</option>
-                }
-            </InputSelect>
-        </div>
+            <div class="form-group">
+                <label>Name </label>
+                <InputText class="form-control" @bind-Value="@element.Item.Name"/>
+            </div>
 
-        <div class="form-group">
-            <button type="button" class="btn btn-danger" @onclick="@(() => _view.SqlDataTypes.Remove(element.Item))">Remove Parameter</button>
-        </div>
-    }
-    <div class="form-group">
-        <button type="button" class="btn btn-primary" @onclick="@(() => _view.SqlUserTypes.Add(new ViewModel.SqlUserTypeViewModel()))">Add UserType parameter</button>
+            <div class="form-group">
+                <label for="sqlDataType">Datatype </label>
+                <InputSelect class="form-control form-control-lg" id="sqlDataType" @bind-Value="element.Item.DataType">
+                    @foreach (var datatype in SqlProcedureApiModel.DataTypes2)
+                    {
+                        <option>@datatype</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="form-group">
+                <button type="button" class="btn btn-danger mt-2" @onclick="@(() => _view.SqlDataTypes.Remove(element.Item))">Remove Parameter</button>
+            </div>
+        }
     </div>
-    <div style="margin-left: 20px">
+    <div class="form-group">
+        <button type="button" class="btn btn-primary mt-2" @onclick="@(() => _view.SqlUserTypes.Add(new ViewModel.SqlUserTypeViewModel()))">Add UserType parameter</button>
+    </div>
+    <div style="display: @(_view.SqlUserTypes.Count > 0 ? "block" : "none")" class="mt-2">
 
         @foreach (var element in _view.SqlUserTypes.Select((x, y) => new {Item = x, Index = y}))
         {
@@ -90,17 +93,17 @@
         }
     </div>
 
-    <button class="btn btn-success" type="submit">Generate SQL</button>
+    <button class="btn btn-success mt-2" type="submit">Generate SQL</button>
 </EditForm>
 
 @if (!string.IsNullOrWhiteSpace(Sql))
 {
-    <button style="margin-top: 30px" type="button" class="btn btn-primary" @onclick="(async e => await clipboard.WriteTextAsync(Sql))">Copy To Clipboard</button>
+    <button type="button" class="btn btn-primary mt-2" @onclick="(async e => await clipboard.WriteTextAsync(Sql))">Copy To Clipboard</button>
 }
 
 @if (!string.IsNullOrWhiteSpace(Sql))
 {
-    <pre style="margin-top: 20px" class="text-success bg-dark">
+    <pre class="text-success bg-dark mt-2">
 @* This can not be indented *@
 @Sql
     </pre>

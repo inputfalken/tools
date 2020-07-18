@@ -22,11 +22,11 @@
 </EditForm>
 
 @if (!string.IsNullOrWhiteSpace(Sql)) {
-    <button style="margin-top: 30px" type="button" class="btn btn-primary" @onclick="(async e => await clipboard.WriteTextAsync(Sql))">Copy To Clipboard</button>
+    <button type="button" class="btn btn-primary mt-2" @onclick="(async e => await clipboard.WriteTextAsync(Sql))">Copy To Clipboard</button>
 }
 
 @if (!string.IsNullOrWhiteSpace(Sql)) {
-    <pre style="margin-top: 20px" class="text-success bg-dark">
+    <pre class="text-success bg-dark mt-2">
 @* This can not be indented *@
 @Sql
     </pre>
