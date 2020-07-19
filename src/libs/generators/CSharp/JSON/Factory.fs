@@ -69,7 +69,7 @@ module internal Factory =
             ``class``
         else
             let formattedPropertyName = key |> settings.PropertyCasing.apply
-            // BUG propertyFormatter creates invalid proprety type
+
             let property = propertyFormatter formattedClassName formattedPropertyName
             [ ``class``; property ] |> joinStringsWithSpaceSeparation
 
