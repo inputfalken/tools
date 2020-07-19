@@ -29,14 +29,12 @@ module internal Factory =
             settings.ClassCasing.applyMultiple [ className; property ]
         else
             property
-        |> Option.Some
 
     let validateName (name: String) =
         if not (Char.IsLetter name.[0]) then
             raise (System.ArgumentException("Member names can only start with letters."))
 
     let rec private GeneratedType members key (classSet: CIString Set) settings propertyFormatter className =
-        let className = className |> Option.defaultValue key
         let classSet = classSet.Add <| CI className
 
         let classContent =
@@ -75,7 +73,7 @@ module internal Factory =
 
     and private CSharpFactoryPrivate ``type`` key classSet settings propertyFormatter =
         match ``type`` with
-        | GeneratedType members -> GeneratedType members key classSet settings propertyFormatter Option.None
+        | GeneratedType members -> GeneratedType members key classSet settings propertyFormatter key
         | ArrayType ``type`` -> CSharpFactoryPrivate ``type`` key classSet settings arrayProperty
         | BaseType x ->
 
