@@ -16,7 +16,7 @@ let private float = CIString.CI "float"
 let private bool = CIString.CI "bool"
 let private boolean = CIString.CI "boolean"
 let private guid = CIString.CI "guid"
-let private datetTime = CIString.CI "datetime"
+let private dateTime = CIString.CI "datetime"
 let private intNullable = CIString.CI "int?"
 let private int32Nullable = CIString.CI "int32?"
 let private doubleNullable = CIString.CI "double?"
@@ -24,7 +24,7 @@ let private floatNullable = CIString.CI "float?"
 let private boolNullable = CIString.CI "bool?"
 let private booleanNullable = CIString.CI "boolean?"
 let private guidNullable = CIString.CI "guid?"
-let private datetTimeNullable = CIString.CI "datetime?"
+let private dateTimeNullable = CIString.CI "datetime?"
 
 let toSqlType (str: string): SqlDataType =
     let ciString = str.Replace("System.", System.String.Empty, StringComparison.OrdinalIgnoreCase) |> CIString.CI
@@ -33,7 +33,7 @@ let toSqlType (str: string): SqlDataType =
     | x when x.Equals bool || x.Equals boolean || x.Equals boolNullable || x.Equals booleanNullable ->
         SqlDataType.Bit
     | x when x.Equals guid || x.Equals guidNullable -> SqlDataType.UniqueIdentifier
-    | x when x.Equals datetTime || x.Equals datetTimeNullable -> SqlDataType.DateTime
+    | x when x.Equals dateTime || x.Equals dateTimeNullable -> SqlDataType.DateTime
     | x when x.Equals float || x.Equals double || x.Equals floatNullable || x.Equals doubleNullable ->
         SqlDataType.Float
     | x when x.Equals string -> SqlDataType.Nvarchar Max
