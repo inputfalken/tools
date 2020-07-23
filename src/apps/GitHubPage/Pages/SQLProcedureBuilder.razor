@@ -10,28 +10,26 @@
     <DataAnnotationsValidator/>
     <ValidationSummary/>
 
-    <div class="form-group">
+    <div class="form-row row">
         <label>Procedure Name: </label>
         <InputText class="form-control" @bind-Value="@_view.ProcedureName"/>
     </div>
-    <div class="form-group">
-        <button type="button" class="btn btn-primary" @onclick="@(() => _view.SqlDataTypes.Add(new ViewModel.SqlDataTypeViewModel()))">Add DataType</button>
-    </div>
-    <div style="display: @(_view.SqlDataTypes.Count > 0 ? "block" : "none")" class="mt-2">
 
-        @foreach (var element in _view.SqlDataTypes.Select((x, y) => new {Item = x, Index = y}))
-        {
-            var humanIndex = element.Index + 1;
-            <h3>@DataType: @humanIndex</h3>
+    @foreach (var element in _view.SqlDataTypes.Select((x, y) => new {Item = x, Index = y}))
+    {
+        var humanIndex = element.Index + 1;
+        var dataTypeId = "dataType" + humanIndex;
+        var nameId = "dataName" + humanIndex;
+        <h3>@DataType: @humanIndex</h3>
 
-            <div class="form-group">
-                <label>Name </label>
-                <InputText class="form-control" @bind-Value="@element.Item.Name"/>
+
+        <div class="form-row align-items-center">
+            <div class="col-auto">
+                <InputText id="@nameId" placeholder="Name" class="form-control mb-2" @bind-Value="@element.Item.Name"/>
             </div>
 
-            <div class="form-group">
-                <label for="sqlDataType">Datatype </label>
-                <InputSelect class="form-control form-control-lg" id="sqlDataType" @bind-Value="element.Item.DataType">
+            <div class="col-auto">
+                <InputSelect class="form-control mb-2" id="@dataTypeId" @bind-Value="element.Item.DataType">
                     @foreach (var datatype in SqlProcedureApiModel.DataTypes2)
                     {
                         <option>@datatype</option>
@@ -39,12 +37,17 @@
                 </InputSelect>
             </div>
 
-            <div class="form-group">
-                <button type="button" class="btn btn-danger mt-2" @onclick="@(() => _view.SqlDataTypes.Remove(element.Item))">Remove @DataType</button>
+            <div class="col-auto">
+                <button type="button" class="btn btn-danger mb-2" @onclick="@(() => _view.SqlDataTypes.Remove(element.Item))">Remove @DataType</button>
             </div>
-        }
+
+        </div>
+    }
+    <div class="form-row">
+        <button type="button" class="btn btn-primary mt-2" @onclick="@(() => _view.SqlDataTypes.Add(new ViewModel.SqlDataTypeViewModel()))">Add @DataType</button>
     </div>
-    <div class="form-group">
+
+    <div class="form-row">
         <button type="button" class="btn btn-primary mt-2" @onclick="@(() => _view.SqlUserTypes.Add(new ViewModel.SqlUserTypeViewModel()))">Add @UserDefinedType</button>
     </div>
     <div style="display: @(_view.SqlUserTypes.Count > 0 ? "block" : "none")" class="mt-2">
@@ -52,29 +55,29 @@
         @foreach (var element in _view.SqlUserTypes.Select((x, y) => new {Item = x, Index = y}))
         {
             var humanIndex = element.Index + 1;
-
+            var nameId = "userTypeName" + humanIndex;
+            
             <h3>@($"{UserDefinedType} {element.Item.Name} {humanIndex}")</h3>
 
-            <div class="form-group">
+            <div class="form-group row">
                 <label>Name </label>
-                <InputText class="form-control" @bind-Value="@element.Item.Name"/>
+                <InputText id="@nameId" class="form-control form-control-sm" @bind-Value="@element.Item.Name"/>
             </div>
 
-            <div class="form-group">
+            <div class="form-group row">
                 <button type="button" class="btn btn-primary" @onclick="@(() => element.Item.SqlDataTypes.Add(new ViewModel.SqlDataTypeViewModel()))">Add @DataType</button>
             </div>
             @foreach (var subElement in element.Item.SqlDataTypes.Select((x, y) => new {Item = x, Index = y}))
             {
                 <h4> @($"{DataType}: {subElement.Index + 1}")</h4>
 
-                <div class="form-group">
-                    <label>Name</label>
-                    <InputText class="form-control" @bind-Value="@subElement.Item.Name"/>
+                <div class="form-row">
+                    <InputText class="form-control form-control-sm" @bind-Value="@subElement.Item.Name"/>
                 </div>
 
-                <div class="form-group">
+                <div class="form-row">
                     <label for="sqlDataType">Type </label>
-                    <InputSelect class="form-control form-control-lg" id="sqlDataType" @bind-Value="subElement.Item.DataType">
+                    <InputSelect class="form-control form-control-sm" id="sqlDataType" @bind-Value="subElement.Item.DataType">
                         @foreach (var datatype in SqlProcedureApiModel.DataTypes2)
                         {
                             <option>@datatype</option>
@@ -82,27 +85,26 @@
                     </InputSelect>
                 </div>
 
-                <div class="form-group">
+                <div class="form-row ">
                     <button type="button" class="btn btn-danger" @onclick="@(() => element.Item.SqlDataTypes.Remove(subElement.Item))">Remove @DataType</button>
                 </div>
             }
 
-            <div class="form-group">
+            <div class="form-row">
                 <button type="button" class="btn btn-danger" @onclick="@(() => _view.SqlUserTypes.Remove(element.Item))">Remove @UserDefinedType</button>
             </div>
         }
     </div>
+    <div class="form-row">
+        <button class="btn btn-success mt-2" type="submit">Generate SQL</button>
+    </div>
 
-    <button class="btn btn-success mt-2" type="submit">Generate SQL</button>
+
 </EditForm>
 
 @if (!string.IsNullOrWhiteSpace(Sql))
 {
     <button type="button" class="btn btn-primary mt-2" @onclick="(async e => await clipboard.WriteTextAsync(Sql))">Copy To Clipboard</button>
-}
-
-@if (!string.IsNullOrWhiteSpace(Sql))
-{
     <pre class="text-success bg-dark mt-2">
 @* This can not be indented *@
 @Sql
@@ -112,13 +114,13 @@
 @code {
     private string StatusClass { get; set; } = string.Empty;
     private string StatusMessage { get; set; } = string.Empty;
-        const string UserDefinedType = "UserType";
-        const string DataType = "DataType";
+        const string UserDefinedType = "User type";
+        const string DataType = "Data type";
 
     private class ViewModel
     {
         [Required]
-        public string ProcedureName { get; set; } = "DoStuff";
+        public string ProcedureName { get; set; } = "InsertElement";
 
         public List<SqlDataTypeViewModel> SqlDataTypes { get; } = new List<SqlDataTypeViewModel>();
         public List<SqlUserTypeViewModel> SqlUserTypes { get; } = new List<SqlUserTypeViewModel>();
@@ -126,7 +128,7 @@
         public class SqlDataTypeViewModel
         {
             [Required]
-            public string Name { get; set; } = "arg";
+            public string Name { get; set; }
 
             [Required]
             public SqlDataApiEnum DataType { get; set; } = SqlDataApiEnum.Int;
@@ -135,7 +137,7 @@
         public class SqlUserTypeViewModel
         {
             [Required]
-            public string Name { get; set; } = "arg";
+            public string Name { get; set; }
 
             public List<SqlDataTypeViewModel> SqlDataTypes { get; } = new List<SqlDataTypeViewModel>();
         }
