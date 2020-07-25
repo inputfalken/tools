@@ -131,11 +131,20 @@
 
 @if (!string.IsNullOrWhiteSpace(Sql))
 {
-    <button type="button" class="btn btn-primary" @onclick="(async e => await clipboard.WriteTextAsync(Sql))">Copy To Clipboard</button>
-    <pre class="text-success bg-dark">
-@* This can not be indented *@
+    <div class="row mt-2">
+        <div class="col-auto">
+            <button type="button" class="btn btn-primary" @onclick="async e => await clipboard.WriteTextAsync(Sql)">Copy To Clipboard</button>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-auto">
+            <pre class="text-success bg-dark px-5">
 @Sql
-    </pre>
+            </pre>
+        </div>
+
+    </div>
 }
 
 @code {

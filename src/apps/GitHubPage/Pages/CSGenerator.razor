@@ -65,16 +65,21 @@
 
 @if (!string.IsNullOrWhiteSpace(_view.CSharp))
 {
-    <button type="button" class="btn btn-primary mt-2" @onclick="(async e => await clipboard.WriteTextAsync(_view.CSharp))">Copy To Clipboard</button>
+    <div class="row mt-2">
+        <div class="col-auto">
+            <button type="button" class="btn btn-primary " @onclick="(async e => await clipboard.WriteTextAsync(_view.CSharp))">Copy To Clipboard</button>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-auto">
+            <pre class="text-success bg-dark px-5">
+@_view.CSharp
+            </pre>
+        </div>
+    </div>
 }
 
-@if (!string.IsNullOrWhiteSpace(_view.CSharp))
-{
-    <pre class="text-success bg-dark mt-2">
-@* This can not be indented *@
-@_view.CSharp
-    </pre>
-}
 
 @code {
     private string StatusClass { get; set; } = string.Empty;
