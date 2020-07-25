@@ -5,51 +5,60 @@
 @using CurrieTechnologies.Razor.Clipboard
 @inject ClipboardService clipboard
 
-<h1>Generate C#</h1>
+<p class="h1">Generate C# from JSON</p>
 
 <EditForm Model="@_view" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
     <div class="alert @StatusClass">@StatusMessage</div>
     <DataAnnotationsValidator/>
     <ValidationSummary/>
 
-    <div class="form-group">
-        <label for="json">JSON: </label>
-        <InputTextArea rows="10" class="form-control form-control-lg" id="json" @bind-Value="@_view.Json"/>
-    </div>
-    <div class="form-group">
-        <label for="propertyCasingSelector">Casing for properties: </label>
-        <InputSelect class="form-control form-control-lg" id="propertyCasingSelector" @bind-Value="@_view.PropertyCasing">
-            @foreach (var casingOption in CasingOptions)
-            {
-                <option>@casingOption</option>
-            }
-        </InputSelect>
+    <div class="form-row">
 
+        <div class="col-auto">
+            <label for="rootName">Root object name: </label>
+            <InputText type="text" class="form-control form-control-lg " id="rootName" @bind-Value="@_view.RootName"></InputText>
+        </div>
+
+        <div class="col-auto">
+            <label for="classPrefix">Class Prefix: </label>
+            <InputText type="text" class="form-control form-control-lg " id="classPrefix" @bind-Value="@_view.ClassPrefix"></InputText>
+        </div>
+
+        <div class="col-auto">
+            <label for="classSuffix">Class Suffix: </label>
+            <InputText type="text" class="form-control form-control-lg " id="classSuffix" @bind-Value="@_view.ClassSuffix"></InputText>
+        </div>
+
+        <div class="col-auto">
+            <label for="namespace">Namespace: </label>
+            <InputText type="text" class="form-control form-control-lg " id="namespace" @bind-Value="@_view.NameSpace"></InputText>
+        </div>
+
+        <div class="col-auto">
+            <label for="propertyCasingSelector">Casing for properties: </label>
+            <InputSelect class="form-control form-control-lg" id="propertyCasingSelector" @bind-Value="@_view.PropertyCasing">
+                @foreach (var casingOption in CasingOptions)
+                {
+                    <option>@casingOption</option>
+                }
+            </InputSelect>
+        </div>
+        <div class="col-auto">
+
+            <label for="classCasingSelector">Casing for classes: </label>
+            <InputSelect class="form-control form-control-lg" id="classCasingSelector" @bind-Value="@_view.ClassCasing">
+                @foreach (var casingOption in CasingOptions)
+                {
+                    <option>@casingOption</option>
+                }
+            </InputSelect>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="classCasingSelector">Casing for classes: </label>
-        <InputSelect class="form-control form-control-lg" id="classCasingSelector" @bind-Value="@_view.ClassCasing">
-            @foreach (var casingOption in CasingOptions)
-            {
-                <option>@casingOption</option>
-            }
-        </InputSelect>
-    </div>
-    <div class="form-group">
-        <label for="classPrefix">Class Prefix: </label>
-        <InputText type="text" class="form-control form-control-lg " id="classPrefix" @bind-Value="@_view.ClassPrefix"></InputText>
-    </div>
-    <div class="form-group">
-        <label for="classSuffix">Class Suffix: </label>
-        <InputText type="text" class="form-control form-control-lg " id="classSuffix" @bind-Value="@_view.ClassSuffix"></InputText>
-    </div>
-    <div class="form-group">
-        <label for="namespace">Namespace: </label>
-        <InputText type="text" class="form-control form-control-lg " id="namespace" @bind-Value="@_view.NameSpace"></InputText>
-    </div>
-    <div class="form-group">
-        <label for="rootName">Root object name: </label>
-        <InputText type="text" class="form-control form-control-lg " id="rootName" @bind-Value="@_view.RootName"></InputText>
+    <div class="form-row">
+        <div class="col-8">
+            <label for="json">JSON: </label>
+            <InputTextArea rows="10" class="form-control form-control-lg" id="json" @bind-Value="@_view.Json"/>
+        </div>
     </div>
     <button class="btn btn-primary" type="submit">Generate C#</button>
 </EditForm>
