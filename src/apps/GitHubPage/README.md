@@ -1,5 +1,5 @@
 
 # Running locally: 
 
-`dotnet run --pathbase=/JSON2Class`
+`dotnet run --pathbase=/tools`
 
