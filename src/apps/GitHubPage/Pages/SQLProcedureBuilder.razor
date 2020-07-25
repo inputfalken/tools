@@ -14,7 +14,7 @@
         <div class="col-auto">
             <p class="h2">Procedure Name: </p>
         </div>
-        
+
         <div class="col-auto">
             <InputText class="form-control" @bind-Value="@_view.ProcedureName"/>
         </div>
@@ -72,7 +72,7 @@
                 <div class="col-auto">
                     <button type="button" class="btn btn-primary" @onclick="@(() => element.Item.SqlDataTypes.Add(new ViewModel.SqlDataTypeViewModel()))">Add</button>
                 </div>
-                
+
                 <div class="col-auto">
                     <button type="button" class="btn btn-danger" @onclick="@(() => _view.SqlUserTypes.Remove(element.Item))">Remove</button>
                 </div>
@@ -122,7 +122,7 @@
         </div>
 
         <div class="col-auto">
-            <button class="btn btn-success" type="submit">Generate SQL</button>
+            <button disabled="@DisabledButton" class="btn btn-success" type="submit">Generate SQL</button>
         </div>
     </div>
 
@@ -139,6 +139,12 @@
 }
 
 @code {
+
+    private bool DisabledButton =>
+        string.IsNullOrWhiteSpace(_view.ProcedureName)
+        || _view.SqlDataTypes.Any(x => string.IsNullOrWhiteSpace(x.Name))
+        || _view.SqlUserTypes.Any(x => string.IsNullOrWhiteSpace(x.Name) || x.SqlDataTypes.Any(y => string.IsNullOrWhiteSpace(y.Name)));
+
     private string StatusClass { get; set; } = string.Empty;
     private string StatusMessage { get; set; } = string.Empty;
         const string UserDefinedType = "User type";
