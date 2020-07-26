@@ -10,35 +10,52 @@
     <DataAnnotationsValidator/>
     <ValidationSummary/>
 
-    <div class="form-group">
-        <label for="CSharp">C#: </label>
-        <InputTextArea rows="10" class="form-control form-control-lg" id="CSharp" @bind-Value="@_view.CSharp"/>
+    <div class="form-row">
+        <div class="col-8">
+            <label for="CSharp">C#: </label>
+            <InputTextArea rows="10" class="form-control form-control-lg" id="CSharp" @bind-Value="@_view.CSharp"/>
+        </div>
     </div>
-    <div class="form-check">
-        <InputCheckbox class="form-check-input" id="generateUserDefinedTable" @bind-Value="@_view.Settings.GenerateUserDefinedTable" />
-        <label class="form-check-label" for="generateUserDefinedTable">Batchable</label>
+    <div class="form-row mt-2">
+        <div class="col-auto">
+            <button class="btn btn-success" type="submit">Generate SQL</button>
+        </div>
+        <div class="col-auto">
+            <div class="form-check">
+                <InputCheckbox class="form-check-input" id="generateUserDefinedTable" @bind-Value="@_view.Settings.GenerateUserDefinedTable"/>
+                <label class="form-check-label" for="generateUserDefinedTable">Batchable</label>
+            </div>
+        </div>
     </div>
-    <button class="btn btn-primary" type="submit">Generate SQL</button>
 </EditForm>
 
-@if (!string.IsNullOrWhiteSpace(Sql)) {
-    <button type="button" class="btn btn-primary mt-2" @onclick="(async e => await clipboard.WriteTextAsync(Sql))">Copy To Clipboard</button>
-}
+@if (!string.IsNullOrWhiteSpace(Sql))
+{
+    <div class="row mt-2">
+        <div class="col-auto">
+            <button type="button" class="btn btn-primary" @onclick="async e => await clipboard.WriteTextAsync(Sql)">Copy To Clipboard</button>
+        </div>
+    </div>
 
-@if (!string.IsNullOrWhiteSpace(Sql)) {
-    <pre class="text-success bg-dark mt-2">
-@* This can not be indented *@
+    <div class="row mt-2">
+        <div class="col-auto">
+            <pre class="text-success bg-dark px-5">
 @Sql
-    </pre>
+            </pre>
+        </div>
+
+    </div>
 }
 
 @code {
     private string StatusClass { get; set; } = string.Empty;
     private string StatusMessage { get; set; } = string.Empty;
 
-    private class ViewModel {
+    private class ViewModel
+    {
         [Required]
         public string CSharp { get; set; } = "public class Foo { public int Bar { get; set; } }";
+
         public SqlSettingsApiModel Settings { get; set; } = new SqlSettingsApiModel();
     }
 
@@ -46,7 +63,8 @@
 
     private string Sql { get; set; }
 
-    private void HandleValidSubmit() {
+    private void HandleValidSubmit()
+    {
         Sql = null;
         StatusClass = string.Empty;
         StatusMessage = string.Empty;
@@ -54,14 +72,16 @@
             .ConfiguredStoredProcedureFromCsharp(_view.CSharp, _view.Settings)
             .Match(
                 x => Sql = x,
-                x => {
+                x =>
+                {
                     StatusMessage = x.Message;
                     HandleInvalidSubmit();
                 }
             );
     }
 
-    private void HandleInvalidSubmit() {
+    private void HandleInvalidSubmit()
+    {
         Sql = null;
         StatusClass = "alert-danger";
     }
