@@ -3,7 +3,7 @@
 @using Common.Casing
 @using Microsoft.CodeAnalysis
 @using CurrieTechnologies.Razor.Clipboard
-@inject ClipboardService clipboard
+@inject ClipboardService Clipboard
 
 <p class="h1">Generate C# from JSON</p>
 
@@ -67,7 +67,7 @@
 {
     <div class="row mt-2">
         <div class="col-auto">
-            <button type="button" class="btn btn-primary " @onclick="(async e => await clipboard.WriteTextAsync(_view.CSharp))">Copy To Clipboard</button>
+            <button type="button" class="btn btn-primary " @onclick="(async e => await Clipboard.WriteTextAsync(_view.CSharp))">Copy To Clipboard</button>
         </div>
     </div>
 

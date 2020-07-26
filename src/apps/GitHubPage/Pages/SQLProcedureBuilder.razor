@@ -1,7 +1,7 @@
 ﻿@page "/SQLProcedureBuilder"
 @using CurrieTechnologies.Razor.Clipboard
 @using System.ComponentModel.DataAnnotations
-@inject ClipboardService clipboard
+@inject ClipboardService Clipboard
 
 <p class="h1">SQL Procedure Builder</p>
 
@@ -38,7 +38,7 @@
 
             <div class="col-auto">
                 <InputSelect class="form-control" id="@dataTypeId" @bind-Value="element.Item.DataType">
-                    @foreach (var datatype in SqlProcedureApiModel.DataTypes2)
+                    @foreach (var datatype in SqlProcedureApiModel.DataTypeOptions)
                     {
                         <option>@datatype</option>
                     }
@@ -96,7 +96,7 @@
 
                     <div class="col-auto">
                         <InputSelect class="form-control" id="@userTypeDataTypeId" @bind-Value="subElement.Item.DataType">
-                            @foreach (var datatype in SqlProcedureApiModel.DataTypes2)
+                            @foreach (var datatype in SqlProcedureApiModel.DataTypeOptions)
                             {
                                 <option>@datatype</option>
                             }
@@ -133,7 +133,7 @@
 {
     <div class="row mt-2">
         <div class="col-auto">
-            <button type="button" class="btn btn-primary" @onclick="async e => await clipboard.WriteTextAsync(Sql)">Copy To Clipboard</button>
+            <button type="button" class="btn btn-primary" @onclick="async e => await Clipboard.WriteTextAsync(Sql)">Copy To Clipboard</button>
         </div>
     </div>
 

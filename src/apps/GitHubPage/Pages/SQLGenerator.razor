@@ -1,7 +1,7 @@
 ﻿@page "/SQLGenerator"
 @using System.ComponentModel.DataAnnotations
 @using CurrieTechnologies.Razor.Clipboard
-@inject ClipboardService clipboard
+@inject ClipboardService Clipboard
 
 <h1>Generate SQL from CSharp</h1>
 
@@ -33,7 +33,7 @@
 {
     <div class="row mt-2">
         <div class="col-auto">
-            <button type="button" class="btn btn-primary" @onclick="async e => await clipboard.WriteTextAsync(Sql)">Copy To Clipboard</button>
+            <button type="button" class="btn btn-primary" @onclick="async e => await Clipboard.WriteTextAsync(Sql)">Copy To Clipboard</button>
         </div>
     </div>
 

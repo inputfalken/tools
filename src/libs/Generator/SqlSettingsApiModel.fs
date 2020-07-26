@@ -3,18 +3,16 @@ namespace Generator
 open System
 open System.Collections.Generic
 open System.Linq
-        
 
 type SqlDataApiEnum =
     | Bit = 1
     | Int = 2
-    | String = 3
-    | DateTime = 4
-    | Float = 5
-    | UniqueIdentifier = 6
-    | NVarchar = 7
-    | Varchar = 8
-    | DateTime2 = 9
+    | DateTime = 3
+    | Float = 4
+    | UniqueIdentifier = 5
+    | NVarchar = 6
+    | Varchar = 7
+    | DateTime2 = 8
 
 type public SqlSettingsApiModel() =
     member val GenerateUserDefinedTable = false with get, set
@@ -32,4 +30,4 @@ type SqlProcedureApiModel(dataTypes: IEnumerable<SqlProcedureDataTypeParameterAp
     member val DataTypes = dataTypes
     member val UserDefinedTypes = userDefinedTypes
     member val Name = name
-    static member DataTypes2  = Enum.GetValues(typeof<SqlDataApiEnum>) |> Enumerable.Cast<SqlDataApiEnum> |> Enumerable.ToArray
+    static member DataTypeOptions  = Enum.GetValues(typeof<SqlDataApiEnum>) |> Enumerable.Cast<SqlDataApiEnum> |> Enumerable.ToArray

@@ -55,7 +55,6 @@ type public Factory =
         let mapSqlDataType (x: SqlProcedureDataTypeParameterApiModel) =
             let sqlDataType =
                 match x.DataType with
-                | SqlDataApiEnum.String -> Sql.Index.SqlDataType.NvarcharMax
                 | SqlDataApiEnum.Int -> Sql.Index.Int
                 | SqlDataApiEnum.Bit -> Sql.Index.Bit
                 | SqlDataApiEnum.UniqueIdentifier -> Sql.Index.UniqueIdentifier
