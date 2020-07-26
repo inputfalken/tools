@@ -12,7 +12,7 @@
 
     <div class="form-row">
         <div class="col-auto">
-            <p class="h2">Procedure Name: </p>
+            <p class="h2">Name: </p>
         </div>
 
         <div class="col-auto">
@@ -29,7 +29,7 @@
 
         <div class="form-row">
             <div class="col-auto offset-1">
-                <p class="h3">@DataType: @humanIndex</p>
+                <p class="h3">@DataType @humanIndex: </p>
             </div>
 
             <div class="col-auto">
@@ -62,7 +62,7 @@
             <div class="form-row">
 
                 <div class="col-auto offset-1">
-                    <p class="h3">@($"{UserDefinedType} {element.Item.Name} {userTypeHumanIndex}")</p>
+                    <p class="h3">@($"{UserDefinedType} {element.Item.Name} {userTypeHumanIndex}:")</p>
                 </div>
 
                 <div class="col-auto">
@@ -87,7 +87,7 @@
                 <div class="form-row">
 
                     <div class="col-auto offset-2">
-                        <p class="h4"> @($"{DataType}: {userTypeDataHumanIndex}")</p>
+                        <p class="h4"> @($"{DataType} {userTypeDataHumanIndex}:")</p>
                     </div>
 
                     <div class="col-auto">
@@ -156,8 +156,8 @@
 
     private string StatusClass { get; set; } = string.Empty;
     private string StatusMessage { get; set; } = string.Empty;
-        const string UserDefinedType = "User type";
-        const string DataType = "Data type";
+        const string UserDefinedType = "User Type";
+        const string DataType = "Data Type";
 
     private class ViewModel
     {
