@@ -88,4 +88,7 @@ module internal Factory =
             propertyFormatter x.TypeInfo.Stringified formattedPropertyName
 
     let internal CSharpFactory ``type`` settings =
-        CSharpFactoryPrivate ``type`` settings.RootName Set.empty settings (getFormatter ``type``)
+        let cSharp = CSharpFactoryPrivate ``type`` settings.RootName Set.empty settings (getFormatter ``type``)
+        settings.NameSpace
+        |> Option.map (fun x -> joinStringsWithSpaceSeparation [ "namespace"; x; "{"; cSharp; "}" ])
+        |> Option.defaultValue cSharp

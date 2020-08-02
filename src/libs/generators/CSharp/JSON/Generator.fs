@@ -146,16 +146,11 @@ module CSharp =
             | Null -> Option.None
 
         try
-            let cSharp =
                 Json.parse input
                 |> baseType
                 |> Option.defaultValue UnresolvedBaseType
                 |> CSharpFactory
                 <| settings
-
-            settings.NameSpace
-            |> Option.map (fun x -> StringJoin.joinStringsWithSpaceSeparation [ "namespace"; x; "{"; cSharp; "}" ])
-            |> Option.defaultValue cSharp
-            |> Lemonad.ErrorHandling.Result.Value
+                |> Lemonad.ErrorHandling.Result.Value
 
         with ex -> ex |> Lemonad.ErrorHandling.Result.Error
