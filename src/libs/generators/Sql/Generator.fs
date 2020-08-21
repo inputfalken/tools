@@ -26,7 +26,9 @@ let public formatProcedure name (arg: ProcedureParameter list): string =
                     | x when x.[0] = '@' -> x
                     | x -> joinStrings [ "@"; x ]
 
-                [ name; x.Type.ToString() ]
+                [ name
+                  x.Type.ToString()
+                  (if x.Nullable then "NULL" else "NOT NULL") ]
                 |> joinStringsWithSpaceSeparation
             | UserDefinedTableType userDefined ->
 

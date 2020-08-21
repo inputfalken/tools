@@ -54,8 +54,7 @@ type public Factory =
         <| input
         <| CSharpSettings()
 
-    static member public ConfiguredCSharpFromJson (input: String) (settings: CSharpSettings)
-                                                  : IResult<String, exn> =
+    static member public ConfiguredCSharpFromJson (input: String) (settings: CSharpSettings): IResult<String, exn> =
         CSharp.generateFromJson
         <| input
         <| Config.transformCSharpSettings settings
@@ -71,14 +70,15 @@ type public Factory =
                 | SqlDataApiEnum.Float -> Float
                 | SqlDataApiEnum.NVarchar -> CharArgument.Max |> Nvarchar
                 | SqlDataApiEnum.DateTime -> DateTime
-                | SqlDataApiEnum.DateTime2 ->
-                    DateTime2Argument.Default
-                    |> DateTime2
+                | SqlDataApiEnum.DateTime2 -> DateTime2Argument.Default |> DateTime2
                 | SqlDataApiEnum.Varchar -> CharArgument.Max |> Varchar
                 | _ -> raise (NotImplementedException(x.ToString()))
 
             match valueExists x.Name with
-            | Some x -> { Name = x; Type = sqlDataType }
+            | Some x ->
+                { Name = x
+                  Type = sqlDataType
+                  Nullable = true }
             | Option.None -> raise (ArgumentException("Invalid name"))
 
         match arg with

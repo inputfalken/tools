@@ -24,6 +24,7 @@
     {
         var humanIndex = element.Index + 1;
         var dataTypeId = "dataType" + humanIndex;
+        var nullableId = "nullableId" + humanIndex;
         var nameId = "dataName" + humanIndex;
 
 
@@ -43,6 +44,15 @@
                         <option>@datatype</option>
                     }
                 </InputSelect>
+            </div>
+
+            <div class="col-auto my-1">
+                <div class="form-check">
+                    <InputCheckbox class="form-check-input" id="@nullableId" @bind-Value="@element.Item.Nullable"/>
+                    <label class="form-check-label" for="@nullableId">
+                        Nullable
+                    </label>
+                </div>
             </div>
 
             <div class="col-auto">
@@ -84,6 +94,7 @@
                 var userTypeDataHumanIndex = subElement.Index + 1;
                 var userDataTypeNameId = "userTypeName" + userTypeDataHumanIndex;
                 var userTypeDataTypeId = "userTypeDataType" + userTypeDataHumanIndex;
+                var userTypeNullable = "userTypeNullable" + userTypeDataHumanIndex;
                 <div class="form-row">
 
                     <div class="col-auto offset-2">
@@ -103,6 +114,14 @@
                         </InputSelect>
                     </div>
 
+                    <div class="col-auto my-1">
+                        <div class="form-check">
+                            <InputCheckbox class="form-check-input" id="@userTypeNullable" @bind-Value="@subElement.Item.Nullable"/>
+                            <label class="form-check-label" for="@userTypeNullable">
+                                Nullable
+                            </label>
+                        </div>
+                    </div>
                     <div class="col-auto">
                         <button type="button" class="btn btn-danger" @onclick="@(() => element.Item.SqlDataTypes.Remove(subElement.Item))">Remove</button>
                     </div>
@@ -174,6 +193,9 @@
 
             [Required]
             public SqlDataApiEnum DataType { get; set; } = SqlDataApiEnum.Int;
+
+            [Required]
+            public bool Nullable { get; set; } = true;
         }
 
         public class SqlUserTypeViewModel
@@ -196,10 +218,10 @@
         StatusMessage = string.Empty;
         Sql = Factory.StoredProcedure(
             new SqlProcedureApiModel(
-                _view.SqlDataTypes.Select(x => new SqlProcedureDataTypeParameterApiModel(x.DataType, x.Name)),
+                _view.SqlDataTypes.Select(x => new SqlProcedureDataTypeParameterApiModel(x.DataType, x.Name, x.Nullable)),
                 _view.SqlUserTypes.Select(x =>
                     new SqlProcedureUserTypeParameterApiModel(
-                        x.SqlDataTypes.Select(y => new SqlProcedureDataTypeParameterApiModel(y.DataType, y.Name)), x.Name)
+                        x.SqlDataTypes.Select(y => new SqlProcedureDataTypeParameterApiModel(y.DataType, y.Name, y.Nullable)), x.Name)
                     ),
                 _view.ProcedureName
                 )

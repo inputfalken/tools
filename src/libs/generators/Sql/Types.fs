@@ -40,7 +40,10 @@ type DataType =
             | Max -> "nvarchar(max)"
             | Number x -> sprintf "nvarchar(%d)" x
 
-type Parameter = { Type: DataType; Name: string }
+type Parameter =
+    { Type: DataType
+      Name: string
+      Nullable: bool }
 
 type UserDefined =
     { Parameters: Parameter list
