@@ -5,7 +5,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Include="Index.fs" />
+      <Compile Include="Types.fs" />
+      <Compile Include="Generator.fs" />
     </ItemGroup>
 
     <ItemGroup>

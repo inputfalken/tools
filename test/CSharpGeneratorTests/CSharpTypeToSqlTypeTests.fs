@@ -2,7 +2,7 @@ module CSharpGeneratorTests.SQL.CSharpTypeToSqlTypeTests
 
 open System
 open Xunit
-open Sql.Index
+open Sql.Generator
 open TemplateFactory.SQL.SQL
 
 [<Theory>]
@@ -25,21 +25,21 @@ let ``Unhandled types`` str =
 [<InlineData("float?")>]
 let ``Float?`` str =
     let res = str |> toSqlType
-    Assert.Equal(SqlDataType.Float, res)
+    Assert.Equal(Sql.Types.Float, res)
 
 [<Theory>]
 [<InlineData("System.Double?")>]
 [<InlineData("double?")>]
 let ``Double?`` str =
     let res = str |> toSqlType
-    Assert.Equal(SqlDataType.Float, res)
+    Assert.Equal(Sql.Types.Float, res)
 
 [<Theory>]
 [<InlineData("Guid?")>]
 [<InlineData("System.Guid?")>]
 let ``Guid?`` str =
     let res = str |> toSqlType
-    Assert.Equal(SqlDataType.UniqueIdentifier, res)
+    Assert.Equal(Sql.Types.UniqueIdentifier, res)
 
 [<Theory>]
 [<InlineData("int?")>]
@@ -47,27 +47,27 @@ let ``Guid?`` str =
 [<InlineData("System.Int32?")>]
 let ``Int?`` str =
     let res = str |> toSqlType
-    Assert.Equal(SqlDataType.Int, res)
+    Assert.Equal(Sql.Types.Int, res)
 
 [<Theory>]
 [<InlineData("bool?")>]
 [<InlineData("System.Boolean?")>]
 let ``Bool?`` str =
     let res = str |> toSqlType
-    Assert.Equal(SqlDataType.Bit, res)
+    Assert.Equal(Sql.Types.Bit, res)
 
 [<Theory>]
 [<InlineData("DateTime?")>]
 [<InlineData("System.DateTime?")>]
 let ``DateTime?`` str =
     let res = str |> toSqlType
-    Assert.Equal(SqlDataType.DateTime, res)
+    Assert.Equal(Sql.Types.DateTime, res)
 
 [<Theory>]
 [<InlineData("float")>]
 let Float str =
     let res = str |> toSqlType
-    Assert.Equal(SqlDataType.Float, res)
+    Assert.Equal(Sql.Types.Float, res)
 
 [<Theory>]
 [<InlineData("double")>]
@@ -75,14 +75,14 @@ let Float str =
 [<InlineData("Double")>]
 let Double str =
     let res = str |> toSqlType
-    Assert.Equal(SqlDataType.Float, res)
+    Assert.Equal(Sql.Types.Float, res)
 
 [<Theory>]
 [<InlineData("Guid")>]
 [<InlineData("System.Guid")>]
 let Guid str =
     let res = str |> toSqlType
-    Assert.Equal(SqlDataType.UniqueIdentifier, res)
+    Assert.Equal(Sql.Types.UniqueIdentifier, res)
 
 [<Theory>]
 [<InlineData("int")>]
@@ -90,7 +90,7 @@ let Guid str =
 [<InlineData("Int32")>]
 let Int str =
     let res = str |> toSqlType
-    Assert.Equal(SqlDataType.Int, res)
+    Assert.Equal(Sql.Types.Int, res)
 
 [<Theory>]
 [<InlineData("bool")>]
@@ -98,14 +98,14 @@ let Int str =
 [<InlineData("System.Boolean")>]
 let Bool str =
     let res = str |> toSqlType
-    Assert.Equal(SqlDataType.Bit, res)
+    Assert.Equal(Sql.Types.Bit, res)
 
 [<Theory>]
 [<InlineData("DateTime")>]
 [<InlineData("System.DateTime")>]
 let DateTime str =
     let res = str |> toSqlType
-    Assert.Equal(SqlDataType.DateTime, res)
+    Assert.Equal(Sql.Types.DateTime, res)
 
 [<Theory>]
 [<InlineData("string")>]
@@ -113,7 +113,7 @@ let DateTime str =
 let String str =
     let res =
         match str |> toSqlType with
-        | Nvarchar x -> x
+        | Sql.Types.Nvarchar x -> x
         | _ -> raise (System.Exception())
 
-    Assert.Equal(charArgument.Max, res)
+    Assert.Equal(Sql.Types.CharArgument.Max, res)

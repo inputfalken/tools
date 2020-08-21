@@ -4,9 +4,15 @@ open System
 open System.Linq
 open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis.CSharp.Syntax
-open Sql.Index
+open Sql.Generator
+open Sql.Types
 open Common.CaseInsensitiveString
 
+type GenerationType =
+    | UserDefinedTableType
+    | None
+
+type Settings = { GenerationType: GenerationType }
 // TODO create proper type with support for nullable value types.
 let private string = CIString.CI "string"
 let private int = CIString.CI "int"
@@ -26,17 +32,17 @@ let private booleanNullable = CIString.CI "boolean?"
 let private guidNullable = CIString.CI "guid?"
 let private dateTimeNullable = CIString.CI "datetime?"
 
-let toSqlType (str: string): SqlDataType =
+let toSqlType (str: string): Sql.Types.DataType =
     let ciString = str.Replace("System.", System.String.Empty, StringComparison.OrdinalIgnoreCase) |> CIString.CI
     match ciString with
-    | x when x.Equals int || x.Equals int32 || x.Equals intNullable || x.Equals int32Nullable -> SqlDataType.Int
+    | x when x.Equals int || x.Equals int32 || x.Equals intNullable || x.Equals int32Nullable -> Sql.Types.Int
     | x when x.Equals bool || x.Equals boolean || x.Equals boolNullable || x.Equals booleanNullable ->
-        SqlDataType.Bit
-    | x when x.Equals guid || x.Equals guidNullable -> SqlDataType.UniqueIdentifier
-    | x when x.Equals dateTime || x.Equals dateTimeNullable -> SqlDataType.DateTime
+        Sql.Types.Bit
+    | x when x.Equals guid || x.Equals guidNullable -> Sql.Types.UniqueIdentifier
+    | x when x.Equals dateTime || x.Equals dateTimeNullable -> Sql.Types.DateTime
     | x when x.Equals float || x.Equals double || x.Equals floatNullable || x.Equals doubleNullable ->
-        SqlDataType.Float
-    | x when x.Equals string -> SqlDataType.Nvarchar Max
+        Sql.Types.Float
+    | x when x.Equals string -> Sql.Types.Nvarchar Sql.Types.Max
     | _ -> raise (NotImplementedException(sprintf "Type '%s' is not supported." str))
 
 let parseClass (input: string) =

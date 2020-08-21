@@ -1,21 +1,24 @@
 ﻿namespace Generator
 
 open System
-open System.Collections.Generic
 open CSHarp.JSON
 open Common
 open Common.Casing
 open Generator
+open Sql.Types
 open Lemonad.ErrorHandling
 open StringValidator
 open TemplateFactory.SQL
-open Sql.Index
+open Sql.Generator
+open TemplateFactory.SQL.SQL
 
 module Config =
     let transformCSharpSettings (settings: CSharpSettings) =
         let letterRule =
             match valueExists settings.ClassPrefix, valueExists settings.ClassSuffix with
-            | Some prefix, Some suffix -> (prefix, suffix) |> LetterRule.``Prefix and Suffix``
+            | Some prefix, Some suffix ->
+                (prefix, suffix)
+                |> LetterRule.``Prefix and Suffix``
             | Some prefix, Option.None -> prefix |> LetterRule.Prefix
             | Option.None, Option.Some suffix -> suffix |> LetterRule.Suffix
             | Option.None, Option.None -> "model" |> LetterRule.Suffix: LetterRule
@@ -46,29 +49,36 @@ module Config =
 
 type public Factory =
 
-    static member public CSharpFromJson input = Factory.ConfiguredCSharpFromJson <| input <| CSharpSettings()
-    static member public ConfiguredCSharpFromJson (input: System.String) (settings: CSharpSettings): IResult<System.String, exn> =
-        CSharp.generateFromJson <| input <| Config.transformCSharpSettings settings
+    static member public CSharpFromJson input =
+        Factory.ConfiguredCSharpFromJson
+        <| input
+        <| CSharpSettings()
+
+    static member public ConfiguredCSharpFromJson (input: System.String) (settings: CSharpSettings)
+                                                  : IResult<System.String, exn> =
+        CSharp.generateFromJson
+        <| input
+        <| Config.transformCSharpSettings settings
 
     static member StoredProcedure(arg: SqlProcedureApiModel) =
 
         let mapSqlDataType (x: SqlProcedureDataTypeParameterApiModel) =
             let sqlDataType =
                 match x.DataType with
-                | SqlDataApiEnum.Int -> Sql.Index.Int
-                | SqlDataApiEnum.Bit -> Sql.Index.Bit
-                | SqlDataApiEnum.UniqueIdentifier -> Sql.Index.UniqueIdentifier
-                | SqlDataApiEnum.Float -> Sql.Index.Float
-                | SqlDataApiEnum.NVarchar -> charArgument.Max |> Sql.Index.Nvarchar
-                | SqlDataApiEnum.DateTime -> Sql.Index.DateTime
-                | SqlDataApiEnum.DateTime2 -> Sql.Index.DateTime2Argument.Default |> Sql.Index.DateTime2
-                | SqlDataApiEnum.Varchar -> charArgument.Max |> Sql.Index.Varchar
+                | SqlDataApiEnum.Int -> Sql.Types.Int
+                | SqlDataApiEnum.Bit -> Sql.Types.Bit
+                | SqlDataApiEnum.UniqueIdentifier -> Sql.Types.UniqueIdentifier
+                | SqlDataApiEnum.Float -> Sql.Types.Float
+                | SqlDataApiEnum.NVarchar -> Sql.Types.CharArgument.Max |> Sql.Types.Nvarchar
+                | SqlDataApiEnum.DateTime -> Sql.Types.DateTime
+                | SqlDataApiEnum.DateTime2 ->
+                    Sql.Types.DateTime2Argument.Default
+                    |> Sql.Types.DateTime2
+                | SqlDataApiEnum.Varchar -> Sql.Types.CharArgument.Max |> Sql.Types.Varchar
                 | _ -> raise (NotImplementedException(x.ToString()))
 
             match valueExists x.Name with
-            | Some x ->
-                { Name = x
-                  Type = sqlDataType }
+            | Some x -> { Name = x; Type = sqlDataType }
             | Option.None -> raise (ArgumentException("Invalid name"))
 
         match arg with
@@ -93,7 +103,8 @@ type public Factory =
             let parameters =
                 seq {
                     dataTypes
-                    userDefinedTypes }
+                    userDefinedTypes
+                }
                 |> Seq.concat
                 |> Seq.toList
 
@@ -104,6 +115,7 @@ type public Factory =
                 |> Seq.map (mapSqlDataType)
                 |> Seq.map ProcedureParameter.DataType
                 |> Seq.toList
+
             formatProcedure x.Name dataTypes
         | x when x.UserDefinedTypes <> null ->
             let userDefinedTypes =
@@ -116,6 +128,7 @@ type public Factory =
                            |> Seq.toList) })
                 |> Seq.map ProcedureParameter.UserDefinedTableType
                 |> Seq.toList
+
             formatProcedure x.Name userDefinedTypes
         | _ -> raise (ArgumentException())
 
