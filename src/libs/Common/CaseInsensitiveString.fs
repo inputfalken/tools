@@ -24,7 +24,7 @@ type CIString =
     interface System.IComparable<CIString> with
         member this.CompareTo x = StringComparer.OrdinalIgnoreCase.Compare(this.String, x.String)
 
-    interface System.IComparable with
+    interface IComparable with
         member this.CompareTo x =
             match x with
             | :? CIString as s -> StringComparer.OrdinalIgnoreCase.Compare(this.String, s.String)

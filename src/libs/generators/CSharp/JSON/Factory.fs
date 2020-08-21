@@ -32,7 +32,7 @@ module internal Factory =
 
     let validateName (name: String) =
         if not (Char.IsLetter name.[0]) then
-            raise (System.ArgumentException("Member names can only start with letters."))
+            raise (ArgumentException("Member names can only start with letters."))
 
     let rec private GeneratedType members key (classSet: CIString Set) settings propertyFormatter className =
         let classSet = classSet.Add <| CI className

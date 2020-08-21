@@ -33,16 +33,16 @@ let private guidNullable = CIString.CI "guid?"
 let private dateTimeNullable = CIString.CI "datetime?"
 
 let toSqlType (str: string): Sql.Types.DataType =
-    let ciString = str.Replace("System.", System.String.Empty, StringComparison.OrdinalIgnoreCase) |> CIString.CI
+    let ciString = str.Replace("System.", String.Empty, StringComparison.OrdinalIgnoreCase) |> CIString.CI
     match ciString with
-    | x when x.Equals int || x.Equals int32 || x.Equals intNullable || x.Equals int32Nullable -> Sql.Types.Int
+    | x when x.Equals int || x.Equals int32 || x.Equals intNullable || x.Equals int32Nullable -> Int
     | x when x.Equals bool || x.Equals boolean || x.Equals boolNullable || x.Equals booleanNullable ->
-        Sql.Types.Bit
-    | x when x.Equals guid || x.Equals guidNullable -> Sql.Types.UniqueIdentifier
-    | x when x.Equals dateTime || x.Equals dateTimeNullable -> Sql.Types.DateTime
+        Bit
+    | x when x.Equals guid || x.Equals guidNullable -> UniqueIdentifier
+    | x when x.Equals dateTime || x.Equals dateTimeNullable -> DateTime
     | x when x.Equals float || x.Equals double || x.Equals floatNullable || x.Equals doubleNullable ->
-        Sql.Types.Float
-    | x when x.Equals string -> Sql.Types.Nvarchar Sql.Types.Max
+        Float
+    | x when x.Equals string -> Nvarchar Max
     | _ -> raise (NotImplementedException(sprintf "Type '%s' is not supported." str))
 
 let parseClass (input: string) =

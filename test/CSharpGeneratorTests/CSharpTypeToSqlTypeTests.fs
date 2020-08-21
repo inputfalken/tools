@@ -114,6 +114,6 @@ let String str =
     let res =
         match str |> toSqlType with
         | Sql.Types.Nvarchar x -> x
-        | _ -> raise (System.Exception())
+        | _ -> raise (Exception())
 
     Assert.Equal(Sql.Types.CharArgument.Max, res)

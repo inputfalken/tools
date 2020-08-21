@@ -33,11 +33,11 @@ module Config =
               PropertyCasing =
                   settings.PropertyCasing
                   |> Casing.fromString
-                  |> Option.defaultValue Casing.Pascal
+                  |> Option.defaultValue Pascal
               ClassCasing =
                   settings.ClassCasing
                   |> Casing.fromString
-                  |> Option.defaultValue Casing.Pascal }
+                  |> Option.defaultValue Pascal }
 
         csharpSettings
 
@@ -54,8 +54,8 @@ type public Factory =
         <| input
         <| CSharpSettings()
 
-    static member public ConfiguredCSharpFromJson (input: System.String) (settings: CSharpSettings)
-                                                  : IResult<System.String, exn> =
+    static member public ConfiguredCSharpFromJson (input: String) (settings: CSharpSettings)
+                                                  : IResult<String, exn> =
         CSharp.generateFromJson
         <| input
         <| Config.transformCSharpSettings settings
@@ -65,16 +65,16 @@ type public Factory =
         let mapSqlDataType (x: SqlProcedureDataTypeParameterApiModel) =
             let sqlDataType =
                 match x.DataType with
-                | SqlDataApiEnum.Int -> Sql.Types.Int
-                | SqlDataApiEnum.Bit -> Sql.Types.Bit
-                | SqlDataApiEnum.UniqueIdentifier -> Sql.Types.UniqueIdentifier
-                | SqlDataApiEnum.Float -> Sql.Types.Float
-                | SqlDataApiEnum.NVarchar -> Sql.Types.CharArgument.Max |> Sql.Types.Nvarchar
-                | SqlDataApiEnum.DateTime -> Sql.Types.DateTime
+                | SqlDataApiEnum.Int -> Int
+                | SqlDataApiEnum.Bit -> Bit
+                | SqlDataApiEnum.UniqueIdentifier -> UniqueIdentifier
+                | SqlDataApiEnum.Float -> Float
+                | SqlDataApiEnum.NVarchar -> CharArgument.Max |> Nvarchar
+                | SqlDataApiEnum.DateTime -> DateTime
                 | SqlDataApiEnum.DateTime2 ->
-                    Sql.Types.DateTime2Argument.Default
-                    |> Sql.Types.DateTime2
-                | SqlDataApiEnum.Varchar -> Sql.Types.CharArgument.Max |> Sql.Types.Varchar
+                    DateTime2Argument.Default
+                    |> DateTime2
+                | SqlDataApiEnum.Varchar -> CharArgument.Max |> Varchar
                 | _ -> raise (NotImplementedException(x.ToString()))
 
             match valueExists x.Name with
@@ -136,9 +136,9 @@ type public Factory =
 
     static member public ConfiguredStoredProcedureFromCsharp cSharp settings =
         try
-            SQL.generateStoredProcedureFromCSharp cSharp (Config.transformSqlSettings (settings))
-            |> Lemonad.ErrorHandling.Result.Value
-        with ex -> Lemonad.ErrorHandling.Result.Error ex
+            generateStoredProcedureFromCSharp cSharp (Config.transformSqlSettings (settings))
+            |> Result.Value
+        with ex -> Result.Error ex
 
     static member public StoredProcedureFromCsharp cSharp =
         Factory.ConfiguredStoredProcedureFromCsharp cSharp (SqlSettingsApiModel())

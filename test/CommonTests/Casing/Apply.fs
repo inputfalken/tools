@@ -10,7 +10,7 @@ open Common.Casing
 [<InlineData("foo_bar")>]
 [<InlineData("Foo_Bar")>]
 let ``Camel`` data =
-    Assert.Equal("fooBar", data |> Casing.Camel.apply)
+    Assert.Equal("fooBar", data |> Camel.apply)
     
 [<Theory>]
 [<InlineData("foo bar")>]
@@ -19,7 +19,7 @@ let ``Camel`` data =
 [<InlineData("foo_bar")>]
 [<InlineData("Foo_Bar")>]
 let ``Pascal`` data =
-    Assert.Equal("FooBar", data |> Casing.Pascal.apply)
+    Assert.Equal("FooBar", data |> Pascal.apply)
     
 [<Theory>]
 [<InlineData("foo bar", "foobar")>]
@@ -28,4 +28,4 @@ let ``Pascal`` data =
 [<InlineData("foo_bar", "foo_bar")>]
 [<InlineData("Foo_Bar", "Foo_Bar")>]
 let ``None`` data expected =
-    Assert.Equal(expected, data |> Casing.None.apply)
+    Assert.Equal(expected, data |> None.apply)

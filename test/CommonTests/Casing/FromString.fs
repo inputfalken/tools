@@ -3,9 +3,9 @@ module Tests.Casing.FromString
 open Xunit
 open Common.Casing
 
-let CamelCase = Common.Casing.Casing.CamelCase
-let PascalCase = Common.Casing.Casing.PascalCase
-let NoneCase = Common.Casing.Casing.NoneCase
+let CamelCase = Casing.CamelCase
+let PascalCase = Casing.PascalCase
+let NoneCase = Casing.NoneCase
 
 [<Fact>]
 let ``Camel``() =

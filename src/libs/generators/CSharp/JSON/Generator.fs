@@ -95,7 +95,7 @@ module CSharp =
                 BaseType.Decimal x
                 |> CSType.BaseType
                 |> Option.Some
-            | JsonParser.Int x ->
+            | Int x ->
                 BaseType.Integer x
                 |> CSType.BaseType
                 |> Option.Some
