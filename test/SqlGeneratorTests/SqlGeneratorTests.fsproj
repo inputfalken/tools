@@ -8,11 +8,12 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\libs\generators\Sql\Sql.fsproj" />
-        <ProjectReference Include="..\TestDependencies\TestDependencies.fsproj" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+        <PackageReference Include="xunit" Version="2.4.1" />
     </ItemGroup>
 
     <ItemGroup>
