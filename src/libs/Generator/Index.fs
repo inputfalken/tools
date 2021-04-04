@@ -8,7 +8,7 @@ open Languages.CSharp
 open Languages.SQL
 open Lemonad.ErrorHandling
 open Sql.Generator
-open CSharp.FromSQL
+open Sql.FromCSharp
 open CSharp.FromJSON
 
 module Config =

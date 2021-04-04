@@ -1,6 +1,6 @@
 module CSharpGeneratorTests.SQL.GenerateProcedureTests
 
-open CSharp.FromSQL
+open Sql.FromCSharp
 open Xunit
 
 

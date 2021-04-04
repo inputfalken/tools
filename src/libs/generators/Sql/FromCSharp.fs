@@ -1,4 +1,4 @@
-module CSharp.FromSQL
+module Sql.FromCSharp
 
 open System
 open System.Linq

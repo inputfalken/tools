@@ -1,7 +1,7 @@
 module CSharpGeneratorTests.SQL.parseClassTests
 
 open System
-open CSharp.FromSQL
+open Sql.FromCSharp
 open Xunit
 
 

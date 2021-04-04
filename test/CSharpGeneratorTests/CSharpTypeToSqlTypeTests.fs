@@ -3,7 +3,7 @@ module CSharpGeneratorTests.SQL.CSharpTypeToSqlTypeTests
 open System
 open Xunit
 open Languages.SQL
-open CSharp.FromSQL
+open Sql.FromCSharp
 
 [<Theory>]
 [<InlineData("foobar")>]
