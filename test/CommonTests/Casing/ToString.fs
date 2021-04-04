@@ -1,7 +1,7 @@
 module Tests.Casing.ToString
 
 open Xunit
-open Common.Casing
+open Common
 
 let CamelCase = Camel
 let PascalCase = Pascal

@@ -5,12 +5,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Include="Types.fs" />
       <Compile Include="Generator.fs" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\Common\Common.fsproj" />
+      <ProjectReference Include="..\..\Languages\Languages.fsproj" />
     </ItemGroup>
 
 </Project>

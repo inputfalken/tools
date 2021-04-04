@@ -1,16 +1,15 @@
 ﻿namespace Generator
 
 open System
-open CSHarp.JSON
+open Common.StringValidator
 open Common
-open Common.Casing
 open Generator
-open Sql.Types
+open Languages.CSharp
+open Languages.SQL
 open Lemonad.ErrorHandling
-open StringValidator
-open TemplateFactory.SQL
 open Sql.Generator
-open TemplateFactory.SQL.SQL
+open CSharp.FromSQL
+open CSharp.FromJSON
 
 module Config =
     let transformCSharpSettings (settings: CSharpSettings) =
@@ -56,7 +55,7 @@ type public Factory =
 
     static member public ConfiguredCSharpFromJson (input: String) (settings: CSharpSettings)
                                                   : IResult<String, exn> =
-        CSharp.generateFromJson
+        generate
         <| input
         <| Config.transformCSharpSettings settings
 

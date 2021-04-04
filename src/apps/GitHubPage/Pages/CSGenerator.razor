@@ -1,6 +1,5 @@
 ﻿@page "/CSGenerator"
 @using System.ComponentModel.DataAnnotations
-@using Common.Casing
 @using Microsoft.CodeAnalysis
 @using CurrieTechnologies.Razor.Clipboard
 @inject ClipboardService Clipboard
@@ -84,7 +83,7 @@
 @code {
     private string StatusClass { get; set; } = string.Empty;
     private string StatusMessage { get; set; } = string.Empty;
-    private static IReadOnlyList<string> CasingOptions { get; } = Casing.Cases;
+    private static IReadOnlyList<string> CasingOptions { get; } = Common.Casing.Cases;
 
     private class ViewModel
     {

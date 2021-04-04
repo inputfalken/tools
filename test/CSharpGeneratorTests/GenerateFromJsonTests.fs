@@ -1,7 +1,8 @@
 module Tests
 
-open CSHarp.JSON
-open Common.Casing
+open CSharp.FromJSON
+open Languages.CSharp
+open Common
 open Xunit
 
 let settings =
@@ -22,21 +23,21 @@ let setCasing classCasing propertyCasing =
 [<Theory>]
 [<InlineData("""{}""")>]
 let ``Empty object is valid`` json =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     let expected = "public object RootModel { get; set; }"
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
 [<InlineData("""[]""")>]
 let ``Empty Array is valid`` json =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     let expected = "public object[] RootModel { get; set; }"
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
 [<InlineData("""abc""")>]
 let ``Passing invalid json results in an exception`` json =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     Assert.Null(result.Either.Value)
     Assert.NotNull(result.Either.Error)
 
@@ -50,7 +51,7 @@ let ``Passing invalid json results in an exception`` json =
 [<InlineData(""" false """, "bool")>]
 [<InlineData(""" null """, "object")>]
 let ``Entry with value`` json expected =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     let expected = sprintf "public %s RootModel { get; set; }" expected
     Assert.Equal(expected, result.Either.Value)
 
@@ -59,14 +60,14 @@ let ``Entry with value`` json expected =
 [<InlineData("public class RootModel { public object[] Object { get; set; } }")>]
 let ``Handle reserved words with Pascal casing`` expected =
     let settings = setCasing Pascal Pascal
-    let result = CSharp.generateFromJson """{ "object" : [] }""" settings
+    let result = generate """{ "object" : [] }""" settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
 [<InlineData("public class rootmodel { public object[] @object { get; set; } }")>]
 let ``Handle reserved words with NoneCasing`` expected =
     let settings = setCasing None None
-    let result = CSharp.generateFromJson """{ "object" : [] }""" settings
+    let result = generate """{ "object" : [] }""" settings
     Assert.Equal(expected, result.Either.Value)
 
 
@@ -76,7 +77,7 @@ let ``Handle reserved words with NoneCasing`` expected =
              "public class rootModel { public class innerClassModel { public int fooBar { get; set; } } public innerClassModel innerClass { get; set; } }")>]
 let ``Casing Camel `` json expected =
     let settings = setCasing Camel Camel
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -92,7 +93,7 @@ let ``Casing Camel  works with arguments classSuffix and classPrefix`` json expe
           PropertyCasing = Camel
           ClassCasing = Camel }
 
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -108,7 +109,7 @@ let ``Casing None works with arguments classSuffix, root and classPrefix`` json 
           PropertyCasing = None
           ClassCasing = None }
 
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -117,7 +118,7 @@ let ``Casing Pascal`` json =
     let expected =
         "public class RootModel { public class InnerClassModel { public int FooBar { get; set; } } public InnerClassModel InnerClass { get; set; } }"
     let settings = setCasing Pascal Pascal
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -133,7 +134,7 @@ let ``Casing Pascal  works with arguments classSuffix, root and classPrefix`` js
           PropertyCasing = Pascal
           ClassCasing = Pascal }
 
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -141,14 +142,14 @@ let ``Casing Pascal  works with arguments classSuffix, root and classPrefix`` js
              "public class rootmodel { public class INNER_CLASSmodel { public int FOO_BAR { get; set; } } public INNER_CLASSmodel INNER_CLASS { get; set; } }")>]
 let ``Casing none`` json expected =
     let settings = setCasing None None
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     Assert.Equal(expected, result.Either.Value)
 
 
 [<Theory>]
 [<InlineData("""[ { "tags": [ "non" ], "friends": [ { "id": 0, "name": "Henrietta Tillman" } ] }, { "tags": [ "aliqua" ], "friends": [ { "id": 0, "name": "Kristy Calhoun" } ] } ]""")>]
 let ``Two array Objects next to each other`` json =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     let expected =
         "public class RootModel { public string[] Tags { get; set; } public class FriendsModel { public int Id { get; set; } public string Name { get; set; } } public FriendsModel[] Friends { get; set; } }"
 
@@ -160,7 +161,7 @@ let ``Two array Objects next to each other`` json =
 [<InlineData("""[ { "tags": [ "non" ], "friends": [ { "id": 0, "name": "Henrietta Tillman" } ], "john" : "" }, { "tags": [ "aliqua" ], "friends": [ { "id": 0 } ], "doe" : "" } ]""")>]
 [<InlineData("""[ { "Tags": [ "non" ], "friends": [ { "id": 0, "name": "Henrietta Tillman" } ], "john" : "" }, { "tags": [ "aliqua" ], "friends": [ { "id": 0 } ], "doe" : "" } ]""")>]
 let ``Two array Objects next to each other with different properties should expand properties`` json =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     let expected =
         "public class RootModel { public string[] Tags { get; set; } public class FriendsModel { public int Id { get; set; } public string Name { get; set; } } public FriendsModel[] Friends { get; set; } public string John { get; set; } public string Doe { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
@@ -168,7 +169,7 @@ let ``Two array Objects next to each other with different properties should expa
 [<Theory>]
 [<InlineData("""{ "Foo" : [] }""")>]
 let ``Object with Empty Array`` json =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     let expected = "public class RootModel { public object[] Foo { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
 
@@ -176,7 +177,7 @@ let ``Object with Empty Array`` json =
 [<InlineData("""{ "Foo" : {} }""")>]
 [<InlineData("""{ "Foo" : null }""")>]
 let ``Object with Empty or null object`` json =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     let expected = "public class RootModel { public object Foo { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
 
@@ -198,7 +199,7 @@ let ``Object with Empty or null object`` json =
 [<InlineData("""[{}, {}]""", "object")>]
 [<InlineData("""[{}]""", "object")>]
 let ``Entry as with array`` json ``type`` =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     let expected = sprintf "public %s[] RootModel { get; set; }" ``type``
     Assert.Equal(expected, result.Either.Value)
 
@@ -231,7 +232,7 @@ let ``Entry as with array`` json ``type`` =
 [<InlineData("""[{}, null]""", "object")>]
 [<InlineData("""[{}, {}, null]""", "object")>]
 let ``Array with basetypes mixed with null`` json ``type`` =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     let expected = sprintf "public %s[] RootModel { get; set; }" ``type``
     Assert.Equal(expected, result.Either.Value)
 
@@ -255,7 +256,7 @@ let ``Array with basetypes mixed with null`` json ``type`` =
 [<InlineData("""[ { "Foo" : null, "Bar" : 2 }, { "Foo" : "foobar", "Bar" : 2, "test" : 2 } ]""",
              "public string Foo { get; set; } public int Bar { get; set; } public int? Test { get; set; }")>]
 let ``Array with objects`` json csharp =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     let expected = sprintf "public class RootModel { %s }" csharp
     Assert.Equal(expected, result.Either.Value)
 
@@ -274,7 +275,7 @@ let ``Array with objects`` json csharp =
 [<InlineData(""" [ { "Foo" : "foobar", "Bar" : 2 }, { "Foo" : null, "Bar" : 2 } ] """,
              "public string Foo { get; set; } public int Bar { get; set; }")>]
 let ``Entry with object`` json csharp =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     let expected = sprintf "public class RootModel { %s }" csharp
     Assert.Equal(expected, result.Either.Value)
 
@@ -286,7 +287,7 @@ let invalidTypeNameErrorMessage = "Member names can only start with letters."
 [<InlineData("""{"1337": {}}""", invalidTypeNameErrorMessage)>]
 [<InlineData("""{"Foo": {"1337": {"bar": 2}}}""", invalidTypeNameErrorMessage)>]
 let ``Type names or member names who starts with numbers result in error`` json expected =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     Assert.Equal(expected, result.Either.Error.Message)
 
 [<Theory>]
@@ -300,7 +301,7 @@ let ``Class classPrefix with number result in error`` json expected =
           ClassCasing = Pascal
           PropertyCasing = Pascal }
 
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     Assert.Equal(expected, result.Either.Error.Message)
 
 [<Theory>]
@@ -311,7 +312,7 @@ let ``Class classPrefix with number result in error`` json expected =
 [<InlineData("""{"data":{"name":"","token":"","user":{"data":{"name":"","email":""}},"quota":{"data":{"usage":25,"limit":100,"next_reset":"2020-04-01T00:00:00+02:00"}}}}""",
              "public class RootModel { public class DataModel { public string Name { get; set; } public string Token { get; set; } public class UserModel { public class UserDataModel { public string Name { get; set; } public string Email { get; set; } } public UserDataModel Data { get; set; } } public UserModel User { get; set; } public class QuotaModel { public class QuotaDataModel { public int Usage { get; set; } public int Limit { get; set; } public System.DateTime NextReset { get; set; } } public QuotaDataModel Data { get; set; } } public QuotaModel Quota { get; set; } } public DataModel Data { get; set; } }")>]
 let ``Resolve class names when it's the same name as their enclosing type`` json expected =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -330,7 +331,7 @@ let ``Resolve class names when it's the same name as their enclosing type`` json
 [<InlineData("""[null, {"foo":"bar"}, null, null, null]""")>]
 [<InlineData("""[null, null, null, {"foo":"bar"}, null]""")>]
 let ``Array with empty object or null should not resolve in object array`` json =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     let expected = "public class RootModel { public string Foo { get; set; } }"
     Assert.Equal(expected, result.Either.Value)
 
@@ -338,14 +339,14 @@ let ``Array with empty object or null should not resolve in object array`` json 
 [<InlineData(""" { "orgnr": "", "name": "", "children": { "orgnr": "", "name": "", "children": { "orgnr": "", "name": "", "children": { "orgnr": "", "name": "" } } } } """,
              "public class RootModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } } public ChildrenChildrenChildrenModel Children { get; set; } } public ChildrenChildrenModel Children { get; set; } } public ChildrenModel Children { get; set; } }")>]
 let ``Nested identical children with Object`` json expected =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
 [<InlineData(""" { "orgnr": "", "name": "", "children": [ { "orgnr": "", "name": "", "children": [ { "orgnr": "", "name": "", "children": [ { "orgnr": "", "name": "" } ] } ] } ] } """,
              "public class RootModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } public class ChildrenChildrenChildrenModel { public string Orgnr { get; set; } public string Name { get; set; } } public ChildrenChildrenChildrenModel[] Children { get; set; } } public ChildrenChildrenModel[] Children { get; set; } } public ChildrenModel[] Children { get; set; } }")>]
 let ``Nested identical children with Array`` json expected =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     Assert.Equal(expected, result.Either.Value)
 
 [<Theory>]
@@ -355,7 +356,7 @@ let ``Nested identical children with Array`` json expected =
 [<InlineData("[null,3,1.50,3,4]", "decimal?")>]
 [<InlineData("[1,3,1.50,3,null]", "decimal?")>]
 let ``Integers transforms into decimal if a number with decimals occur`` json ``type`` =
-    let result = CSharp.generateFromJson json settings
+    let result = generate json settings
     let expected = sprintf "public %s[] RootModel { get; set; }" ``type``
     Assert.Equal(expected, result.Either.Value)
 
@@ -375,5 +376,5 @@ let ``Issue 49``() =
         "
     
     let expected = @"public class RootModel { public class DataModel { public class AttributesModel { public string Field { get; set; } } public AttributesModel Attributes { get; set; } } public DataModel[] Data { get; set; } }"
-    let result = CSharp.generateFromJson test settings
+    let result = generate test settings
     Assert.Equal(expected, result.Either.Value)

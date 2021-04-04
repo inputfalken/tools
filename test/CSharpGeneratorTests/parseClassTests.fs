@@ -1,7 +1,7 @@
 module CSharpGeneratorTests.SQL.parseClassTests
 
 open System
-open TemplateFactory.SQL
+open CSharp.FromSQL
 open Xunit
 
 
@@ -13,14 +13,14 @@ open Xunit
 [<InlineData("public string { get; set; }")>]
 [<InlineData("public double { get; set; }")>]
 let ``Invalid class syntax`` input =
-    let ``exception`` = Assert.Throws<ArgumentException>(fun () -> SQL.parseClass input |> ignore)
+    let ``exception`` = Assert.Throws<ArgumentException>(fun () -> parseClass input |> ignore)
     Assert.Equal("You must supply a CSharp class.", ``exception``.Message)
 
 [<Fact>]
 let ``Multiple classes throws not supported exception`` () =
     let ``exception`` =
         Assert.Throws<NotSupportedException>(fun () ->
-            SQL.parseClass "public class Foo { public class Bar {} }" |> ignore)
+            parseClass "public class Foo { public class Bar {} }" |> ignore)
     Assert.Equal("Passing multiple classes is not supported.", ``exception``.Message)
 
 
@@ -29,5 +29,5 @@ let ``Multiple classes throws not supported exception`` () =
 [<InlineData("public class Person { public int Id { get; set; } }")>]
 [<InlineData("public class Person { public int Id { get; set; } public string FirstName { get; set; } }")>]
 let ``Single class does not throw`` input =
-    let result = SQL.parseClass input
+    let result = parseClass input
     Assert.NotNull result

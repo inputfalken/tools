@@ -1,4 +1,4 @@
-module Sql.Types
+module Languages.SQL
 
 type CharArgument =
     | Max

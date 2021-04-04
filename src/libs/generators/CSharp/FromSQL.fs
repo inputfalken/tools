@@ -1,12 +1,12 @@
-module TemplateFactory.SQL.SQL
+module CSharp.FromSQL
 
 open System
 open System.Linq
 open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis.CSharp.Syntax
 open Sql.Generator
-open Sql.Types
-open Common.CaseInsensitiveString
+open Languages.SQL
+open Common
 
 type GenerationType =
     | UserDefinedTableType
@@ -14,26 +14,26 @@ type GenerationType =
 
 type Settings = { GenerationType: GenerationType }
 // TODO create proper type with support for nullable value types.
-let private string = CIString.CI "string"
-let private int = CIString.CI "int"
-let private int32 = CIString.CI "int32"
-let private double = CIString.CI "double"
-let private float = CIString.CI "float"
-let private bool = CIString.CI "bool"
-let private boolean = CIString.CI "boolean"
-let private guid = CIString.CI "guid"
-let private dateTime = CIString.CI "datetime"
-let private intNullable = CIString.CI "int?"
-let private int32Nullable = CIString.CI "int32?"
-let private doubleNullable = CIString.CI "double?"
-let private floatNullable = CIString.CI "float?"
-let private boolNullable = CIString.CI "bool?"
-let private booleanNullable = CIString.CI "boolean?"
-let private guidNullable = CIString.CI "guid?"
-let private dateTimeNullable = CIString.CI "datetime?"
+let private string = CI "string"
+let private int = CI "int"
+let private int32 = CI "int32"
+let private double = CI "double"
+let private float = CI "float"
+let private bool = CI "bool"
+let private boolean = CI "boolean"
+let private guid = CI "guid"
+let private dateTime = CI "datetime"
+let private intNullable = CI "int?"
+let private int32Nullable = CI "int32?"
+let private doubleNullable = CI "double?"
+let private floatNullable = CI "float?"
+let private boolNullable = CI "bool?"
+let private booleanNullable = CI "boolean?"
+let private guidNullable = CI "guid?"
+let private dateTimeNullable = CI "datetime?"
 
-let toSqlType (str: string): Sql.Types.DataType =
-    let ciString = str.Replace("System.", String.Empty, StringComparison.OrdinalIgnoreCase) |> CIString.CI
+let toSqlType (str: string): DataType =
+    let ciString = str.Replace("System.", String.Empty, StringComparison.OrdinalIgnoreCase) |> CI
     match ciString with
     | x when x.Equals int || x.Equals int32 || x.Equals intNullable || x.Equals int32Nullable -> Int
     | x when x.Equals bool || x.Equals boolean || x.Equals boolNullable || x.Equals booleanNullable ->

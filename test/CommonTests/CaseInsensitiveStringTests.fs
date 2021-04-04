@@ -1,7 +1,7 @@
 module Tests.CIString
 
 open Xunit
-open Common.CaseInsensitiveString
+open Common
 
 [<Theory>]
 [<InlineData("foo", "foo")>]

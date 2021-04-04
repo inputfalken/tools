@@ -2,7 +2,7 @@ module Sql.Generator
 
 open System
 open Common.StringJoin
-open Types
+open Languages.SQL
 
 let newline = Environment.NewLine
 let doubleNewLine = newline + newline
