@@ -6,16 +6,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="JSON\Types.fs" />
-        <Compile Include="JSON\Formatters.fs" />
-        <Compile Include="JSON\Factory.fs" />
-        <Compile Include="JSON\Generator.fs" />
-        <Compile Include="SQL\SQL.fs" />
+        <Compile Include="FromJSON.fs" />
+        <Compile Include="FromSQL.fs" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\Common\Common.fsproj" />
         <ProjectReference Include="..\..\JsonParser\JsonParser.fsproj" />
+        <ProjectReference Include="..\..\Languages\Languages.fsproj" />
         <ProjectReference Include="..\Sql\Sql.fsproj" />
     </ItemGroup>
 

@@ -1,6 +1,6 @@
 module CSharpGeneratorTests.SettingsTransformationTests
 
-open CSHarp.JSON
+open Languages.CSharp
 open Common.Casing
 open Generator
 open Xunit

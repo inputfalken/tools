@@ -1,15 +1,10 @@
-﻿namespace CSHarp.JSON
-
-open System
-open System
+﻿module CSharp.FromJSON 
+open Languages.CSharp
 open JsonParser
-open CSHarp.JSON
-open Common
 open Common.CaseInsensitiveString
-open CSHarp.JSON.Factory
+open Languages.CSharp.Factory
 
-module CSharp =
-    let generateFromJson input settings =
+    let generate input settings =
         let tryConvertToNullableValueType current =
             match current with
             | BaseType x ->
@@ -91,7 +86,7 @@ module CSharp =
                 BaseType.DateTime x
                 |> CSType.BaseType
                 |> Option.Some
-            | JsonParser.Decimal x ->
+            | Decimal x ->
                 BaseType.Decimal x
                 |> CSType.BaseType
                 |> Option.Some
@@ -99,23 +94,23 @@ module CSharp =
                 BaseType.Integer x
                 |> CSType.BaseType
                 |> Option.Some
-            | JsonParser.String x ->
+            | String x ->
                 BaseType.String x
                 |> CSType.BaseType
                 |> Option.Some
-            | JsonParser.Boolean x ->
+            | Boolean x ->
                 BaseType.Boolean x
                 |> CSType.BaseType
                 |> Option.Some
-            | JsonParser.Guid x ->
+            | Guid x ->
                 BaseType.Guid x
                 |> CSType.BaseType
                 |> Option.Some
-            | JsonParser.Double x ->
+            | Double x ->
                 BaseType.Double x
                 |> CSType.BaseType
                 |> Option.Some
-            | JsonParser.Object records ->
+            | Object records ->
                 match records with
                 | records when records.Length = 0 -> UnresolvedBaseType
                 | records ->
@@ -149,7 +144,7 @@ module CSharp =
                 Json.parse input
                 |> baseType
                 |> Option.defaultValue UnresolvedBaseType
-                |> CSharpFactory
+                |> ToCSharpString
                 <| settings
                 |> Lemonad.ErrorHandling.Result.Value
 

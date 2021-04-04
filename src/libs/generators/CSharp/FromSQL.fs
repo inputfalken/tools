@@ -1,11 +1,11 @@
-module TemplateFactory.SQL.SQL
+module CSharp.FromSQL
 
 open System
 open System.Linq
 open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis.CSharp.Syntax
 open Sql.Generator
-open Sql.Types
+open Languages.SQL
 open Common.CaseInsensitiveString
 
 type GenerationType =
@@ -32,7 +32,7 @@ let private booleanNullable = CIString.CI "boolean?"
 let private guidNullable = CIString.CI "guid?"
 let private dateTimeNullable = CIString.CI "datetime?"
 
-let toSqlType (str: string): Sql.Types.DataType =
+let toSqlType (str: string): DataType =
     let ciString = str.Replace("System.", String.Empty, StringComparison.OrdinalIgnoreCase) |> CIString.CI
     match ciString with
     | x when x.Equals int || x.Equals int32 || x.Equals intNullable || x.Equals int32Nullable -> Int
