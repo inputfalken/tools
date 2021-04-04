@@ -1,7 +1,7 @@
 module CommonTests.Casing.Apply
 
 open Xunit
-open Common.Casing
+open Common
 
 [<Theory>]
 [<InlineData("foo bar")>]

@@ -2,7 +2,7 @@
 
 open System
 open Common.StringValidator
-open Common.Casing
+open Common
 open Generator
 open Languages.CSharp
 open Languages.SQL

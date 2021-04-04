@@ -1,7 +1,7 @@
 module CommonTests.Casing.ApplyMultiple
 
 open Xunit
-open Common.Casing
+open Common
 
 [<Fact>]
 let Camel() =

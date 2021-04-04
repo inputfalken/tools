@@ -1,9 +1,8 @@
 module Languages.CSharp
 
-open Common.Casing
+open Common
 open Common.StringJoin
 open System
-open Common.CaseInsensitiveString
 
 
 type public LetterRule =

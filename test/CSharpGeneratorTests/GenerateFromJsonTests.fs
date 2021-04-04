@@ -2,7 +2,7 @@ module Tests
 
 open CSharp.FromJSON
 open Languages.CSharp
-open Common.Casing
+open Common
 open Xunit
 
 let settings =

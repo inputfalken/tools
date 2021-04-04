@@ -1,7 +1,7 @@
 ﻿module CSharp.FromJSON 
 open Languages.CSharp
 open JsonParser
-open Common.CaseInsensitiveString
+open Common
 open Languages.CSharp.Factory
 
     let generate input settings =

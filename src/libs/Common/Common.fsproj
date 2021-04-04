@@ -5,9 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="StringValidator.fs" />
-        <Compile Include="CaseInsensitiveString.fs" />
-        <Compile Include="Casing.fs" />
+        <Compile Include="Utilities.fs" />
     </ItemGroup>
 
     <ItemGroup>
