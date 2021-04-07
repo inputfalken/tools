@@ -1,5 +1,6 @@
 ﻿module CSharpParser
 
+open System.ComponentModel.DataAnnotations
 open FParsec
 
 let test p str =
@@ -8,7 +9,7 @@ let test p str =
     | Failure (errorMsg, _, _) -> printfn "Failure: %s" errorMsg
 
 
-let digitOrLetter<'a> : Parser<char, unit> = letter <|> digit
+let digitOrLetter: Parser<char, unit> = letter <|> digit
 
 let tableNameParser<'a> : Parser<{| Schema: string option
                                     Table: string |}, unit> =
@@ -24,12 +25,6 @@ let tableNameParser<'a> : Parser<{| Schema: string option
 
     attempt withSchema <|> attempt withoutSchema
 
-let dropTableParser<'a> =
-    spaces >>. pstringCI "DROP" .>> spaces
-    >>. pstringCI "TABLE"
-    >>. spaces1
-    >>. tableNameParser
-
 let createTableParser<'a> =
     spaces
     >>. pstringCI "CREATE"
@@ -38,18 +33,43 @@ let createTableParser<'a> =
     >>. spaces1
     >>. tableNameParser
 
+type TableCreationDataType =
+    | DateTime2 of {| Presicion: int option |}
+    | Int
+
+let dateTime2Parser<'a> =
+    let withPrecision =
+        pstringCI "DATETIME2"
+        >>. spaces
+        >>. (pchar '(' >>. pint32 .>> pchar ')')
+        |>> (fun x -> TableCreationDataType.DateTime2 {| Presicion = Some x |})
+
+    let withoutPrecision =
+        pstringCI "DATETIME2" .>> spaces
+        |>> (fun _ -> TableCreationDataType.DateTime2 {| Presicion = Option.None |})
+
+    attempt withPrecision <|> attempt withoutPrecision
+
+let intParser<'a> =
+    pstringCI "INT"
+    |>> (fun _ -> TableCreationDataType.Int)
+
 let tableCreationColumnParser<'a> =
     let columnParser =
-        many1Chars digitOrLetter .>> spaces1
-        .>>. many1Chars digitOrLetter
-        |>> (fun (x, y) -> {| Column = x; DataType = y |})
+        spaces >>. many1Chars digitOrLetter .>> spaces1
+        .>>. (dateTime2Parser <|> intParser)
+        |>> (fun (x, y) -> {| Name = x; DataType = y |})
+        .>> spaces
 
     pchar '(' >>. sepBy1 columnParser (pchar ',')
     .>> pchar ')'
 
+// TODO Create table SQL -> CSharp class with properties from the tables columns.
+// TODO then use SELECT .. FROM {table} to generate class with properties names pre written but all have objects as their type.
+
 let testing s =
     let parser =
-        dropTableParser <|> createTableParser
+        createTableParser
         |>> (fun x ->
             sprintf
                 "You tried to create or delete table %s%s"
