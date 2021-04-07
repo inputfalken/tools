@@ -44,7 +44,7 @@ let tableCreationColumnParser<'a> =
         .>>. many1Chars digitOrLetter
         |>> (fun (x, y) -> {| Column = x; DataType = y |})
 
-    pchar '(' >>. sepBy columnParser (pchar ',')
+    pchar '(' >>. sepBy1 columnParser (pchar ',')
     .>> pchar ')'
 
 let testing s =
