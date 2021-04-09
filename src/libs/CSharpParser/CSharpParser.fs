@@ -1,6 +1,5 @@
 ﻿module CSharpParser
 
-open System.ComponentModel.DataAnnotations
 open FParsec
 
 let test p str =
@@ -10,6 +9,8 @@ let test p str =
 
 
 let digitOrLetter: Parser<char, unit> = letter <|> digit
+
+let betweenParentheses parser = pchar '(' >>. parser .>> pchar ')'
 
 let tableNameParser<'a> : Parser<{| Schema: string option
                                     Table: string |}, unit> =
@@ -23,7 +24,7 @@ let tableNameParser<'a> : Parser<{| Schema: string option
         digitOrLetters .>> (notFollowedBy <| pchar '.')
         |>> (fun x -> {| Schema = Option.None; Table = x |})
 
-    attempt withSchema <|> attempt withoutSchema
+    attempt withSchema <|> withoutSchema
 
 let createTableParser<'a> =
     spaces
@@ -33,53 +34,92 @@ let createTableParser<'a> =
     >>. spaces1
     >>. tableNameParser
 
+type CharSize =
+    | Max
+    | Value of int
+
+let charSizeParser<'a> : Parser<CharSize, 'a> =
+    pstringCI "MAX" |>> (fun _ -> CharSize.Max)
+    <|> (pint32 |>> CharSize.Value)
+
 type TableCreationDataType =
     | DateTime2 of {| Presicion: int option |}
+    | DateTime
     | Int
+    | Date
+    | UniqueIdentifier
+    | Nvarchar of CharSize Option
+    | Varchar of CharSize Option
+    | Char of CharSize Option
+    | NChar of CharSize Option
 
-let dateTime2Parser<'a> =
+let dateTime2Parser<'a> : Parser<TableCreationDataType, 'a> =
     let withPrecision =
         pstringCI "DATETIME2"
         >>. spaces
-        >>. (pchar '(' >>. pint32 .>> pchar ')')
+        >>. betweenParentheses pint32
         |>> (fun x -> TableCreationDataType.DateTime2 {| Presicion = Some x |})
 
     let withoutPrecision =
         pstringCI "DATETIME2" .>> spaces
         |>> (fun _ -> TableCreationDataType.DateTime2 {| Presicion = Option.None |})
 
-    attempt withPrecision <|> attempt withoutPrecision
+    attempt withPrecision <|> withoutPrecision
 
-let intParser<'a> =
+let nVarCharParser<'a> : Parser<TableCreationDataType, 'a> =
+
+    let typeParser = pstringCI "NVARCHAR"
+
+    let withParam =
+        typeParser >>. betweenParentheses charSizeParser
+        |>> (fun x -> TableCreationDataType.Nvarchar <| Some x)
+
+    let withoutParam =
+        typeParser
+        |>> (fun _ -> TableCreationDataType.Nvarchar None)
+
+    attempt withParam <|> withoutParam
+
+let dateTimeParser<'a> : Parser<TableCreationDataType, 'a> =
+    pstringCI "DATETIME"
+    |>> (fun _ -> TableCreationDataType.DateTime)
+
+let intParser<'a> : Parser<TableCreationDataType, 'a> =
     pstringCI "INT"
     |>> (fun _ -> TableCreationDataType.Int)
 
+let dateParser<'a> : Parser<TableCreationDataType, 'a> =
+    pstringCI "DATE"
+    |>> (fun _ -> TableCreationDataType.Date)
+
+let uniqueIdentifierParser<'a> : Parser<TableCreationDataType, 'a> =
+    pstringCI "UNIQUEIDENTIFIER"
+    |>> (fun _ -> TableCreationDataType.UniqueIdentifier)
+
+
 let tableCreationColumnParser<'a> =
     let columnParser =
+        let tablecreationDataTypeParser =
+            choice [ intParser
+                     // NOTE order matters
+                     dateTime2Parser
+                     dateTimeParser
+                     dateParser
+                     uniqueIdentifierParser
+                     nVarCharParser ]
+
         spaces >>. many1Chars digitOrLetter .>> spaces1
-        .>>. (dateTime2Parser <|> intParser)
+        .>>. tablecreationDataTypeParser
         |>> (fun (x, y) -> {| Name = x; DataType = y |})
         .>> spaces
 
-    pchar '(' >>. sepBy1 columnParser (pchar ',')
-    .>> pchar ')'
+    // TODO validate uniqueness of column names
+
+    sepBy1 columnParser (pchar ',')
+    |> betweenParentheses
+
+tableCreationColumnParser |> test
+<| "(id int, timestamp datetime, timestampi datetime2)"
 
 // TODO Create table SQL -> CSharp class with properties from the tables columns.
 // TODO then use SELECT .. FROM {table} to generate class with properties names pre written but all have objects as their type.
-
-let testing s =
-    let parser =
-        createTableParser
-        |>> (fun x ->
-            sprintf
-                "You tried to create or delete table %s%s"
-                x.Table
-                (x.Schema
-                 |> Option.map (sprintf " on schema %s.")
-                 |> Option.defaultValue "."))
-
-    parser |> test <| s
-
-testing "CREATE TABLE dbo.Foo"
-testing "CREATE TABLE Foo"
-testing "CREATE TABLE dbo."
