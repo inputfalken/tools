@@ -8,7 +8,7 @@ let test p str =
     | Failure (errorMsg, _, _) -> printfn "Failure: %s" errorMsg
 
 
-let digitOrLetter: Parser<char, unit> = letter <|> digit
+let digitOrLetter : Parser<char, unit> = letter <|> digit
 
 let betweenParentheses parser = pchar '(' >>. parser .>> pchar ')'
 
@@ -53,6 +53,8 @@ type TableCreationDataType =
     | Char of CharSize Option
     | NChar of CharSize Option
 
+let tableCreationDataTypeParser<'a> x y : Parser<TableCreationDataType, 'a> = pstringCI x |>> (fun _ -> y)
+
 let dateTime2Parser<'a> : Parser<TableCreationDataType, 'a> =
     let withPrecision =
         pstringCI "DATETIME2"
@@ -66,47 +68,32 @@ let dateTime2Parser<'a> : Parser<TableCreationDataType, 'a> =
 
     attempt withPrecision <|> withoutPrecision
 
-let nVarCharParser<'a> : Parser<TableCreationDataType, 'a> =
-
-    let typeParser = pstringCI "NVARCHAR"
+let tableCreationTextParser<'a> keyword abc : Parser<TableCreationDataType, 'a> =
+    let typeParser = pstringCI keyword
 
     let withParam =
         typeParser >>. betweenParentheses charSizeParser
-        |>> (fun x -> TableCreationDataType.Nvarchar <| Some x)
+        |>> (fun x -> abc <| Some x)
 
-    let withoutParam =
-        typeParser
-        |>> (fun _ -> TableCreationDataType.Nvarchar None)
+    let withoutParam = typeParser |>> (fun _ -> abc None)
 
     attempt withParam <|> withoutParam
-
-let dateTimeParser<'a> : Parser<TableCreationDataType, 'a> =
-    pstringCI "DATETIME"
-    |>> (fun _ -> TableCreationDataType.DateTime)
-
-let intParser<'a> : Parser<TableCreationDataType, 'a> =
-    pstringCI "INT"
-    |>> (fun _ -> TableCreationDataType.Int)
-
-let dateParser<'a> : Parser<TableCreationDataType, 'a> =
-    pstringCI "DATE"
-    |>> (fun _ -> TableCreationDataType.Date)
-
-let uniqueIdentifierParser<'a> : Parser<TableCreationDataType, 'a> =
-    pstringCI "UNIQUEIDENTIFIER"
-    |>> (fun _ -> TableCreationDataType.UniqueIdentifier)
-
 
 let tableCreationColumnParser<'a> =
     let columnParser =
         let tablecreationDataTypeParser =
-            choice [ intParser
-                     // NOTE order matters
-                     dateTime2Parser
-                     dateTimeParser
-                     dateParser
-                     uniqueIdentifierParser
-                     nVarCharParser ]
+            choice
+                [
+                  // NOTE order matters
+                  dateTime2Parser
+                  tableCreationDataTypeParser "INT" TableCreationDataType.Int
+                  tableCreationDataTypeParser "DATETIME" TableCreationDataType.DateTime
+                  tableCreationDataTypeParser "DATE" TableCreationDataType.Date
+                  tableCreationDataTypeParser "UNIQUEIDENTIFIER" TableCreationDataType.UniqueIdentifier
+                  tableCreationTextParser "NVARCHAR" TableCreationDataType.Nvarchar
+                  tableCreationTextParser "VARCHAR" TableCreationDataType.Varchar
+                  tableCreationTextParser "NCHAR" TableCreationDataType.NChar
+                  tableCreationTextParser "CHAR" TableCreationDataType.Char ]
 
         spaces >>. many1Chars digitOrLetter .>> spaces1
         .>>. tablecreationDataTypeParser
@@ -114,7 +101,6 @@ let tableCreationColumnParser<'a> =
         .>> spaces
 
     // TODO validate uniqueness of column names
-
     sepBy1 columnParser (pchar ',')
     |> betweenParentheses
 
