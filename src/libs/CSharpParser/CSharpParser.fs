@@ -7,9 +7,7 @@ let test p str =
     | Success (result, _, _) -> printfn "Success: %A" result
     | Failure (errorMsg, _, _) -> printfn "Failure: %s" errorMsg
 
-
 let digitOrLetter : Parser<char, unit> = letter <|> digit
-
 let betweenParentheses parser = pchar '(' >>. parser .>> pchar ')'
 
 let tableNameParser<'a> : Parser<{| Schema: string option
@@ -34,69 +32,77 @@ let createTableParser<'a> =
     >>. spaces1
     >>. tableNameParser
 
+type TimePrecision = { Precision: int }
+
 type CharSize =
     | Max
     | Value of int
 
-let charSizeParser<'a> : Parser<CharSize, 'a> =
-    pstringCI "MAX" |>> (fun _ -> CharSize.Max)
-    <|> (pint32 |>> CharSize.Value)
-
 type TableCreationDataType =
-    | DateTime2 of {| Presicion: int option |}
-    | DateTime
-    | Int
-    | Date
-    | UniqueIdentifier
-    | Nvarchar of CharSize Option
-    | Varchar of CharSize Option
     | Char of CharSize Option
+    | Date
+    | DateTime
+    | DateTime2 of TimePrecision option
+    | DateTimeOffset of TimePrecision option
+    | Int
     | NChar of CharSize Option
+    | Nvarchar of CharSize Option
+    | SmallDateTime
+    | Time of TimePrecision option
+    | UniqueIdentifier
+    | Varchar of CharSize Option
 
 let tableCreationDataTypeParser<'a> x y : Parser<TableCreationDataType, 'a> = pstringCI x |>> (fun _ -> y)
 
-let dateTime2Parser<'a> : Parser<TableCreationDataType, 'a> =
+let tableCreationTimePrecisionParser<'a> x y : Parser<TableCreationDataType, 'a> =
+    let precisionParser = betweenParentheses pint32
+    let keyWordParser = pstringCI x
+
     let withPrecision =
-        pstringCI "DATETIME2"
-        >>. spaces
-        >>. betweenParentheses pint32
-        |>> (fun x -> TableCreationDataType.DateTime2 {| Presicion = Some x |})
+        keyWordParser >>. spaces >>. precisionParser
+        |>> (fun x -> { Precision = x } |> Some |> y)
 
     let withoutPrecision =
-        pstringCI "DATETIME2" .>> spaces
-        |>> (fun _ -> TableCreationDataType.DateTime2 {| Presicion = Option.None |})
+        keyWordParser .>> spaces |>> (fun _ -> None |> y)
 
     attempt withPrecision <|> withoutPrecision
 
-let tableCreationTextParser<'a> keyword abc : Parser<TableCreationDataType, 'a> =
-    let typeParser = pstringCI keyword
+let tableCreationTextParser<'a> x y : Parser<TableCreationDataType, 'a> =
+    let charSizeParser : Parser<CharSize, 'a> =
+        pstringCI "MAX" |>> (fun _ -> CharSize.Max)
+        <|> (pint32 |>> CharSize.Value)
+
+    let keyWordParser = pstringCI x
 
     let withParam =
-        typeParser >>. betweenParentheses charSizeParser
-        |>> (fun x -> abc <| Some x)
+        keyWordParser
+        >>. betweenParentheses charSizeParser
+        |>> (fun x -> Some x |> y)
 
-    let withoutParam = typeParser |>> (fun _ -> abc None)
+    let withoutParam = keyWordParser |>> (fun _ -> None |> y)
 
     attempt withParam <|> withoutParam
 
 let tableCreationColumnParser<'a> =
     let columnParser =
-        let tablecreationDataTypeParser =
-            choice
-                [
-                  // NOTE order matters
-                  dateTime2Parser
-                  tableCreationDataTypeParser "INT" TableCreationDataType.Int
-                  tableCreationDataTypeParser "DATETIME" TableCreationDataType.DateTime
-                  tableCreationDataTypeParser "DATE" TableCreationDataType.Date
-                  tableCreationDataTypeParser "UNIQUEIDENTIFIER" TableCreationDataType.UniqueIdentifier
-                  tableCreationTextParser "NVARCHAR" TableCreationDataType.Nvarchar
-                  tableCreationTextParser "VARCHAR" TableCreationDataType.Varchar
-                  tableCreationTextParser "NCHAR" TableCreationDataType.NChar
-                  tableCreationTextParser "CHAR" TableCreationDataType.Char ]
+        let dataTypeDeclarations =
+            choice [
+                     // NOTE order matters
+                     tableCreationTimePrecisionParser "DATETIME2" TableCreationDataType.DateTime2
+                     tableCreationTimePrecisionParser "DATETIMEOFFSET" TableCreationDataType.DateTimeOffset
+                     tableCreationTimePrecisionParser "TIME" TableCreationDataType.Time
+                     tableCreationDataTypeParser "INT" TableCreationDataType.Int
+                     tableCreationDataTypeParser "DATETIME" TableCreationDataType.DateTime
+                     tableCreationDataTypeParser "DATE" TableCreationDataType.Date
+                     tableCreationDataTypeParser "UNIQUEIDENTIFIER" TableCreationDataType.UniqueIdentifier
+                     tableCreationDataTypeParser "SMALLDATETIME" TableCreationDataType.SmallDateTime
+                     tableCreationTextParser "NVARCHAR" TableCreationDataType.Nvarchar
+                     tableCreationTextParser "VARCHAR" TableCreationDataType.Varchar
+                     tableCreationTextParser "NCHAR" TableCreationDataType.NChar
+                     tableCreationTextParser "CHAR" TableCreationDataType.Char ]
 
         spaces >>. many1Chars digitOrLetter .>> spaces1
-        .>>. tablecreationDataTypeParser
+        .>>. dataTypeDeclarations
         |>> (fun (x, y) -> {| Name = x; DataType = y |})
         .>> spaces
 
@@ -104,8 +110,24 @@ let tableCreationColumnParser<'a> =
     sepBy1 columnParser (pchar ',')
     |> betweenParentheses
 
-tableCreationColumnParser |> test
-<| "(id int, timestamp datetime, timestampi datetime2)"
+let sample = @"
+CREATE TABLE Persons (
+    PersonID int,
+    LastName varchar(255),
+    FirstName varchar(255),
+    Address varchar(255),
+    City varchar(255)
+)
+"
+
+let watch = System.Diagnostics.Stopwatch.StartNew()
+
+createTableParser .>> spaces
+.>>. tableCreationColumnParser
+|> test
+<| sample
+
+printfn $"{watch.Elapsed}"
 
 // TODO Create table SQL -> CSharp class with properties from the tables columns.
 // TODO then use SELECT .. FROM {table} to generate class with properties names pre written but all have objects as their type.
