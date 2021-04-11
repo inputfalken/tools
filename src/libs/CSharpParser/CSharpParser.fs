@@ -1,4 +1,10 @@
-﻿module CSharpParser
+﻿#if INTERACTIVE
+#I @"bin\Debug\net5.0"
+#r "Languages"
+#r "nuget: FParsec"
+#else
+module CSharpParser
+#endif
 
 open FParsec
 
