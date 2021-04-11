@@ -85,22 +85,22 @@ let tableCreationTextParser<'a> x y : Parser<TableCreationDataType, 'a> =
 
 let tableCreationColumnParser<'a> =
     let columnParser =
-        let dataTypeDeclarations =
-            choice [
-                     // NOTE order matters
-                     tableCreationTimePrecisionParser "DATETIME2" TableCreationDataType.DateTime2
-                     tableCreationTimePrecisionParser "DATETIMEOFFSET" TableCreationDataType.DateTimeOffset
-                     tableCreationTimePrecisionParser "TIME" TableCreationDataType.Time
-                     tableCreationDataTypeParser "INT" TableCreationDataType.Int
-                     tableCreationDataTypeParser "DATETIME" TableCreationDataType.DateTime
-                     tableCreationDataTypeParser "DATE" TableCreationDataType.Date
-                     tableCreationDataTypeParser "UNIQUEIDENTIFIER" TableCreationDataType.UniqueIdentifier
-                     tableCreationDataTypeParser "SMALLDATETIME" TableCreationDataType.SmallDateTime
-                     tableCreationTextParser "NVARCHAR" TableCreationDataType.Nvarchar
-                     tableCreationTextParser "VARCHAR" TableCreationDataType.Varchar
-                     tableCreationTextParser "NCHAR" TableCreationDataType.NChar
-                     tableCreationTextParser "CHAR" TableCreationDataType.Char ]
-
+        let dataTypes =
+            seq {
+                tableCreationTimePrecisionParser "DATETIME2" TableCreationDataType.DateTime2
+                tableCreationTimePrecisionParser "DATETIMEOFFSET" TableCreationDataType.DateTimeOffset
+                tableCreationTimePrecisionParser "TIME" TableCreationDataType.Time
+                tableCreationDataTypeParser "INT" TableCreationDataType.Int
+                tableCreationDataTypeParser "DATETIME" TableCreationDataType.DateTime
+                tableCreationDataTypeParser "DATE" TableCreationDataType.Date
+                tableCreationDataTypeParser "UNIQUEIDENTIFIER" TableCreationDataType.UniqueIdentifier
+                tableCreationDataTypeParser "SMALLDATETIME" TableCreationDataType.SmallDateTime
+                tableCreationTextParser "NVARCHAR" TableCreationDataType.Nvarchar
+                tableCreationTextParser "VARCHAR" TableCreationDataType.Varchar
+                tableCreationTextParser "NCHAR" TableCreationDataType.NChar
+                tableCreationTextParser "CHAR" TableCreationDataType.Char
+            }
+        let dataTypeDeclarations = choice dataTypes
         spaces >>. many1Chars digitOrLetter .>> spaces1
         .>>. dataTypeDeclarations
         |>> (fun (x, y) -> {| Name = x; DataType = y |})
