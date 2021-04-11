@@ -70,13 +70,14 @@ let tableCreationTimePrecisionParser<'a> x y : Parser<TableCreationDataType, 'a>
     let keyWordParser = pstringCI x
 
     let withPrecision =
-        keyWordParser >>. spaces >>. precisionParser
+        keyWordParser >>? spaces >>? precisionParser
         |>> (fun x -> { Precision = x } |> Some |> y)
 
     let withoutPrecision =
-        keyWordParser .>> spaces |>> (fun _ -> None |> y)
+        keyWordParser .>>? spaces
+        |>> (fun _ -> None |> y)
 
-    attempt withPrecision <|> withoutPrecision
+    withPrecision <|> withoutPrecision
 
 let tableCreationTextParser<'a> x y : Parser<TableCreationDataType, 'a> =
     let charSizeParser : Parser<CharSizeArgument, 'a> =
