@@ -25,13 +25,6 @@ type TableCreationDataType =
     | UniqueIdentifier
     | Varchar of CharSizeArgument Option
 
-type TableCreationColumns =
-    { Columns: {| DataType: TableCreationDataType
-                  Name: string |} list
-      /// A helper property to access the identity column inside the column list.
-      IdentityColumn: {| Name: string
-                         Identity: Identity option |} option }
-
 let test p str =
     match run p str with
     | Success (result, _, _) -> printfn "Success: %A" result
@@ -45,14 +38,14 @@ let tableNameParser<'a> : Parser<{| Schema: string option
     let digitOrLetters = many1Chars digitOrLetter
 
     let withSchema =
-        digitOrLetters .>> pchar '.' .>>. digitOrLetters
+        digitOrLetters .>>? pchar '.' .>>. digitOrLetters
         |>> (fun (x, y) -> {| Schema = Option.Some x; Table = y |})
 
     let withoutSchema =
         digitOrLetters .>> (notFollowedBy <| pchar '.')
         |>> (fun x -> {| Schema = Option.None; Table = x |})
 
-    attempt withSchema <|> withoutSchema
+    withSchema <|> withoutSchema
 
 let createTableParser<'a> =
     spaces
@@ -61,7 +54,6 @@ let createTableParser<'a> =
     >>. pstringCI "TABLE"
     >>. spaces1
     >>. tableNameParser
-
 
 let tableCreationDataTypeParser<'a> x y : Parser<TableCreationDataType, 'a> = pstringCI x |>> (fun _ -> y)
 
@@ -74,8 +66,7 @@ let tableCreationTimePrecisionParser<'a> x y : Parser<TableCreationDataType, 'a>
         |>> (fun x -> { Precision = x } |> Some |> y)
 
     let withoutPrecision =
-        keyWordParser .>>? spaces
-        |>> (fun _ -> None |> y)
+        keyWordParser .>>? spaces |>> (fun _ -> None |> y)
 
     withPrecision <|> withoutPrecision
 
@@ -89,12 +80,13 @@ let tableCreationTextParser<'a> x y : Parser<TableCreationDataType, 'a> =
 
     let withParam =
         keyWordParser
-        >>. betweenParentheses charSizeParser
+        >>? spaces
+        >>? betweenParentheses charSizeParser
         |>> (fun x -> Some x |> y)
 
     let withoutParam = keyWordParser |>> (fun _ -> None |> y)
 
-    attempt withParam <|> withoutParam
+    withParam <|> withoutParam
 
 let tableCreationIntParser<'a> : Parser<TableCreationDataType, 'a> =
     let parameterExtraction =
@@ -168,20 +160,6 @@ let tableCreationColumnParser<'a> =
     sepBy1 columnParser (pchar ',')
     |> betweenParentheses
     |>> List.distinctBy (fun x -> x.Name.ToLower())
-    |>> (fun x ->
-        { Columns = x
-          IdentityColumn =
-              x
-              |> List.tryFind
-                  (fun x ->
-                      match x.DataType with
-                      | Int x when x.IsSome -> true
-                      | _ -> false)
-              |> Option.map
-                  (fun x ->
-                      match x.DataType with
-                      | Int y -> {| Name = x.Name; Identity = y |}
-                      | _ -> failwith "Can't happen") })
 
 let sample = @"
 CREATE TABLE Persons (
