@@ -3,7 +3,7 @@
 #r "Languages"
 #r "nuget: FParsec"
 #else
-module CSharpParser
+module SQLParser
 #endif
 
 open FParsec

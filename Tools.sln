@@ -34,7 +34,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SqlGeneratorTests", "test\S
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Languages", "src\libs\Languages\Languages.fsproj", "{E7C6B2DD-41FF-453F-9FC1-4749442E1A94}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CSharpParser", "src\libs\CSharpParser\CSharpParser.fsproj", "{05980870-CB57-4DFF-B8F9-FD6E0808308B}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SQLParser", "src\libs\SQLParser\SQLParser.fsproj", "{05980870-CB57-4DFF-B8F9-FD6E0808308B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
