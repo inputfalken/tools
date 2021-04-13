@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <Compile Include="SQLParser.fs" />
+        <Compile Include="Translations\CSharp.fs" />
     </ItemGroup>
 
     <ItemGroup>

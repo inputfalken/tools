@@ -20,6 +20,7 @@ type Identity =
 type TableCreationDataType =
     | Char of CharSizeArgument Option
     | Date
+    | Bit
     | DateTime
     | DateTime2 of TimePrecisionArgument option
     | DateTimeOffset of TimePrecisionArgument option
@@ -30,6 +31,13 @@ type TableCreationDataType =
     | Time of TimePrecisionArgument option
     | UniqueIdentifier
     | Varchar of CharSizeArgument Option
+
+type SQLColumn = {DataType: TableCreationDataType ; Name : string}
+type SQLParseResult = {
+    Columns : SQLColumn list
+    TableName: string
+    Schema: string option
+}
 
 let test p str =
     match run p str with
@@ -145,6 +153,7 @@ let tableCreationColumnParser<'a> =
                 tableCreationTimePrecisionParser "DATETIMEOFFSET" TableCreationDataType.DateTimeOffset
                 tableCreationTimePrecisionParser "TIME" TableCreationDataType.Time
                 tableCreationIntParser
+                tableCreationDataTypeParser "BIT" TableCreationDataType.Bit
                 tableCreationDataTypeParser "DATETIME" TableCreationDataType.DateTime
                 tableCreationDataTypeParser "DATE" TableCreationDataType.Date
                 tableCreationDataTypeParser "UNIQUEIDENTIFIER" TableCreationDataType.UniqueIdentifier
@@ -159,7 +168,7 @@ let tableCreationColumnParser<'a> =
 
         spaces >>. many1Chars digitOrLetter .>> spaces1
         .>>. dataTypeDeclarations
-        |>> (fun (x, y) -> {| Name = x; DataType = y |})
+        |>> (fun (x, y) -> { Name = x; DataType = y })
         .>> spaces
 
     // TODO throw error instead of  distinct the names
@@ -184,6 +193,15 @@ createTableParser .>> spaces
 |> test
 <| sample
 
+let parse string =
+   let parser = createTableParser
+                .>> spaces
+                .>>.tableCreationColumnParser
+                |>> (fun (x,y) -> {Columns = y; TableName = x.Table; Schema = x.Schema})
+                
+   match run parser string with
+   | Success (res, x, y) -> res |> Result.Ok
+   | Failure (msg, x, y) -> msg |> Result.Error
 
 // TODO Create table SQL -> CSharp class with properties from the tables columns.
 // TODO then use SELECT .. FROM {table} to generate class with properties names pre written but all have objects as their type.
