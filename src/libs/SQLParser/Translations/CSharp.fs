@@ -19,6 +19,7 @@ let toCSharp sql =
     let toCSType sql =
         sql.Columns
         |> List.map
+            // TODO use object data to create setters with rules.
             (fun x ->
                 let f =
                     match x.DataType with
