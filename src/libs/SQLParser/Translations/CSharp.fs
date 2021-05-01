@@ -13,7 +13,7 @@ open System
 open Common
 open Languages.CSharp
 open Languages.CSharp.Factory
-open SQLParser
+open TableCreationSQLParser
 
 let toCSharp sql =
     let toCSType sql =

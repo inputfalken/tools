@@ -3,7 +3,7 @@
 #r "Languages"
 #r "nuget: FParsec"
 #else
-module SQLParser
+module TableCreationSQLParser
 #endif
 
 open FParsec
@@ -47,11 +47,11 @@ let test p str =
     | Success (result, _, _) -> printfn "Success: %A" result
     | Failure (errorMsg, _, _) -> printfn "Failure: %s" errorMsg
 
-let digitOrLetter : Parser<char, unit> = letter <|> digit
+let private digitOrLetter : Parser<char, unit> = letter <|> digit
 let betweenParentheses parser = pchar '(' >>. parser .>> pchar ')'
 
-let tableNameParser<'a> : Parser<{| Schema: string option
-                                    Table: string |}, unit> =
+let private tableNameParser<'a> : Parser<{| Schema: string option
+                                            Table: string |}, unit> =
     let digitOrLetters = many1Chars digitOrLetter
 
     let withSchema =
@@ -64,7 +64,7 @@ let tableNameParser<'a> : Parser<{| Schema: string option
 
     withSchema <|> withoutSchema
 
-let createTableParser<'a> =
+let private createTableParser<'a> =
     spaces
     >>. pstringCI "CREATE"
     >>. spaces1
@@ -74,7 +74,7 @@ let createTableParser<'a> =
 
 let tableCreationDataTypeParser<'a> x y : Parser<TableCreationDataType, 'a> = pstringCI x |>> (fun _ -> y)
 
-let tableCreationTimePrecisionParser<'a> x y : Parser<TableCreationDataType, 'a> =
+let private tableCreationTimePrecisionParser<'a> x y : Parser<TableCreationDataType, 'a> =
     let precisionParser = betweenParentheses pint32
     let keyWordParser = pstringCI x
 
@@ -87,7 +87,7 @@ let tableCreationTimePrecisionParser<'a> x y : Parser<TableCreationDataType, 'a>
 
     withPrecision <|> withoutPrecision
 
-let tableCreationTextParser<'a> x y : Parser<TableCreationDataType, 'a> =
+let private tableCreationTextParser<'a> x y : Parser<TableCreationDataType, 'a> =
     let charSizeParser : Parser<CharSizeArgument, 'a> =
         pstringCI "MAX"
         |>> (fun _ -> CharSizeArgument.Max)
@@ -105,7 +105,7 @@ let tableCreationTextParser<'a> x y : Parser<TableCreationDataType, 'a> =
 
     withParam <|> withoutParam
 
-let tableCreationIntParser<'a> : Parser<TableCreationDataType, 'a> =
+let private tableCreationIntParser<'a> : Parser<TableCreationDataType, 'a> =
     let parameterExtraction =
         spaces >>. pint32
         .>> spaces
@@ -144,8 +144,22 @@ let tableCreationIntParser<'a> : Parser<TableCreationDataType, 'a> =
         identityWithoutArgument
         int
        }
+let tableCreationDecimalParser<'a> : Parser<TableCreationDataType, 'a> =
+    let parameterExtraction =
+        spaces >>. pint32
+        .>> spaces
+        .>> pchar ','
+        .>> spaces
+        .>>. pint32
+        .>> spaces
+        |>> (fun (x, y) -> { Precision = x; Scale = y })
 
-let tableCreationColumnParser<'a> =
+    let withParam = betweenParentheses parameterExtraction
+    let decimal = tableCreationDataTypeParser "DECIMAL" <| TableCreationDataType.Decimal None
+    
+    decimal .>> spaces >>? withParam  |>> (fun x -> TableCreationDataType.Decimal (Some x) ) <|>  decimal
+
+let private tableCreationColumnParser<'a> =
     let columnParser =
         let dataTypes =
             seq {
@@ -193,7 +207,7 @@ createTableParser .>> spaces
 |> test
 <| sample
 
-let parse string =
+let public parse string =
     let parser =
         createTableParser .>> spaces
         .>>. tableCreationColumnParser
