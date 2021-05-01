@@ -14,8 +14,7 @@ type CharSizeArgument =
     | Max
     | Value of int
 
-type Identity =
-    { Argument: {| Seed: int; Increment: int |} option }
+type Identity = { Seed: int; Increment: int }
 
 type TableCreationDataType =
     | Char of CharSizeArgument Option
@@ -110,7 +109,7 @@ let tableCreationIntParser<'a> : Parser<TableCreationDataType, 'a> =
         .>> spaces
         .>>. pint32
         .>> spaces
-        |>> (fun (x, y) -> {| Seed = x; Increment = y |})
+        |>> (fun (x, y) -> { Seed = x; Increment = y })
 
     let withParam = betweenParentheses parameterExtraction
 
@@ -124,8 +123,7 @@ let tableCreationIntParser<'a> : Parser<TableCreationDataType, 'a> =
         .>> notFollowedByL
                 (pchar '(')
                 "Invalid `IDENTITY` syntax; Allowed syntax: `IDENTITY` or `IDENTITY ({int}, {int})`"
-        |>> (fun _ -> { Argument = option.None })
-        |>> Some
+        |>> (fun _ -> Option.None)
         |>> TableCreationDataType.Int
 
     let identityWithArgument =
@@ -133,8 +131,6 @@ let tableCreationIntParser<'a> : Parser<TableCreationDataType, 'a> =
         >>. pstringCI "IDENTITY"
         >>. spaces
         >>? withParam
-        |>> Some
-        |>> (fun x -> { Argument = x })
         |>> Some
         |>> TableCreationDataType.Int
 
