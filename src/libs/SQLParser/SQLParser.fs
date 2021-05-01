@@ -15,8 +15,10 @@ type CharSizeArgument =
     | Value of int
 
 type Identity = { Seed: int; Increment: int }
+type DecimalArguments = { Precision: int; Scale: int }
 
 type TableCreationDataType =
+    | Decimal of DecimalArguments option
     | Char of CharSizeArgument Option
     | Date
     | Bit
@@ -31,12 +33,14 @@ type TableCreationDataType =
     | UniqueIdentifier
     | Varchar of CharSizeArgument Option
 
-type SQLColumn = {DataType: TableCreationDataType ; Name : string}
-type SQLParseResult = {
-    Columns : SQLColumn list
-    TableName: string
-    Schema: string option
-}
+type SQLColumn =
+    { DataType: TableCreationDataType
+      Name: string }
+
+type SQLParseResult =
+    { Columns: SQLColumn list
+      TableName: string
+      Schema: string option }
 
 let test p str =
     match run p str with
@@ -190,14 +194,17 @@ createTableParser .>> spaces
 <| sample
 
 let parse string =
-   let parser = createTableParser
-                .>> spaces
-                .>>.tableCreationColumnParser
-                |>> (fun (x,y) -> {Columns = y; TableName = x.Table; Schema = x.Schema})
-                
-   match run parser string with
-   | Success (res, x, y) -> res |> Result.Ok
-   | Failure (msg, x, y) -> msg |> Result.Error
+    let parser =
+        createTableParser .>> spaces
+        .>>. tableCreationColumnParser
+        |>> (fun (x, y) ->
+            { Columns = y
+              TableName = x.Table
+              Schema = x.Schema })
+
+    match run parser string with
+    | Success (res, x, y) -> res |> Result.Ok
+    | Failure (msg, x, y) -> msg |> Result.Error
 
 // TODO Create table SQL -> CSharp class with properties from the tables columns.
 // TODO then use SELECT .. FROM {table} to generate class with properties names pre written but all have objects as their type.
