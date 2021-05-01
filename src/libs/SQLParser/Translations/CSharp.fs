@@ -21,7 +21,7 @@ let toCSharp sql =
         |> List.map
             // TODO use object data to create setters with rules.
             (fun x ->
-                let f =
+                let translation =
                     match x.DataType with
                     | Char _ -> BaseType.String String.Empty
                     | Date -> BaseType.DateTime DateTime.MinValue
@@ -30,6 +30,7 @@ let toCSharp sql =
                     | DateTime2 _ -> BaseType.DateTime DateTime.MinValue
                     | DateTimeOffset _ -> BaseType.DateTime DateTime.MinValue
                     | Int _ -> BaseType.Integer 0
+                    | Decimal _ -> BaseType.Decimal 0m
                     | NChar _ -> BaseType.String String.Empty
                     | Nvarchar _ -> BaseType.String String.Empty
                     | SmallDateTime -> BaseType.DateTime DateTime.MinValue
@@ -38,7 +39,7 @@ let toCSharp sql =
                     | Varchar _ -> BaseType.String String.Empty
                     |> CSType.BaseType
 
-                { Name = x.Name; Type = Option.Some f })
+                { Name = x.Name; Type = Option.Some translation })
         |> List.toArray
         |> CSType.GeneratedType
         |> (fun x ->
