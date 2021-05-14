@@ -83,19 +83,19 @@ open Languages.CSharp.Factory
         let rec baseType =
             function
             | DateTime x ->
-                BaseType.DateTime x
+                BaseType.DateTime x option.None
                 |> CSType.BaseType
                 |> Option.Some
             | Decimal x ->
-                BaseType.Decimal x
+                BaseType.Decimal x option.None
                 |> CSType.BaseType
                 |> Option.Some
             | Int x ->
-                BaseType.Integer x
+                BaseType.Integer x option.None
                 |> CSType.BaseType
                 |> Option.Some
             | String x ->
-                BaseType.String x
+                BaseType.String x option.None
                 |> CSType.BaseType
                 |> Option.Some
             | Boolean x ->
@@ -103,11 +103,11 @@ open Languages.CSharp.Factory
                 |> CSType.BaseType
                 |> Option.Some
             | Guid x ->
-                BaseType.Guid x
+                BaseType.Guid x option.None
                 |> CSType.BaseType
                 |> Option.Some
             | Double x ->
-                BaseType.Double x
+                BaseType.Double x option.None
                 |> CSType.BaseType
                 |> Option.Some
             | Object records ->

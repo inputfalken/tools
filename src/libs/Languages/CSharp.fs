@@ -39,10 +39,12 @@ type public TypeInfo =
 
 type public ValueTypePair<'T> =
     { Value: 'T
-      Type: TypeInfo }
+      Type: TypeInfo
+      Setter: string option }
     member pair.AsNullable =
         { Value = pair.Value
-          Type = pair.Type.AsNullable }
+          Type = pair.Type.AsNullable
+          Setter = pair.Setter }
 
 and public ValueType =
     | Integer of ValueTypePair<int>
@@ -88,33 +90,36 @@ and public BaseType =
         | ReferenceType x -> x.TypeInfo
         | ValueType x -> x.TypeInfo
 
-    static member Guid x =
+    static member Guid x (y: string option) =
         { Type =
               { Namespace = "System"
                 Name = "Guid"
                 Alias = option.None
                 Nullable = false }
-          Value = x }
+          Value = x
+          Setter = y }
         |> ValueType.Guid
         |> BaseType.ValueType
 
-    static member Double x =
+    static member Double x (y: string option) =
         { Type =
               { Namespace = "System"
                 Name = "Double"
                 Alias = option.Some "double"
                 Nullable = false }
-          Value = x }
+          Value = x
+          Setter = y }
         |> ValueType.Double
         |> BaseType.ValueType
 
-    static member Integer x =
+    static member Integer x (y: string option) =
         { Type =
               { Namespace = "System"
                 Name = "Int32"
                 Alias = option.Some "int"
                 Nullable = false }
-          Value = x }
+          Value = x
+          Setter = y }
         |> ValueType.Integer
         |> BaseType.ValueType
 
@@ -124,27 +129,30 @@ and public BaseType =
                 Name = "Boolean"
                 Alias = option.Some "bool"
                 Nullable = false }
-          Value = x }
+          Value = x
+          Setter = option.None }
         |> ValueType.Boolean
         |> BaseType.ValueType
 
-    static member DateTime x =
+    static member DateTime x (y: string option) =
         { Type =
               { Namespace = "System"
                 Name = "DateTime"
                 Alias = option.None
                 Nullable = false }
-          Value = x }
+          Value = x
+          Setter = y }
         |> ValueType.Datetime
         |> BaseType.ValueType
 
-    static member Decimal x =
+    static member Decimal x (y: string option) =
         { Type =
               { Namespace = "System"
                 Name = "Decimal"
                 Alias = option.Some "decimal"
                 Nullable = false }
-          Value = x }
+          Value = x
+          Setter = y }
         |> ValueType.Decimal
         |> BaseType.ValueType
 
@@ -156,13 +164,14 @@ and public BaseType =
         |> ReferenceType.Object
         |> BaseType.ReferenceType
 
-    static member String x =
+    static member String x (y: string option) =
         { Type =
               { Namespace = "System"
                 Name = "String"
                 Alias = option.Some "string"
                 Nullable = false }
-          Value = x }
+          Value = x
+          Setter = y }
         |> ReferenceType.String
         |> BaseType.ReferenceType
 
@@ -257,7 +266,10 @@ module internal Formatters =
         |> Set
 
     let resolveName (name: string) =
-        if keywords.Contains name then [ "@"; name ] else [ name ]
+        (if keywords.Contains name then
+             [ "@"; name ]
+         else
+             [ name ])
         |> joinStrings
 
     let ``class`` name content =
@@ -302,36 +314,37 @@ module public Factory =
             property
 
     let validateName (name: String) =
-        if not (Char.IsLetter name.[0])
-        then raise (ArgumentException("Member names can only start with letters."))
+        if not (Char.IsLetter name.[0]) then
+            raise (ArgumentException("Member names can only start with letters."))
 
     let rec private GeneratedType members key (classSet: CIString Set) settings propertyFormatter className =
         let classSet = classSet.Add <| CI className
 
         let classContent =
             members
-            |> Array.map (fun property ->
-                let formatter =
-                    property.Type
-                    |> Option.map getFormatter
-                    |> Option.defaultValue propertyFormatter
+            |> Array.map
+                (fun property ->
+                    let formatter =
+                        property.Type
+                        |> Option.map getFormatter
+                        |> Option.defaultValue propertyFormatter
 
-                match property.Type
-                      |> Option.defaultValue UnresolvedBaseType with
-                | GeneratedType x ->
-                    let uniqueClassName =
-                        createClassName classSet property.Name className settings
-
-                    GeneratedType x property.Name classSet settings formatter uniqueClassName
-                | ArrayType x ->
-                    match x with
+                    match property.Type
+                          |> Option.defaultValue UnresolvedBaseType with
                     | GeneratedType x ->
                         let uniqueClassName =
                             createClassName classSet property.Name className settings
 
                         GeneratedType x property.Name classSet settings formatter uniqueClassName
-                    | x -> CSharpFactoryPrivate x property.Name classSet settings formatter
-                | x -> CSharpFactoryPrivate x property.Name classSet settings (getFormatter x))
+                    | ArrayType x ->
+                        match x with
+                        | GeneratedType x ->
+                            let uniqueClassName =
+                                createClassName classSet property.Name className settings
+
+                            GeneratedType x property.Name classSet settings formatter uniqueClassName
+                        | x -> CSharpFactoryPrivate x property.Name classSet settings formatter
+                    | x -> CSharpFactoryPrivate x property.Name classSet settings (getFormatter x))
             |> joinStringsWithSpaceSeparation
 
         let formattedClassName =
@@ -361,9 +374,10 @@ module public Factory =
         | BaseType x ->
 
             let formattedPropertyName =
-                if classSet.IsEmpty
-                then applyPrefixSuffix key settings settings.PropertyCasing
-                else key |> settings.PropertyCasing.apply
+                if classSet.IsEmpty then
+                    applyPrefixSuffix key settings settings.PropertyCasing
+                else
+                    key |> settings.PropertyCasing.apply
 
             // Ugly side effect, maybe use Result in order in order to be explicit that things could go wrong.
             validateName formattedPropertyName
@@ -375,10 +389,11 @@ module public Factory =
             CSharpFactoryPrivate ``type`` settings.RootName Set.empty settings (getFormatter ``type``)
 
         settings.NameSpace
-        |> Option.map (fun x ->
-            joinStringsWithSpaceSeparation [ "namespace"
-                                             x
-                                             "{"
-                                             cSharp
-                                             "}" ])
+        |> Option.map
+            (fun x ->
+                joinStringsWithSpaceSeparation [ "namespace"
+                                                 x
+                                                 "{"
+                                                 cSharp
+                                                 "}" ])
         |> Option.defaultValue cSharp
