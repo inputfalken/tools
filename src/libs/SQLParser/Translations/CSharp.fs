@@ -32,7 +32,9 @@ let toCSharp sql =
                     | Int _ -> BaseType.Integer 0 option.None
                     | Decimal _ -> BaseType.Decimal 0m option.None
                     | NChar _ -> BaseType.String String.Empty option.None
-                    | Nvarchar _ -> BaseType.String String.Empty option.None
+                    | Nvarchar x -> BaseType.String String.Empty (x |> Option.bind (fun x -> match x with
+                                                                                             | CharSizeArgument.Max -> option.None
+                                                                                             | CharSizeArgument.Value x -> option.Some "TEST"))
                     | SmallDateTime -> BaseType.DateTime DateTime.MinValue option.None
                     | Time _ -> BaseType.DateTime DateTime.MinValue option.None
                     | UniqueIdentifier -> BaseType.Guid System.Guid.Empty option.None

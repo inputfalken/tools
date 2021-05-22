@@ -72,6 +72,15 @@ and public ValueType =
         | Decimal x -> x.Type
         | Double x -> x.Type
 
+    member this.Setter =
+        match this with
+        | Integer x -> x.Setter
+        | Guid x -> x.Setter
+        | Boolean x -> x.Setter
+        | Datetime x -> x.Setter
+        | Decimal x -> x.Setter
+        | Double x -> x.Setter
+
 
 and public ReferenceType =
     | String of ValueTypePair<string>
@@ -280,15 +289,22 @@ module internal Formatters =
           "}" ]
         |> joinStringsWithSpaceSeparation
 
-    let property ``type`` name =
-        [ "public"
-          ``type``
-          resolveName name
-          "{ get; set; }" ]
-        |> joinStringsWithSpaceSeparation
+    let property ``type`` name (setter: string option) =
+        if setter.IsSome then
+            [ "public"
+              ``type``
+              resolveName name
+              $"{{ get; set {{{setter.Value}}}}}" ]
+            |> joinStringsWithSpaceSeparation
+        else
+            [ "public"
+              ``type``
+              resolveName name
+              "{ get; set; }" ]
+            |> joinStringsWithSpaceSeparation
 
     let arrayProperty ``type`` name =
-        property ([ ``type``; "[]" ] |> joinStrings) name
+        property ([ ``type``; "[]" ] |> joinStrings) name option.None
 
 module public Factory =
     open Formatters
@@ -297,7 +313,22 @@ module public Factory =
     let private getFormatter =
         function
         | ArrayType _ -> arrayProperty
-        | _ -> property
+        | BaseType x ->
+            match x with
+            | ValueType x ->
+                let prop ``type`` name = property ``type`` name x.Setter
+                prop
+            | ReferenceType x ->
+                match x with
+                | String x ->
+                    let prop ``type`` name = property ``type`` name x.Setter
+                    prop
+                | _ ->
+                    let prop x y = property x y option.None
+                    prop
+        | _ ->
+            let prop x y = property x y option.None
+            prop
 
     let private applyPrefixSuffix key (settings: Settings) (casing: Casing) =
         match settings.LetterRule with

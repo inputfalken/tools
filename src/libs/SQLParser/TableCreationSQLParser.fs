@@ -167,6 +167,7 @@ let private tableCreationColumnParser<'a> =
                 tableCreationTimePrecisionParser "DATETIMEOFFSET" TableCreationDataType.DateTimeOffset
                 tableCreationTimePrecisionParser "TIME" TableCreationDataType.Time
                 tableCreationIntParser
+                tableCreationDecimalParser
                 tableCreationDataTypeParser "BIT" TableCreationDataType.Bit
                 tableCreationDataTypeParser "DATETIME" TableCreationDataType.DateTime
                 tableCreationDataTypeParser "DATE" TableCreationDataType.Date
@@ -189,23 +190,6 @@ let private tableCreationColumnParser<'a> =
     sepBy1 columnParser (pchar ',')
     |> betweenParentheses
     |>> List.distinctBy (fun x -> x.Name.ToLower())
-
-let sample = @"
-CREATE TABLE Persons (
-    Id int IDENTITY (1,1),
-    Length int,
-    LastName varchar(255),
-    FirstName varchar(255),
-    Address varchar(255),
-    City varchar(255)
-)
-"
-
-
-createTableParser .>> spaces
-.>>. tableCreationColumnParser
-|> test
-<| sample
 
 let public parse string =
     let parser =
