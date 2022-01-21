@@ -70,6 +70,7 @@ type public Factory =
                 | SqlDataApiEnum.Float -> Float
                 | SqlDataApiEnum.NVarchar -> CharArgument.Max |> Nvarchar
                 | SqlDataApiEnum.DateTime -> DateTime
+                | SqlDataApiEnum.Date -> Date
                 | SqlDataApiEnum.DateTime2 ->
                     DateTime2Argument.Default
                     |> DateTime2
@@ -86,7 +87,7 @@ type public Factory =
         | x when x.DataTypes <> null && x.UserDefinedTypes <> null ->
             let dataTypes =
                 x.DataTypes
-                |> Seq.map (mapSqlDataType)
+                |> Seq.map mapSqlDataType
                 |> Seq.map ProcedureParameter.DataType
 
             let userDefinedTypes =
@@ -111,7 +112,7 @@ type public Factory =
         | x when x.DataTypes <> null ->
             let dataTypes =
                 x.DataTypes
-                |> Seq.map (mapSqlDataType)
+                |> Seq.map mapSqlDataType
                 |> Seq.map ProcedureParameter.DataType
                 |> Seq.toList
 

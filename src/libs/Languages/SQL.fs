@@ -10,6 +10,7 @@ type DateTime2Argument =
     static member Default = DateTime2Argument.Precision 7
 
 type DataType =
+    | Date
     | DateTime
     | DateTime2 of DateTime2Argument
     | Varchar of CharArgument
@@ -23,22 +24,23 @@ type DataType =
 
     override x.ToString() =
         match x with
-        | DateTime -> "datetime"
+        | Date -> "DATE"
+        | DateTime -> "DATETIME"
         | DateTime2 x ->
             match x with
-            | Precision y -> sprintf "datetime2(%d)" y
+            | Precision y -> sprintf "DATETIME2(%d)" y
         | Varchar x ->
             match x with
-            | Max -> "varchar(max)"
-            | Number x -> sprintf "varchar(%d)" x
-        | Int -> "int"
-        | Bit -> "bit"
-        | UniqueIdentifier -> "uniqueidentifier"
-        | Float -> "float"
+            | Max -> "VARCHAR(MAX)"
+            | Number x -> sprintf "VARCHAR(%d)" x
+        | Int -> "INT"
+        | Bit -> "BIT"
+        | UniqueIdentifier -> "UNIQUEIDENTIFIER"
+        | Float -> "FLOAT"
         | Nvarchar x ->
             match x with
-            | Max -> "nvarchar(max)"
-            | Number x -> sprintf "nvarchar(%d)" x
+            | Max -> "NVARCHAR(MAX)"
+            | Number x -> sprintf "NVARCHAR(%d)" x
 
 type Parameter = { Type: DataType; Name: string }
 

@@ -164,8 +164,8 @@
         [Required]
         public string ProcedureName { get; set; } = "InsertElement";
 
-        public List<SqlDataTypeViewModel> SqlDataTypes { get; } = new List<SqlDataTypeViewModel>();
-        public List<SqlUserTypeViewModel> SqlUserTypes { get; } = new List<SqlUserTypeViewModel>();
+        public List<SqlDataTypeViewModel> SqlDataTypes { get; } = new();
+        public List<SqlUserTypeViewModel> SqlUserTypes { get; } = new();
 
         public class SqlDataTypeViewModel
         {
@@ -181,11 +181,11 @@
             [Required]
             public string Name { get; set; }
 
-            public List<SqlDataTypeViewModel> SqlDataTypes { get; } = new List<SqlDataTypeViewModel>();
+            public List<SqlDataTypeViewModel> SqlDataTypes { get; } = new();
         }
     }
 
-    private readonly ViewModel _view = new ViewModel();
+    private readonly ViewModel _view = new();
 
     private string Sql { get; set; }
 
